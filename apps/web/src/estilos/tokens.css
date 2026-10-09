@@ -1,0 +1,78 @@
+/*
+ * Tokens da interface (seção "Variáveis CSS"). Carregado antes de qualquer outro estilo.
+ * Os componentes usam só os nomes semânticos, nunca o hex direto.
+ */
+:root {
+  /* Marca (valores aproximados, confirmar com a família) */
+  --marca-vinho: #6e0f14;
+  --marca-vinho-escuro: #4f0a0e; /* hover sobre vinho */
+  --marca-vermelho: #b3161b;
+  --marca-dourado: #f2a51a;
+  --marca-dourado-claro: #ffc93c;
+  --marca-marrom: #2b0e0b;
+  --marca-creme: #fff6e6;
+  --marca-creme-escuro: #f6e7cc; /* faixa do total, linhas zebradas */
+
+  /* Semânticas */
+  --cor-fundo: var(--marca-creme);
+  --cor-superficie: #ffffff;
+  --cor-moldura: var(--marca-vinho);
+  --cor-texto: var(--marca-marrom);
+  --cor-texto-suave: #6b4a44;
+  --cor-texto-sobre-moldura: #ffffff;
+  --cor-borda: #e3d3ba;
+  --cor-acao-principal: var(--marca-dourado);
+  --cor-acao-principal-hover: var(--marca-dourado-claro);
+  --cor-texto-acao-principal: var(--marca-marrom);
+  --cor-selecionado: var(--marca-vermelho);
+  --cor-foco: var(--marca-dourado-claro);
+  --cor-desabilitado-fundo: #ede6dc;
+  --cor-desabilitado-texto: #9c8f84;
+
+  /* Estados */
+  --cor-sucesso: #2e7d32;
+  --cor-sucesso-fundo: #e8f5e9;
+  --cor-aviso: #b26a00;
+  --cor-aviso-fundo: #fff3e0;
+  --cor-erro: #c62828;
+  --cor-erro-fundo: #fdecea;
+
+  /* Tipografia */
+  --fonte-titulo: 'Oswald', 'Arial Narrow', sans-serif;
+  --fonte-texto: 'Nunito Sans', 'Segoe UI', Arial, sans-serif;
+  --fonte-enfeite: 'Pacifico', cursive;
+
+  /* Espaçamento (grade de 8 px) */
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 24px;
+  --esp-6: 32px;
+  --esp-7: 48px;
+
+  /* Formas */
+  --raio: 8px;
+  --raio-etiqueta: 999px;
+  --sombra: 0 1px 3px rgba(43, 14, 11, 0.15);
+  --sombra-elevada: 0 8px 24px rgba(43, 14, 11, 0.25); /* janelas e painéis */
+
+  /* Medidas fixas */
+  --altura-cabecalho: 64px;
+  --largura-menu: 220px;
+  --largura-menu-recolhido: 72px;
+  --altura-toque: 48px;
+
+  /* Movimento */
+  --tempo-rapido: 150ms;
+  --tempo-medio: 300ms;
+  --tempo-lento: 500ms;
+  --curva: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Tablet: alvos de toque de 64 px (interface, "Tamanhos de tela"). */
+@media (min-width: 768px) and (max-width: 1365px) and (pointer: coarse) {
+  :root {
+    --altura-toque: 64px;
+  }
+}

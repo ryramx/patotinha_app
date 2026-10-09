@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Patotinha da Vovó">
+  <!-- Selo PROVISÓRIO: trocar pelo arquivo original da família (tarefa 0.3 do plano). -->
+  <circle cx="100" cy="92" r="78" fill="#B3161B" stroke="#F2A51A" stroke-width="6"/>
+  <circle cx="100" cy="92" r="64" fill="none" stroke="#FFF6E6" stroke-width="2" stroke-dasharray="4 5"/>
+  <g fill="#FFF6E6">
+    <circle cx="76" cy="78" r="16"/>
+    <circle cx="124" cy="78" r="16"/>
+    <path d="M60 70 q16 -26 32 0 z" fill="#FFFFFF"/>
+    <path d="M108 70 q16 -26 32 0 z" fill="#FFFFFF"/>
+    <rect x="58" y="96" width="36" height="26" rx="10"/>
+    <rect x="106" y="96" width="36" height="26" rx="10"/>
+  </g>
+  <path d="M10 140 L190 140 L180 158 L190 176 L10 176 L20 158 Z" fill="#F2A51A" stroke="#2B0E0B" stroke-width="2"/>
+  <text x="100" y="165" text-anchor="middle" font-family="Oswald, Arial Narrow, sans-serif" font-weight="700" font-size="17" fill="#2B0E0B" textLength="150" lengthAdjust="spacingAndGlyphs">PATOTINHA DA VOVÓ</text>
+</svg>

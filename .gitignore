@@ -1,0 +1,23 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+
+# Prisma
+apps/api/src/generated/
+
+# Relatórios de teste
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Editores e sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# Configuração local do Claude
+.claude/

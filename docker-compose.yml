@@ -1,0 +1,38 @@
+# Sobe a aplicação e o PostgreSQL 16 com um comando: docker compose up --build
+# Lê DATABASE_URL, JWT_SECRET etc. do arquivo .env (veja o .env.example).
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: patotinha
+      POSTGRES_USER: ${POSTGRES_USER:-patotinha_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+      TZ: America/Sao_Paulo
+    ports:
+      - '5432:5432'
+    volumes:
+      - dados-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d patotinha']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-patotinha_app}:${POSTGRES_PASSWORD}@db:5432/patotinha
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no .env}
+      NODE_ENV: production
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      TZ: America/Sao_Paulo
+    ports:
+      - '3000:3000'
+
+volumes:
+  dados-postgres:

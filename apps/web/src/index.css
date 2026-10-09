@@ -1,0 +1,221 @@
+@import 'tailwindcss';
+
+/* O Tailwind lê os tokens; nenhuma cor própria além deles (tarefa 5.1.2). */
+@theme inline {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-branco: #ffffff;
+  --color-fundo: var(--cor-fundo);
+  --color-superficie: var(--cor-superficie);
+  --color-moldura: var(--cor-moldura);
+  --color-moldura-escura: var(--marca-vinho-escuro);
+  --color-texto: var(--cor-texto);
+  --color-texto-suave: var(--cor-texto-suave);
+  --color-sobre-moldura: var(--cor-texto-sobre-moldura);
+  --color-borda: var(--cor-borda);
+  --color-acao: var(--cor-acao-principal);
+  --color-acao-hover: var(--cor-acao-principal-hover);
+  --color-texto-acao: var(--cor-texto-acao-principal);
+  --color-selecionado: var(--cor-selecionado);
+  --color-foco: var(--cor-foco);
+  --color-creme-escuro: var(--marca-creme-escuro);
+  --color-desab-fundo: var(--cor-desabilitado-fundo);
+  --color-desab-texto: var(--cor-desabilitado-texto);
+  --color-sucesso: var(--cor-sucesso);
+  --color-sucesso-fundo: var(--cor-sucesso-fundo);
+  --color-aviso: var(--cor-aviso);
+  --color-aviso-fundo: var(--cor-aviso-fundo);
+  --color-erro: var(--cor-erro);
+  --color-erro-fundo: var(--cor-erro-fundo);
+
+  --font-titulo: var(--fonte-titulo);
+  --font-texto: var(--fonte-texto);
+  --font-enfeite: var(--fonte-enfeite);
+
+  --radius-padrao: var(--raio);
+  --shadow-padrao: var(--sombra);
+  --shadow-elevada: var(--sombra-elevada);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: var(--fonte-texto);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Foco do teclado: contorno de 3 px Amarelo Faixa, visível em tudo que é clicável. */
+  :focus-visible {
+    outline: 3px solid var(--cor-foco);
+    outline-offset: 2px;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer components {
+  .valor {
+    font-variant-numeric: tabular-nums;
+  }
+  .titulo-tela {
+    font-family: var(--fonte-titulo);
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 36px;
+    text-transform: uppercase;
+  }
+  .titulo-secao {
+    font-family: var(--fonte-titulo);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 28px;
+    text-transform: uppercase;
+  }
+  .rotulo {
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+  }
+  .legenda {
+    font-size: 13px;
+    line-height: 18px;
+    color: var(--cor-texto-suave);
+  }
+  .enfeite {
+    font-family: var(--fonte-enfeite);
+  }
+  .cartao {
+    background: var(--cor-superficie);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra);
+  }
+  .esqueleto {
+    background: linear-gradient(
+      90deg,
+      var(--marca-creme-escuro) 0%,
+      #fbf1de 50%,
+      var(--marca-creme-escuro) 100%
+    );
+    background-size: 200% 100%;
+    animation: brilho 1.2s linear infinite;
+    border-radius: var(--raio);
+  }
+}
+
+@keyframes brilho {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes piscar-dourado {
+  from {
+    background-color: #ffe8a8;
+  }
+  to {
+    background-color: transparent;
+  }
+}
+@keyframes entrar-baixo {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+}
+@keyframes descer-topo {
+  from {
+    transform: translateY(-12px);
+    opacity: 0;
+  }
+}
+@keyframes crescer {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+}
+@keyframes deslizar-direita {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes esmaecer {
+  from {
+    opacity: 0.3;
+  }
+}
+@keyframes borda-dourada {
+  0% {
+    border-color: var(--marca-dourado);
+  }
+  100% {
+    border-color: var(--cor-borda);
+  }
+}
+
+.anim-item-novo {
+  animation:
+    entrar-baixo var(--tempo-rapido) var(--curva),
+    piscar-dourado 600ms ease-out;
+}
+.anim-piscar {
+  animation: piscar-dourado var(--tempo-medio) ease-out;
+}
+.anim-toast {
+  animation: descer-topo var(--tempo-rapido) var(--curva);
+}
+.anim-janela {
+  animation: crescer var(--tempo-rapido) var(--curva);
+}
+.anim-painel {
+  animation: deslizar-direita var(--tempo-medio) var(--curva);
+}
+.anim-total {
+  animation: esmaecer var(--tempo-rapido) ease-out;
+}
+.anim-toque {
+  animation: borda-dourada var(--tempo-medio) ease-out;
+}
+.botao-produto:active {
+  transform: scale(0.97);
+  transition: transform 100ms;
+}
+
+/* "Reduzir movimento": tudo vira troca instantânea. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Impressão do resumo: sem menu, fundo branco. */
+@media print {
+  body {
+    background: #fff;
+  }
+  .nao-imprimir {
+    display: none !important;
+  }
+  .cartao {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
