@@ -71,7 +71,7 @@ O CI (`.github/workflows/ci.yml`) roda tudo isso com um PostgreSQL 16 de serviç
 ```text
 apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos, relatorios
   prisma/        schema.prisma e migrações (DDL do PRD 15.5, com CHECKs e gatilhos)
-  scripts/       seed-admin.ts e seed-dev.ts
+  scripts/       seed-dev.ts (o seed-admin fica em src/scripts para rodar também no servidor)
   test/          testes de integração (Supertest) contra PostgreSQL real
 apps/web/        React. telas/, componentes/, layout/, estilos/tokens.css, textos.pt-BR.json
 packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação

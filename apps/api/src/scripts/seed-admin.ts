@@ -2,16 +2,16 @@
  * Cria o primeiro administrador (tarefa 3.6). Pede nome, login e senha no terminal;
  * nunca existe senha padrão no código (PRD 10, Primeiro acesso).
  *
- * Uso: npm run seed:admin
+ * Uso: npm run seed:admin (desenvolvimento) ou, no servidor, npm run seed:admin:producao
  * Sem terminal (ex.: implantação), passe ADMIN_NOME, ADMIN_LOGIN e ADMIN_SENHA no ambiente.
  */
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { Writable } from 'node:stream';
 import { esquemaUsuarioNovo } from '@patotinha/shared';
-import { criarBanco } from '../src/banco.js';
-import { gerarHash } from '../src/auth/senha.js';
-import { buscarPorLogin } from '../src/usuarios/repositorio.js';
+import { criarBanco } from '../banco.js';
+import { gerarHash } from '../auth/senha.js';
+import { buscarPorLogin } from '../usuarios/repositorio.js';
 
 async function perguntar(texto: string, oculto = false): Promise<string> {
   let mudo = false;
