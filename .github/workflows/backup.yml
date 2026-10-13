@@ -1,0 +1,64 @@
+# Cópia diária do banco de produção (plano 7.5 e 7.6, RNF-15 e RNF-16).
+# O Neon gratuito só volta 6 horas no tempo, então a cópia fica aqui, fora do servidor, por 30 dias.
+# Cada cópia é restaurada num PostgreSQL vazio e conferida antes de ser guardada.
+# Precisa do segredo PRODUCAO_DATABASE_URL (Settings > Secrets and variables > Actions).
+name: Backup do banco
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # 3h da manhã em Brasília, com a loja fechada
+  workflow_dispatch:
+
+concurrency: backup
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    services:
+      restauracao:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: so_para_conferir
+          POSTGRES_DB: restauracao
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Copiar o banco (pg_dump)
+        env:
+          PRODUCAO_DATABASE_URL: ${{ secrets.PRODUCAO_DATABASE_URL }}
+        run: |
+          if [ -z "$PRODUCAO_DATABASE_URL" ]; then
+            echo "::error::Segredo PRODUCAO_DATABASE_URL não configurado"
+            exit 1
+          fi
+          mkdir copia
+          arquivo="patotinha-$(TZ=America/Sao_Paulo date +%Y-%m-%d).dump"
+          echo "ARQUIVO=$arquivo" >> "$GITHUB_ENV"
+          docker run --rm -e URL="$PRODUCAO_DATABASE_URL" -v "$PWD/copia:/copia" postgres:18 \
+            sh -c "pg_dump --format=custom --no-owner --no-privileges --dbname=\"\$URL\" --file=/copia/$arquivo"
+          ls -lh copia
+
+      - name: Restaurar num banco vazio e conferir
+        run: |
+          docker run --rm --network host -e PGPASSWORD=so_para_conferir -v "$PWD/copia:/copia" postgres:18 \
+            pg_restore --no-owner --no-privileges --exit-on-error \
+            -h localhost -U postgres -d restauracao "/copia/$ARQUIVO"
+          docker run --rm --network host -e PGPASSWORD=so_para_conferir postgres:18 \
+            psql -h localhost -U postgres -d restauracao -v ON_ERROR_STOP=1 -c "
+              SELECT
+                (SELECT count(*) FROM usuarios) AS usuarios,
+                (SELECT count(*) FROM produtos) AS produtos,
+                (SELECT count(*) FROM pedidos) AS pedidos,
+                (SELECT max(criado_em) FROM pedidos) AS ultimo_pedido;"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARQUIVO }}
+          path: copia/${{ env.ARQUIVO }}
+          retention-days: 30
+          if-no-files-found: error

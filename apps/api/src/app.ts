@@ -108,6 +108,9 @@ export async function construirApp(opcoes: OpcoesApp): Promise<FastifyInstance> 
         }
       });
 
+      // Para o monitor externo: não toca no banco, para o Neon poder desligar quando parado.
+      api.get('/vivo', async () => ({ status: 'ok' }));
+
       api.get('/saude', async (_request, reply) => {
         try {
           await banco.$queryRaw`SELECT 1`;

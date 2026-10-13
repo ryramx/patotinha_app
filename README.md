@@ -7,7 +7,7 @@ desenvolvimento do projeto.
 - **Backend:** Node.js + Fastify + Prisma (`apps/api`), API REST em `/api`
 - **Frontend:** React + Vite + Tailwind CSS + TanStack Query (`apps/web`)
 - **Compartilhado:** esquemas Zod, tipos e formatação de R$ e datas (`packages/shared`)
-- **Banco:** PostgreSQL (16 em produção; 16 ou mais novo em desenvolvimento)
+- **Banco:** PostgreSQL (Neon em produção; 16 ou mais novo em desenvolvimento)
 
 ## Requisitos
 
@@ -53,6 +53,45 @@ docker compose exec app npm run seed:admin
 | `PORT`               | Porta da API (padrão 3000)                                                |
 | `PASTA_WEB`          | Pasta com o build das telas, servida pela API (a imagem Docker já define) |
 
+## Publicação (Render + Neon, planos gratuitos)
+
+O Render roda a aplicação (imagem Docker do `Dockerfile`, descrita no `render.yaml`) e o banco
+fica num projeto do Neon na região us-east-2 (Ohio), a mesma do app. A cada publicação a imagem
+aplica as migrações pendentes antes de subir.
+
+1. **Neon:** criar um projeto (região AWS us-east-2) e copiar o endereço de conexão **direto**
+   (desligar "Connection pooling", sem `-pooler` no servidor), terminado em `?sslmode=require`.
+2. **Render:** New > Blueprint, escolher este repositório. Ele pede só a `DATABASE_URL`: colar o
+   endereço do Neon. O `JWT_SECRET` é gerado pelo Render.
+3. **GitHub** (Settings > Secrets and variables > Actions): criar `PRODUCAO_DATABASE_URL` com o
+   mesmo endereço e `ADMIN_SENHA` com a senha do primeiro administrador.
+4. **Primeiro admin:** aba Actions > "Criar primeiro admin" > Run workflow, com nome e login.
+   Depois de entrar no sistema, apagar o segredo `ADMIN_SENHA`.
+5. **Monitor:** apontar um serviço de monitoramento (ex.: cron-job.org) para `/api/vivo` a cada
+   10 minutos, só no horário da loja. Essa rota não consulta o banco, então o Neon continua
+   podendo desligar quando parado. O `/api/saude` testa o banco também, para conferências.
+
+Limites do plano gratuito: o app do Render desliga depois de 15 minutos sem acesso e leva cerca
+de 1 minuto para voltar (o monitor evita isso no horário da loja); as 750 horas mensais do Render
+são divididas entre todos os apps gratuitos da conta. O Neon tem 1 GB e 100 horas de
+processamento por mês, desligando depois de 5 minutos parado.
+
+### Backup e restauração
+
+O workflow "Backup do banco" (`.github/workflows/backup.yml`) roda todo dia às 3h (Brasília):
+copia o banco com `pg_dump`, restaura a cópia num PostgreSQL vazio, confere as contagens e guarda
+o arquivo por 30 dias na aba Actions. Para rodar na hora: Actions > Backup do banco > Run workflow.
+
+Para restaurar: baixar o arquivo `patotinha-AAAA-MM-DD.dump` da execução desejada (vem dentro de
+um .zip) e, num banco vazio (por exemplo, um branch novo do Neon), rodar:
+
+```bash
+pg_restore --no-owner --no-privileges --exit-on-error -d "ENDERECO_DO_BANCO_VAZIO" patotinha-AAAA-MM-DD.dump
+```
+
+Conferir os pedidos do dia e só então trocar a `DATABASE_URL` no Render para o banco restaurado.
+Repetir esse teste a cada 3 meses (plano 7.6).
+
 ## Testes e qualidade
 
 ```powershell
@@ -85,4 +124,5 @@ e2e/             Testes Playwright (fluxo do pedido do exemplo, tablet, preço a
 - As decisões pendentes do PRD (seção 20) seguem a sugestão do próprio PRD; os limites de campo
   seguem a tabela final do plano (quantidade 1 a 99, nome de produto 2 a 80, categoria 2 a 40,
   login 3 a 30 só minúsculas, motivo 5 a 200, preço até R$ 9.999,99).
-- Publicação, HTTPS, backup e restauração (etapa 7 do plano) ainda não foram feitos.
+- Publicação (etapa 7 do plano): os arquivos estão prontos; falta criar as contas e seguir os
+  passos da seção Publicação.

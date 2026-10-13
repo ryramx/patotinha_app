@@ -186,6 +186,12 @@ describe('Proteções gerais', () => {
     expect(r.body).toEqual({ status: 'ok', banco: 'ok' });
   });
 
+  it('vivo responde sem consultar o banco', async () => {
+    const r = await ctx.http().get('/api/vivo');
+    expect(r.status).toBe(200);
+    expect(r.body).toEqual({ status: 'ok' });
+  });
+
   it('cabeçalhos de segurança do Helmet', async () => {
     const r = await ctx.http().get('/api/saude');
     expect(r.headers['x-content-type-options']).toBe('nosniff');

@@ -1,0 +1,43 @@
+# Cria o primeiro administrador no banco de produção (plano 7.3), já que o plano gratuito do
+# Render não tem terminal. Rode uma vez pela aba Actions, depois da primeira publicação.
+# A senha vem do segredo ADMIN_SENHA (nunca de um campo do formulário, que aparece no log);
+# apague o segredo depois de entrar no sistema.
+name: Criar primeiro admin
+
+on:
+  workflow_dispatch:
+    inputs:
+      nome:
+        description: Nome do administrador
+        required: true
+      login:
+        description: 'Login (minúsculas, ex.: ryramx)'
+        required: true
+
+jobs:
+  criar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w packages/shared
+      - name: Aplicar migrações e criar o admin
+        working-directory: apps/api
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCAO_DATABASE_URL }}
+          ADMIN_SENHA: ${{ secrets.ADMIN_SENHA }}
+          ADMIN_NOME: ${{ inputs.nome }}
+          ADMIN_LOGIN: ${{ inputs.login }}
+          TZ: America/Sao_Paulo
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$ADMIN_SENHA" ]; then
+            echo "::error::Configure os segredos PRODUCAO_DATABASE_URL e ADMIN_SENHA"
+            exit 1
+          fi
+          npx prisma generate
+          npx prisma migrate deploy
+          npx tsx src/scripts/seed-admin.ts
