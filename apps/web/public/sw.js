@@ -1,6 +1,6 @@
 // Service worker do app instalável. Guarda só os arquivos das telas para abrir rápido;
 // nunca guarda respostas da API: pedidos e preços vêm sempre do servidor (PRD 7 e D-18).
-const VERSAO = 'patotinha-v1';
+const VERSAO = 'patotinha-v2';
 
 self.addEventListener('install', () => self.skipWaiting());
 

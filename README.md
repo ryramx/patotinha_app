@@ -117,10 +117,20 @@ packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
 e2e/             Testes Playwright (fluxo do pedido do exemplo, tablet, preço alterado)
 ```
 
+## Logo e ícones
+
+A arte original da família está em `docs/marca/logo-original.png`. Para refazer a logo das telas,
+os ícones do app instalável e o favicon depois de trocar a arte:
+
+```
+python3 scripts/recortar-logo.py docs/marca/logo-original.png docs/marca/logo-transparente.png
+python3 scripts/gerar-icones.py docs/marca/logo-transparente.png apps/web/public
+```
+
+Ao trocar os ícones, suba a `VERSAO` em `apps/web/public/sw.js` para os aparelhos buscarem os novos.
+
 ## Pendências conhecidas
 
-- O selo em `apps/web/public/` é **provisório**: trocar pelo arquivo original da família
-  (PNG transparente ou SVG), como pede a tarefa 0.3 do plano.
 - As decisões pendentes do PRD (seção 20) seguem a sugestão do próprio PRD; os limites de campo
   seguem a tabela final do plano (quantidade 1 a 99, nome de produto 2 a 80, categoria 2 a 40,
   login 3 a 30 só minúsculas, motivo 5 a 200, preço até R$ 9.999,99).
