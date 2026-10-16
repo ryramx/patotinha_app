@@ -46,6 +46,7 @@ model Produto {
   categoriaId  BigInt   @map("categoria_id")
   nome         String   @db.VarChar(100)
   preco        Decimal  @db.Decimal(10, 2)
+  ingredientes String?  @db.VarChar(300)
   ativo        Boolean  @default(true)
   criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
   atualizadoEm DateTime @default(now()) @map("atualizado_em") @db.Timestamptz(6)

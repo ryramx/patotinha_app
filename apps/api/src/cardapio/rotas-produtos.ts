@@ -20,6 +20,7 @@ function paraProdutoApi(p: ProdutoComCategoria): Produto {
     id: id(p.id),
     nome: p.nome,
     preco: dinheiro(p.preco),
+    ingredientes: p.ingredientes,
     ativo: p.ativo,
     categoria: { id: id(p.categoria.id), nome: p.categoria.nome, ativo: p.categoria.ativo },
     criadoEm: data(p.criadoEm),
@@ -97,7 +98,12 @@ export async function rotasProdutos(app: FastifyInstance) {
     if (!categoria.ativo) throw categoriaInativa();
     try {
       const criado = await app.banco.produto.create({
-        data: { nome: dados.nome, categoriaId: categoria.id, preco: precoNormalizado },
+        data: {
+          nome: dados.nome,
+          categoriaId: categoria.id,
+          preco: precoNormalizado,
+          ingredientes: dados.ingredientes ?? null,
+        },
         include: { categoria: true },
       });
       return reply.status(201).send(paraProdutoApi(criado));
@@ -115,7 +121,12 @@ export async function rotasProdutos(app: FastifyInstance) {
     try {
       const salvo = await app.banco.produto.update({
         where: { id: atual.id },
-        data: { nome: dados.nome, categoriaId: categoria.id, preco: precoNormalizado },
+        data: {
+          nome: dados.nome,
+          categoriaId: categoria.id,
+          preco: precoNormalizado,
+          ingredientes: dados.ingredientes,
+        },
         include: { categoria: true },
       });
       if (dinheiro(atual.preco) !== dinheiro(salvo.preco)) {

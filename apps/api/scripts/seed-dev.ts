@@ -21,14 +21,14 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
-const cardapio: Record<string, [string, string][]> = {
+const cardapio: Record<string, [string, string, string?][]> = {
   Pastéis: [
-    ['Pastel de Carne', '8.00'],
-    ['Pastel de Queijo', '7.00'],
-    ['Pastel de Frango', '8.00'],
-    ['Pastel de Pizza', '8.50'],
-    ['Pastel de Palmito', '9.00'],
-    ['Pastel de Carne com Queijo', '9.50'],
+    ['Pastel de Carne', '8.00', 'Carne moída temperada'],
+    ['Pastel de Queijo', '7.00', 'Muçarela'],
+    ['Pastel de Frango', '8.00', 'Frango desfiado e catupiry'],
+    ['Pastel de Pizza', '8.50', 'Muçarela, presunto, tomate e orégano'],
+    ['Pastel de Palmito', '9.00', 'Palmito e muçarela'],
+    ['Pastel de Carne com Queijo', '9.50', 'Carne moída e muçarela'],
   ],
   Coxinhas: [
     ['Coxinha de Frango', '6.00'],
@@ -54,11 +54,15 @@ try {
       (await banco.categoria.findFirst({
         where: { nome: { equals: nomeCategoria, mode: 'insensitive' } },
       })) ?? (await banco.categoria.create({ data: { nome: nomeCategoria } }));
-    for (const [nome, preco] of produtos) {
+    for (const [nome, preco, ingredientes] of produtos) {
       const existe = await banco.produto.findFirst({
         where: { nome: { equals: nome, mode: 'insensitive' } },
       });
-      if (!existe) await banco.produto.create({ data: { nome, preco, categoriaId: categoria.id } });
+      if (!existe) {
+        await banco.produto.create({
+          data: { nome, preco, ingredientes, categoriaId: categoria.id },
+        });
+      }
     }
   }
   console.log('Cardápio de exemplo cadastrado.');

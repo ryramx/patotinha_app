@@ -131,3 +131,18 @@ test('CA-09 e CA-10: admin cancela o pedido e ele sai do resumo', async ({ page 
   const faturamento = page.locator('.cartao').filter({ hasText: 'Faturamento' }).first();
   await expect(faturamento).toContainText('R$ 0,00');
 });
+
+test('admin cadastra os ingredientes e eles aparecem no novo pedido', async ({ page }) => {
+  await entrar(page, ADMIN);
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/produtos');
+  await page.getByRole('button', { name: 'Pastel de Carne', exact: true }).click();
+  await page.getByLabel(/Ingredientes/).fill('Carne moída, azeitona e ovo');
+  await page.getByRole('button', { name: 'Salvar' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'salvo' })).toBeVisible();
+
+  await page.goto('/pedidos/novo');
+  await page.getByRole('tab', { name: 'Pastéis' }).click();
+  const cartao = page.locator('.botao-produto').filter({ hasText: 'Pastel de Carne' }).first();
+  await expect(cartao).toContainText('Carne moída, azeitona e ovo');
+});

@@ -8,6 +8,7 @@ import { z } from 'zod';
 export const LIMITES = {
   quantidadeMax: 99,
   produtoNome: { min: 2, max: 80 },
+  ingredientes: 300,
   categoriaNome: { min: 2, max: 40 },
   usuarioNome: { min: 1, max: 80 },
   login: { min: 3, max: 30 },
@@ -88,6 +89,13 @@ export const esquemaProduto = z.strictObject({
   nome: texto(LIMITES.produtoNome.min, LIMITES.produtoNome.max, 'o nome do produto'),
   categoriaId: z.number({ error: 'Escolha uma categoria' }).int().positive('Escolha uma categoria'),
   preco: esquemaPreco,
+  /** Opcional (o que o produto leva, ex.: recheio do pastel). Vazio vira null; ausente no PUT mantém. */
+  ingredientes: z
+    .string()
+    .trim()
+    .max(LIMITES.ingredientes, `Use no máximo ${LIMITES.ingredientes} caracteres`)
+    .nullish()
+    .transform((v) => (v === undefined ? undefined : v || null)),
 });
 
 export const esquemaFiltroProdutos = z.strictObject({
