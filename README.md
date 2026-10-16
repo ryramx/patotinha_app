@@ -141,13 +141,27 @@ apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos, 
   scripts/       seed-dev.ts (o seed-admin fica em src/scripts para rodar também no servidor)
   test/          testes de integração (Supertest) contra PostgreSQL real
 apps/web/        React. telas/, componentes/, layout/, estilos/tokens.css, textos.pt-BR.json
-  public/        manifest.webmanifest, sw.js (app instalável), ícones e selo
+  public/        manifest.webmanifest, sw.js (app instalável), logo, ícones e favicon
 packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
 e2e/             Testes Playwright (fluxo do pedido do exemplo, tablet, preço alterado)
 docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
+  marca/         Arte original da logo e a versão sem fundo
+scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)
 render.yaml      Serviço do Render (Docker, plano gratuito, Ohio)
 .github/         CI, backup diário do banco e criação do primeiro admin
 ```
+
+## Logo e ícones
+
+A arte original da família está em `docs/marca/logo-original.png`. Para refazer a logo das telas,
+os ícones do app instalável e o favicon depois de trocar a arte:
+
+```
+python3 scripts/recortar-logo.py docs/marca/logo-original.png docs/marca/logo-transparente.png
+python3 scripts/gerar-icones.py docs/marca/logo-transparente.png apps/web/public
+```
+
+Ao trocar os ícones, suba a `VERSAO` em `apps/web/public/sw.js` para os aparelhos buscarem os novos.
 
 ## Situação atual
 
@@ -157,8 +171,6 @@ administrador criado, backup diário e monitor no horário da loja.
 
 ## Pendências conhecidas
 
-- O selo em `apps/web/public/` é **provisório**: trocar pelo arquivo original da família
-  (PNG transparente ou SVG), como pede a tarefa 0.3 do plano.
 - Apagar o segredo `ADMIN_SENHA` do GitHub, agora que o primeiro administrador já entrou.
 - Cadastrar o cardápio real e os usuários dos funcionários em produção.
 - Testar no Safari (iPad ou Mac), num tablet de verdade e com alguém que nunca usou o sistema.

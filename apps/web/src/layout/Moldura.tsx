@@ -151,7 +151,7 @@ export function Moldura() {
         >
           <Menu size={24} />
         </button>
-        <img src="/selo-reduzido.svg" alt="Patotinha da Vovó" className="h-10 w-10" />
+        <img src="/logo-pequeno.webp" alt="Patotinha da Vovó" className="h-12 w-auto" />
         <span className="hidden font-titulo text-[18px] font-semibold uppercase tracking-wide sm:inline">
           {t('sistema.nome')}
         </span>
