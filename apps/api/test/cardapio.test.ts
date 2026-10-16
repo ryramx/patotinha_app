@@ -116,6 +116,53 @@ describe('CA-03 Produtos', () => {
     expect(lista.body).toHaveLength(1);
   });
 
+  it('ingredientes: opcionais, mantidos no PUT sem o campo, apagados com texto vazio', async () => {
+    const cat = await ctx.banco.categoria.create({ data: { nome: 'Pastéis' } });
+    const r = await ctx
+      .http()
+      .post('/api/produtos')
+      .set('Cookie', admin)
+      .send({
+        nome: 'Pastel de Frango',
+        categoriaId: Number(cat.id),
+        preco: '8.00',
+        ingredientes: '  Frango desfiado, catupiry e milho  ',
+      });
+    expect(r.status).toBe(201);
+    expect(r.body.ingredientes).toBe('Frango desfiado, catupiry e milho');
+
+    const semCampo = await ctx
+      .http()
+      .post('/api/produtos')
+      .set('Cookie', admin)
+      .send({ nome: 'Refrigerante', categoriaId: Number(cat.id), preco: '6.00' });
+    expect(semCampo.body.ingredientes).toBeNull();
+
+    const url = `/api/produtos/${r.body.id}`;
+    const base = { nome: 'Pastel de Frango', categoriaId: Number(cat.id), preco: '8.50' };
+    const mantido = await ctx.http().put(url).set('Cookie', admin).send(base);
+    expect(mantido.body.ingredientes).toBe('Frango desfiado, catupiry e milho');
+
+    const lista = await ctx.http().get('/api/produtos?ativo=true').set('Cookie', func);
+    expect(lista.body.find((p: { id: number }) => p.id === r.body.id).ingredientes).toBe(
+      'Frango desfiado, catupiry e milho',
+    );
+
+    const longo = await ctx
+      .http()
+      .put(url)
+      .set('Cookie', admin)
+      .send({ ...base, ingredientes: 'x'.repeat(301) });
+    expect(longo.status).toBe(422);
+
+    const apagado = await ctx
+      .http()
+      .put(url)
+      .set('Cookie', admin)
+      .send({ ...base, ingredientes: '   ' });
+    expect(apagado.body.ingredientes).toBeNull();
+  });
+
   it('preço negativo, vazio ou acima de R$ 9.999,99 é recusado', async () => {
     const cat = await ctx.banco.categoria.create({ data: { nome: 'Pastéis' } });
     for (const preco of ['-1.00', '', '10000.00', 'abc']) {

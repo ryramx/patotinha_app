@@ -35,6 +35,8 @@ export interface Produto {
   id: number;
   nome: string;
   preco: string;
+  /** O que o produto leva, mostrado abaixo do nome no novo pedido. */
+  ingredientes: string | null;
   ativo: boolean;
   categoria: { id: number; nome: string; ativo: boolean };
   criadoEm: string;

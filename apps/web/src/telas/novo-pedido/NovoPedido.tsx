@@ -546,13 +546,20 @@ export function NovoPedido() {
                       p.id === toqueCartao.current && piscando ? `${p.id}-${piscando.vez}` : p.id
                     }
                     type="button"
-                    title={p.nome}
+                    title={p.ingredientes ? `${p.nome}: ${p.ingredientes}` : p.nome}
                     onClick={() => adicionar(p)}
                     className={`botao-produto relative flex min-h-[88px] flex-col items-start justify-between rounded-padrao border border-borda bg-superficie p-3 text-left shadow-padrao transition-colors hover:border-acao md:min-h-24 ${
                       p.id === toqueCartao.current && piscando ? 'anim-toque' : ''
                     }`}
                   >
-                    <span className="line-clamp-2 pr-6 text-[16px] leading-5">{p.nome}</span>
+                    <span className="flex flex-col gap-1 pr-6">
+                      <span className="line-clamp-2 text-[16px] leading-5">{p.nome}</span>
+                      {p.ingredientes && (
+                        <span className="line-clamp-3 text-[13px] leading-4 text-texto-suave">
+                          {p.ingredientes}
+                        </span>
+                      )}
+                    </span>
                     <span className="mt-2 text-[18px] font-bold tabular-nums">
                       {formatarReais(p.preco)}
                     </span>

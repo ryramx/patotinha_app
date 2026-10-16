@@ -224,18 +224,21 @@ function FormularioProduto({
   const [nome, setNome] = useState(produto?.nome ?? '');
   const [categoriaId, setCategoriaId] = useState(produto ? String(produto.categoria.id) : '');
   const [preco, setPreco] = useState<number | null>(precoInicial);
+  const [ingredientes, setIngredientes] = useState(produto?.ingredientes ?? '');
   const [erros, setErros] = useState<Record<string, string>>({});
 
   const alterado =
     nome !== (produto?.nome ?? '') ||
     categoriaId !== (produto ? String(produto.categoria.id) : '') ||
-    preco !== precoInicial;
+    preco !== precoInicial ||
+    ingredientes !== (produto?.ingredientes ?? '');
 
   const validar = (campo?: string) => {
     const resultado = esquemaProduto.safeParse({
       nome,
       categoriaId: categoriaId ? Number(categoriaId) : undefined,
       preco: preco === null ? '' : (preco / 100).toFixed(2),
+      ingredientes,
     });
     const novos: Record<string, string> = {};
     if (!resultado.success) {
@@ -264,6 +267,7 @@ function FormularioProduto({
           nome: nome.trim(),
           categoriaId: Number(categoriaId),
           preco: ((preco ?? 0) / 100).toFixed(2),
+          ingredientes: ingredientes.trim() || null,
         },
       }),
     onSuccess: (p) => {
@@ -327,6 +331,27 @@ function FormularioProduto({
         onBlur={() => validar('preco')}
         erro={erros.preco || null}
       />
+      <div>
+        <label htmlFor="ingredientes" className="rotulo mb-1 block">
+          Ingredientes <span className="legenda">(opcional)</span>
+        </label>
+        <textarea
+          id="ingredientes"
+          value={ingredientes}
+          rows={3}
+          maxLength={LIMITES.ingredientes}
+          placeholder="Ex.: carne moída, azeitona e ovo"
+          onChange={(e) => setIngredientes(e.target.value)}
+          onBlur={() => validar('ingredientes')}
+          aria-invalid={erros.ingredientes ? true : undefined}
+          className={`w-full rounded-padrao border bg-superficie px-3 py-2 text-[16px] outline-none transition-colors hover:border-texto focus:border-2 focus:border-acao ${erros.ingredientes ? 'border-2 border-erro' : 'border-borda'}`}
+        />
+        {erros.ingredientes ? (
+          <MensagemErro texto={erros.ingredientes} />
+        ) : (
+          <p className="legenda mt-1">Aparece abaixo do nome na tela de novo pedido.</p>
+        )}
+      </div>
       {produto && preco !== precoInicial && (
         <p className="flex items-start gap-2 rounded-padrao bg-aviso-fundo px-3 py-2 font-semibold text-aviso">
           <TriangleAlert size={20} className="mt-0.5 shrink-0" aria-hidden /> {t('dica.avisoPreco')}
