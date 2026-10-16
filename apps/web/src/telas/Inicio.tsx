@@ -137,9 +137,9 @@ export function Inicio() {
           <table className="w-full text-left">
             <thead className="legenda">
               <tr>
-                <th className="py-2 font-semibold">Nº</th>
-                <th className="py-2 font-semibold">Cliente</th>
-                <th className="py-2 font-semibold">Hora</th>
+                <th className="py-2 pr-3 font-semibold">Nº</th>
+                <th className="py-2 pr-3 font-semibold">Cliente</th>
+                <th className="hidden py-2 pr-3 font-semibold sm:table-cell">Hora</th>
                 <th className="py-2 text-right font-semibold">Total</th>
                 <th className="hidden py-2 pl-6 font-semibold sm:table-cell">Pagamento</th>
                 <th className="py-2 pl-4 font-semibold">Status</th>
@@ -154,11 +154,15 @@ export function Inicio() {
                   onKeyDown={(e) => e.key === 'Enter' && navegar(`/pedidos/${p.id}`)}
                   className="h-11 cursor-pointer border-t border-borda even:bg-creme-escuro/50 hover:bg-creme-escuro"
                 >
-                  <td className="font-bold">{p.id}</td>
-                  <td className="max-w-[160px] truncate pr-3">{p.cliente ?? '—'}</td>
-                  <td>{formatarHora(p.criadoEm)}</td>
+                  <td className="pr-3 font-bold tabular-nums">{p.id}</td>
+                  <td className="max-w-[120px] truncate pr-3 sm:max-w-[160px]">
+                    {p.cliente ?? '—'}
+                  </td>
+                  <td className="hidden whitespace-nowrap pr-3 sm:table-cell">
+                    {formatarHora(p.criadoEm)}
+                  </td>
                   <td
-                    className={`text-right tabular-nums ${p.status === 'CANCELADO' ? 'text-desab-texto line-through' : ''}`}
+                    className={`whitespace-nowrap text-right tabular-nums ${p.status === 'CANCELADO' ? 'text-desab-texto line-through' : ''}`}
                   >
                     {formatarReais(p.total)}
                   </td>
