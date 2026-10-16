@@ -1,17 +1,23 @@
 import type { FastifyInstance } from 'fastify';
-import type { ListaPedidos } from '@patotinha/shared';
+import type { FilaPreparo, ListaPedidos } from '@patotinha/shared';
 import {
   esquemaCancelamento,
   esquemaFiltroPedidos,
   esquemaNovoPedido,
   esquemaParamId,
+  esquemaPreparo,
 } from '@patotinha/shared';
 import { ErroApp, erros } from '../erros.js';
 import { usuarioDa } from '../auth/plugin.js';
 import { intervaloDeDias } from '../periodo.js';
 import { dinheiro } from '../serializar.js';
 import type { Prisma } from '../generated/prisma/client.js';
-import { buscarPedidoCompleto, paraPedidoApi, paraPedidoResumidoApi } from './repositorio.js';
+import {
+  buscarPedidoCompleto,
+  paraPedidoApi,
+  paraPedidoNaFilaApi,
+  paraPedidoResumidoApi,
+} from './repositorio.js';
 import { criarPedido } from './servico.js';
 
 const naoEncontrado = () => erros.naoEncontrado('PEDIDO_NAO_ENCONTRADO', 'Pedido não encontrado');
@@ -62,6 +68,7 @@ export async function rotasPedidos(app: FastifyInstance) {
         status: filtro.status,
         formaPagamento: filtro.formaPagamento ? { codigo: filtro.formaPagamento } : undefined,
         usuarioId: filtro.usuarioId ? BigInt(filtro.usuarioId) : undefined,
+        clienteNome: filtro.cliente ? { contains: filtro.cliente, mode: 'insensitive' } : undefined,
       };
     }
     const [dados, total, soma] = await Promise.all([
@@ -94,6 +101,57 @@ export async function rotasPedidos(app: FastifyInstance) {
     const pedido = await buscarPedidoCompleto(app.banco, BigInt(id));
     if (!pedido) throw naoEncontrado();
     return paraPedidoApi(pedido);
+  });
+
+  // Fila de preparo do dia: pedidos pagos ainda não entregues, por ordem de chegada.
+  app.get('/fila', { preHandler: app.autenticar }, async (): Promise<FilaPreparo> => {
+    const hoje = intervaloDeDias(undefined, undefined, 'FILTRO_INVALIDO');
+    const doDia = {
+      status: 'FINALIZADO',
+      criadoEm: { gte: hoje.inicio, lt: hoje.fim },
+    } satisfies Prisma.PedidoWhereInput;
+    const [ativos, entregues] = await Promise.all([
+      app.banco.pedido.findMany({
+        where: { ...doDia, statusPreparo: { not: 'ENTREGUE' } },
+        include: { itens: { orderBy: { id: 'asc' } } },
+        orderBy: [{ criadoEm: 'asc' }, { id: 'asc' }],
+        take: 200,
+      }),
+      app.banco.pedido.findMany({
+        where: { ...doDia, statusPreparo: 'ENTREGUE' },
+        include: { itens: { orderBy: { id: 'asc' } } },
+        orderBy: [{ preparoAtualizadoEm: 'desc' }, { id: 'desc' }],
+        take: 5,
+      }),
+    ]);
+    return {
+      dados: ativos.map(paraPedidoNaFilaApi),
+      entreguesRecentes: entregues.map(paraPedidoNaFilaApi),
+    };
+  });
+
+  // Qualquer usuário avança (ou volta, para corrigir um toque errado) o preparo.
+  // Só muda o andamento; itens, valores e status do pedido não mudam (RN-13).
+  app.patch('/pedidos/:id/preparo', { preHandler: app.autenticar }, async (request) => {
+    const { id } = esquemaParamId.parse(request.params);
+    const corpo = esquemaPreparo.safeParse(request.body);
+    if (!corpo.success) {
+      throw new ErroApp(422, 'STATUS_PREPARO_INVALIDO', 'Status de preparo inválido');
+    }
+    const atual = await app.banco.pedido.findUnique({ where: { id: BigInt(id) } });
+    if (!atual) throw naoEncontrado();
+    if (atual.status === 'CANCELADO') {
+      throw new ErroApp(409, 'PEDIDO_CANCELADO', 'Este pedido foi cancelado e saiu da fila');
+    }
+    await app.banco.pedido.update({
+      where: { id: atual.id },
+      data: { statusPreparo: corpo.data.status, preparoAtualizadoEm: new Date() },
+    });
+    request.log.info(
+      { evento: 'preparo_alterado', pedidoId: id, status: corpo.data.status },
+      'preparo alterado',
+    );
+    return paraPedidoApi((await buscarPedidoCompleto(app.banco, atual.id))!);
   });
 
   // Não existe endpoint para editar nem apagar pedido (RN-13).

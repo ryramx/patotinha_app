@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Check, Minus, Plus, Trash2, TriangleAlert, X } from 'lucide-react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
+import { Check, Minus, Plus, Trash2, TriangleAlert, UserRound, X } from 'lucide-react';
 import {
   formatarReais,
   LIMITES,
@@ -7,7 +7,7 @@ import {
   type FormaPagamento,
 } from '@patotinha/shared';
 import { Botao } from '../../componentes/Botao';
-import { CampoDinheiro } from '../../componentes/Campos';
+import { CampoDinheiro, CampoTexto } from '../../componentes/Campos';
 import { IconePagamento, NOME_PAGAMENTO } from '../../componentes/Diversos';
 import { t } from '../../textos';
 import type { ItemRascunho, Rascunho } from './rascunho';
@@ -23,6 +23,8 @@ interface Props {
   enviando: boolean;
   semConexao: boolean;
   dicaFinalizar: string | null;
+  refCliente: RefObject<HTMLInputElement | null>;
+  aoMudarCliente: (nome: string) => void;
   aoMudarQuantidade: (produtoId: number, quantidade: number) => void;
   aoRemover: (produtoId: number) => void;
   aoEscolherForma: (forma: CodigoPagamento) => void;
@@ -79,6 +81,22 @@ export function PainelPedido(props: Props) {
             <X size={24} />
           </button>
         </div>
+      </div>
+
+      {/* Comanda: nome para chamar o cliente quando o pedido ficar pronto. */}
+      <div className="border-b border-borda px-4 py-3">
+        <CampoTexto
+          ref={props.refCliente}
+          rotulo={t('pedido.cliente')}
+          value={rascunho.cliente}
+          maxLength={LIMITES.clienteNome.max}
+          autoComplete="off"
+          autoCapitalize="words"
+          enterKeyHint="done"
+          esquerda={<UserRound size={20} aria-hidden />}
+          dica={t('pedido.clienteDica')}
+          onChange={(e) => props.aoMudarCliente(e.target.value)}
+        />
       </div>
 
       {/* Lista de itens: rola sozinha; o rodapé nunca rola. */}

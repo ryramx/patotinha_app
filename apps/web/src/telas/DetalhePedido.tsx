@@ -9,6 +9,7 @@ import { useAvisos } from '../componentes/Avisos';
 import { Botao } from '../componentes/Botao';
 import { MensagemErro } from '../componentes/Campos';
 import {
+  EtiquetaPreparo,
   EtiquetaStatus,
   IconePagamento,
   LinhasEsqueleto,
@@ -98,7 +99,13 @@ function ConteudoPedido({
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="titulo-tela">{t('detalhe.titulo', { numero: p.id })}</h1>
             <EtiquetaStatus status={p.status} />
+            {p.status === 'FINALIZADO' && <EtiquetaPreparo status={p.preparo.status} />}
           </div>
+          {p.cliente && (
+            <p className="mt-1 text-[20px] font-bold">
+              {t('detalhe.cliente', { nome: p.cliente })}
+            </p>
+          )}
           <p className="legenda mt-1">
             {t('detalhe.por', {
               data: formatarData(p.criadoEm),
@@ -186,6 +193,7 @@ function JanelaCancelamento({ pedido, aoFechar }: { pedido: Pedido; aoFechar: ()
       queryClient.setQueryData(['pedidos', 'detalhe', String(pedido.id)], atualizado);
       void queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       void queryClient.invalidateQueries({ queryKey: ['inicio'] });
+      void queryClient.invalidateQueries({ queryKey: ['fila'] });
       avisos.sucesso(t('sucesso.pedidoCancelado', { numero: pedido.id }));
       aoFechar();
     },

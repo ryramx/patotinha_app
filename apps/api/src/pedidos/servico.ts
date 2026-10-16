@@ -54,6 +54,10 @@ export async function criarPedido(
       const criado = await tx.pedido.create({
         data: {
           status: 'FINALIZADO',
+          clienteNome: dados.cliente,
+          // Entra no fim da fila de preparo (comanda digital).
+          statusPreparo: 'AGUARDANDO',
+          preparoAtualizadoEm: new Date(),
           usuarioId,
           formaPagamentoId: forma!.id,
           total: deCentavos(calculo.totalCentavos),

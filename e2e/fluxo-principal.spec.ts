@@ -58,8 +58,13 @@ test('CA-05 a CA-07: funcionário registra o pedido do exemplo em dinheiro', asy
   await page.getByRole('button', { name: 'Aumentar Coca-Cola' }).click();
   await expect(total).toHaveText('R$ 33,00');
 
-  // Sem forma de pagamento, Finalizar fica desabilitado com a dica.
+  // Sem nome do cliente, Finalizar fica desabilitado com a dica (comanda).
   const finalizar = page.getByRole('button', { name: 'Finalizar pedido' });
+  await expect(finalizar).toBeDisabled();
+  await expect(page.getByText('Informe o nome do cliente')).toBeVisible();
+  await page.getByLabel('Nome do cliente').fill('Dona Joana');
+
+  // Sem forma de pagamento, também fica desabilitado com a dica.
   await expect(finalizar).toBeDisabled();
   await expect(page.getByText('Escolha a forma de pagamento')).toBeVisible();
 
@@ -75,11 +80,14 @@ test('CA-05 a CA-07: funcionário registra o pedido do exemplo em dinheiro', asy
   await expect(page.getByText('Troco R$ 17,00')).toBeVisible();
 
   await finalizar.click();
-  const aviso = page.getByRole('status').filter({ hasText: /Pedido nº \d+ registrado, R\$ 33,00/ });
+  const aviso = page
+    .getByRole('status')
+    .filter({ hasText: /Pedido nº \d+ de Dona Joana registrado, R\$ 33,00/ });
   await expect(aviso).toBeVisible();
   numeroPedido = (await aviso.textContent())!.match(/nº (\d+)/)![1]!;
   await expect(total).toHaveText('R$ 0,00');
   await expect(page.getByText('Toque num produto para começar')).toBeVisible();
+  await expect(page.getByLabel('Nome do cliente')).toHaveValue('');
 });
 
 test('CA-08: o pedido aparece no histórico e no detalhe, como gravado', async ({ page }) => {
@@ -90,17 +98,44 @@ test('CA-08: o pedido aparece no histórico e no detalhe, como gravado', async (
   await expect(linha).toContainText('Dinheiro');
   await expect(linha).toContainText('Finalizado');
   await expect(linha).toContainText('Maria');
+  await expect(linha).toContainText('Dona Joana');
   await expect(page.getByText('Total finalizado no filtro: R$ 33,00 · 1 pedidos')).toBeVisible();
 
   await linha.click();
   await expect(page.getByRole('heading', { name: `Pedido nº ${numeroPedido}` })).toBeVisible();
   await expect(page.getByText('Recebido R$ 50,00 · Troco R$ 17,00')).toBeVisible();
+  await expect(page.getByText('Cliente: Dona Joana')).toBeVisible();
   // Funcionário não vê o botão de cancelar (CA-09).
   await expect(page.getByRole('button', { name: 'Cancelar pedido' })).toHaveCount(0);
 
   // Tela de administrador pelo endereço direto (CA-01).
   await page.goto('/produtos');
   await expect(page.getByText('Esta área é só para administradores')).toBeVisible();
+});
+
+test('Comanda: o pedido entra na fila e anda até ser entregue', async ({ page }) => {
+  await entrar(page, FUNCIONARIO);
+  await page.getByRole('link', { name: 'Fila de preparo' }).click();
+  const comanda = page.getByRole('article', { name: `Pedido nº ${numeroPedido}, Dona Joana` });
+  const coluna = (nome: string) => page.getByRole('region', { name: nome });
+  await expect(coluna('Aguardando').getByRole('article')).toHaveCount(1);
+  await expect(comanda).toContainText(/2×\s*Pastel de Carne/);
+  await expect(comanda).toContainText('1º');
+
+  await comanda.getByRole('button', { name: 'Começar preparo' }).click();
+  await expect(coluna('Preparando').getByRole('article')).toHaveCount(1);
+  await comanda.getByRole('button', { name: 'Marcar pronto' }).click();
+  await expect(coluna('Pronto').getByRole('article')).toHaveCount(1);
+  await comanda.getByRole('button', { name: 'Entregue ao cliente' }).click();
+
+  await expect(page.getByText('Nenhum pedido esperando')).toBeVisible();
+  const entregues = page.getByRole('region', { name: 'Entregues há pouco' });
+  await expect(entregues).toContainText('Dona Joana');
+  // Toque errado: volta para a fila como Pronto.
+  await entregues.getByRole('button', { name: 'Voltar para a fila' }).click();
+  await expect(coluna('Pronto').getByRole('article')).toHaveCount(1);
+  await comanda.getByRole('button', { name: 'Entregue ao cliente' }).click();
+  await expect(page.getByText('Nenhum pedido esperando')).toBeVisible();
 });
 
 test('CA-09 e CA-10: admin cancela o pedido e ele sai do resumo', async ({ page }) => {

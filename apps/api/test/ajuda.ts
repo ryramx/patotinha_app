@@ -101,10 +101,12 @@ export function pedidoExemplo(
     formaPagamento: string;
     valorRecebido: string | null;
     chaveIdempotencia: string;
+    cliente: string;
   }> = {},
 ) {
   return {
     chaveIdempotencia: randomUUID(),
+    cliente: 'Joana',
     formaPagamento: 'PIX',
     itens: [
       { produtoId: c.carne, quantidade: 2, precoExibido: '8.00' },

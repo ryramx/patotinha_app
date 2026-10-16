@@ -1,6 +1,16 @@
 import type { ReactNode } from 'react';
-import { Ban, CircleCheck, Clock, Banknote, QrCode, CreditCard } from 'lucide-react';
-import type { CodigoPagamento, StatusPedido } from '@patotinha/shared';
+import {
+  Ban,
+  BellRing,
+  CircleCheck,
+  Clock,
+  Banknote,
+  Flame,
+  HandPlatter,
+  QrCode,
+  CreditCard,
+} from 'lucide-react';
+import type { CodigoPagamento, StatusPedido, StatusPreparo } from '@patotinha/shared';
 import { t } from '../textos';
 
 /** Status nunca só por cor: palavra + ícone. */
@@ -15,6 +25,30 @@ export function EtiquetaStatus({ status }: { status: StatusPedido }) {
       className={`inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-[14px] font-bold ${config.cor}`}
     >
       <config.Icone size={14} aria-hidden /> {config.texto}
+    </span>
+  );
+}
+
+export const NOME_PREPARO: Record<StatusPreparo, string> = {
+  AGUARDANDO: t('fila.aguardando'),
+  PREPARANDO: t('fila.preparando'),
+  PRONTO: t('fila.pronto'),
+  ENTREGUE: t('fila.entregue'),
+};
+
+/** Andamento da comanda: palavra + ícone, como o status do pedido. */
+export function EtiquetaPreparo({ status }: { status: StatusPreparo }) {
+  const config = {
+    AGUARDANDO: { cor: 'bg-desab-fundo text-texto', Icone: Clock },
+    PREPARANDO: { cor: 'bg-aviso-fundo text-aviso', Icone: Flame },
+    PRONTO: { cor: 'bg-sucesso-fundo text-sucesso', Icone: BellRing },
+    ENTREGUE: { cor: 'bg-creme-escuro text-texto-suave', Icone: HandPlatter },
+  }[status];
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-3 py-0.5 text-[14px] font-bold ${config.cor}`}
+    >
+      <config.Icone size={14} aria-hidden /> {NOME_PREPARO[status]}
     </span>
   );
 }

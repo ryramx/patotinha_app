@@ -17,10 +17,11 @@
     "atalhos": "Atalhos de teclado",
     "abrirMenu": "Abrir menu",
     "conectado": "Conectado ao servidor",
-    "semConexao": "Sem conexão com o servidor"
+    "semConexao": "Sem conexão com o servidor",
+    "fila": "Fila de preparo"
   },
   "sucesso": {
-    "pedidoGravado": "Pedido nº {numero} registrado, {total}",
+    "pedidoGravado": "Pedido nº {numero} de {cliente} registrado, {total}",
     "pedidoCancelado": "Pedido nº {numero} cancelado",
     "produtoSalvo": "Produto salvo",
     "categoriaSalva": "Categoria salva",
@@ -82,7 +83,9 @@
     "avisoPreco": "O novo preço vale para pedidos a partir de agora. Pedidos anteriores não mudam",
     "avisoPrecoZero": "Este produto ficará de graça. Confirme se está certo",
     "semProdutos": "Ainda não há produtos cadastrados",
-    "capsLock": "Caps Lock ligado"
+    "capsLock": "Caps Lock ligado",
+    "semCliente": "Informe o nome do cliente",
+    "filaVazia": "Nenhum pedido esperando. Os pedidos novos aparecem aqui sozinhos"
   },
   "login": {
     "titulo": "Entrar no sistema",
@@ -124,7 +127,9 @@
     "quantidadeDe": "Quantidade de {nome}",
     "quantidadeInvalida": "Use um número de 1 a {max}",
     "precoMudouLinha": "Preço mudou de {de} para {para}",
-    "indisponivelLinha": "Produto indisponível"
+    "indisponivelLinha": "Produto indisponível",
+    "cliente": "Nome do cliente",
+    "clienteDica": "Para chamar quando ficar pronto"
   },
   "inicio": {
     "bomDia": "Bom dia",
@@ -147,7 +152,8 @@
     "todos": "Todos",
     "limparFiltros": "Limpar filtros",
     "totalFiltro": "Total finalizado no filtro: {total} · {quantidade} pedidos",
-    "inativo": "(inativo)"
+    "inativo": "(inativo)",
+    "cliente": "Cliente"
   },
   "detalhe": {
     "voltar": "← Voltar ao histórico",
@@ -156,7 +162,9 @@
     "recebido": "Recebido {recebido} · Troco {troco}",
     "cancelado": "Cancelado por {nome} em {data} às {hora}. Motivo: {motivo}",
     "motivo": "Motivo",
-    "naoEncontrado": "Pedido não encontrado"
+    "naoEncontrado": "Pedido não encontrado",
+    "cliente": "Cliente: {nome}",
+    "preparo": "Preparo"
   },
   "resumo": {
     "titulo": "Resumo de vendas",
@@ -213,5 +221,25 @@
     "nova": "Nova senha",
     "confirmacao": "Confirme a nova senha",
     "naoConferem": "As senhas não conferem"
+  },
+  "fila": {
+    "titulo": "Fila de preparo",
+    "aguardando": "Aguardando",
+    "preparando": "Preparando",
+    "pronto": "Pronto",
+    "entregue": "Entregue",
+    "comecar": "Começar preparo",
+    "marcarPronto": "Marcar pronto",
+    "entregar": "Entregue ao cliente",
+    "voltarEtapa": "Voltar etapa",
+    "desfazerEntrega": "Voltar para a fila",
+    "semNome": "Sem nome",
+    "ha": "há {minutos} min",
+    "agora": "agora",
+    "entreguesRecentes": "Entregues há pouco",
+    "atualizado": "Atualiza sozinha a cada 10 segundos",
+    "naFila": "{quantidade} na fila",
+    "posicao": "{posicao}º",
+    "pedidoCancelado": "Este pedido foi cancelado e saiu da fila"
   }
 }

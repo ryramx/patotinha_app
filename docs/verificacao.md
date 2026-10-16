@@ -13,20 +13,21 @@ Resultado desta execução: **96 de 96** (API e shared) e **11 de 11** (ponta a 
 
 ## 6.2 Critérios de aceitação e onde cada um é coberto
 
-| Critério                  | Teste automático                                                                                | Roteiro manual no piloto                                |
-| ------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| CA-01 Login               | `apps/api/test/auth.test.ts` (6 cenários) e `e2e/fluxo-principal.spec.ts` (mensagem única, 403) | —                                                       |
-| CA-02 Categorias          | `apps/api/test/cardapio.test.ts` › CA-02                                                        | Desativar "Doces" e conferir as abas no Novo pedido     |
-| CA-03 Produtos            | `apps/api/test/cardapio.test.ts` › CA-03                                                        | —                                                       |
-| CA-04 Alteração de preço  | `cardapio.test.ts` › CA-04 e `e2e/tela-novo-pedido.spec.ts` › CA-04 (duas janelas)              | —                                                       |
-| CA-05 Montagem do pedido  | `e2e/fluxo-principal.spec.ts` (3 linhas, R$ 33,00, − e +) e `pedidos.test.ts` (quantidades)     | —                                                       |
-| CA-06 Pagamento           | `e2e/fluxo-principal.spec.ts` (troco R$ 17,00, "Faltam R$ 3,00") e `pedidos.test.ts`            | —                                                       |
-| CA-07 Finalização         | `pedidos.test.ts` (idempotência, transação, preço adulterado, soma) e `fluxo-principal.spec.ts` | Clique duplo no balcão                                  |
-| CA-08 Histórico e detalhe | `pedidos.test.ts` › CA-08 e `fluxo-principal.spec.ts` › CA-08                                   | Filtro "Ontem" + PIX com dados reais                    |
-| CA-09 Cancelamento        | `pedidos.test.ts` › CA-09 e `fluxo-principal.spec.ts` › CA-09 e CA-10                           | —                                                       |
-| CA-10 Resumo de vendas    | `relatorios.test.ts` (R$ 68,00, cartão, 23h50, zeros, volume de um mês)                         | Comparar o resumo diário com o caixa (piloto)           |
-| CA-11 Usuários            | `usuarios.test.ts` e `fluxo-principal.spec.ts` (menu do funcionário)                            | —                                                       |
-| CA-12 Operação            | Repositório sem segredos (conferido abaixo)                                                     | HTTPS e restauração de backup: etapa 7, ainda não feita |
+| Critério                    | Teste automático                                                                                | Roteiro manual no piloto                                |
+| --------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| CA-01 Login                 | `apps/api/test/auth.test.ts` (6 cenários) e `e2e/fluxo-principal.spec.ts` (mensagem única, 403) | —                                                       |
+| CA-02 Categorias            | `apps/api/test/cardapio.test.ts` › CA-02                                                        | Desativar "Doces" e conferir as abas no Novo pedido     |
+| CA-03 Produtos              | `apps/api/test/cardapio.test.ts` › CA-03                                                        | —                                                       |
+| CA-04 Alteração de preço    | `cardapio.test.ts` › CA-04 e `e2e/tela-novo-pedido.spec.ts` › CA-04 (duas janelas)              | —                                                       |
+| CA-05 Montagem do pedido    | `e2e/fluxo-principal.spec.ts` (3 linhas, R$ 33,00, − e +) e `pedidos.test.ts` (quantidades)     | —                                                       |
+| CA-06 Pagamento             | `e2e/fluxo-principal.spec.ts` (troco R$ 17,00, "Faltam R$ 3,00") e `pedidos.test.ts`            | —                                                       |
+| CA-07 Finalização           | `pedidos.test.ts` (idempotência, transação, preço adulterado, soma) e `fluxo-principal.spec.ts` | Clique duplo no balcão                                  |
+| CA-08 Histórico e detalhe   | `pedidos.test.ts` › CA-08 e `fluxo-principal.spec.ts` › CA-08                                   | Filtro "Ontem" + PIX com dados reais                    |
+| CA-09 Cancelamento          | `pedidos.test.ts` › CA-09 e `fluxo-principal.spec.ts` › CA-09 e CA-10                           | —                                                       |
+| CA-10 Resumo de vendas      | `relatorios.test.ts` (R$ 68,00, cartão, 23h50, zeros, volume de um mês)                         | Comparar o resumo diário com o caixa (piloto)           |
+| CA-11 Usuários              | `usuarios.test.ts` e `fluxo-principal.spec.ts` (menu do funcionário)                            | —                                                       |
+| CA-13 Comanda (nome e fila) | `comanda.test.ts` (9 cenários) e `fluxo-principal.spec.ts` › Comanda (16/10/2026)               | Tablet na cozinha com a fila aberta durante o piloto    |
+| CA-12 Operação              | Repositório sem segredos (conferido abaixo)                                                     | HTTPS e restauração de backup: etapa 7, ainda não feita |
 
 ## 6.3 Telas em computador e tablet
 

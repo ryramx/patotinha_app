@@ -1,6 +1,6 @@
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { CirclePlus } from 'lucide-react';
+import { ChefHat, CirclePlus } from 'lucide-react';
 import {
   diaEmSaoPaulo,
   formatarDiaPorExtenso,
@@ -83,6 +83,13 @@ export function Inicio() {
           {t('menu.novoPedido')}
         </Botao>
       </div>
+      <Botao
+        className="w-full sm:w-80 sm:self-end"
+        icone={<ChefHat size={22} aria-hidden />}
+        onClick={() => navegar('/fila')}
+      >
+        {t('menu.fila')}
+      </Botao>
 
       {eAdmin && (
         <section aria-label="Números de hoje">
@@ -131,6 +138,7 @@ export function Inicio() {
             <thead className="legenda">
               <tr>
                 <th className="py-2 font-semibold">Nº</th>
+                <th className="py-2 font-semibold">Cliente</th>
                 <th className="py-2 font-semibold">Hora</th>
                 <th className="py-2 text-right font-semibold">Total</th>
                 <th className="hidden py-2 pl-6 font-semibold sm:table-cell">Pagamento</th>
@@ -147,6 +155,7 @@ export function Inicio() {
                   className="h-11 cursor-pointer border-t border-borda even:bg-creme-escuro/50 hover:bg-creme-escuro"
                 >
                   <td className="font-bold">{p.id}</td>
+                  <td className="max-w-[160px] truncate pr-3">{p.cliente ?? '—'}</td>
                   <td>{formatarHora(p.criadoEm)}</td>
                   <td
                     className={`text-right tabular-nums ${p.status === 'CANCELADO' ? 'text-desab-texto line-through' : ''}`}
