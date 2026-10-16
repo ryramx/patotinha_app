@@ -64,6 +64,9 @@ test('RNF-09: pedido de 3 itens em até 8 toques, e o rascunho sobrevive a recar
   }
   await expect(page.getByTestId('total')).toHaveText('R$ 23,00');
 
+  // Nome do cliente: um toque no campo e digitar (comanda).
+  toques++;
+  await page.getByLabel('Nome do cliente').fill('Rafa');
   await tocar(/PIX/, 'radio');
   await tocar('Finalizar pedido');
   await expect(page.getByRole('status').filter({ hasText: /registrado, R\$ 23,00/ })).toBeVisible();
@@ -106,6 +109,7 @@ test('CA-04: preço alterado durante o pedido é recusado e a linha mostra o nov
     .getByRole('region', { name: 'Produtos' })
     .getByRole('button', { name: /Pastel de Chocolate/ })
     .click();
+  await page.getByLabel('Nome do cliente').fill('Carla');
   await page.getByRole('radio', { name: /PIX/ }).click();
 
   // O administrador muda o preço em outra janela.

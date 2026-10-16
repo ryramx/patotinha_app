@@ -1,4 +1,5 @@
 // Modelo de dados do MVP (PRD seções 6 e 15). São exatamente seis tabelas.
+// Comanda digital (nome do cliente e fila de preparo) na migração 20261016000000_comanda.
 // CHECKs, índices em lower() e o gatilho de atualizado_em ficam na migração SQL,
 // porque o Prisma não os representa no schema.
 
@@ -82,6 +83,9 @@ model Pedido {
   canceladoEm        DateTime? @map("cancelado_em") @db.Timestamptz(6)
   canceladoPorId     BigInt?   @map("cancelado_por_id")
   motivoCancelamento String?   @map("motivo_cancelamento") @db.VarChar(255)
+  clienteNome        String?   @map("cliente_nome") @db.VarChar(60)
+  statusPreparo      String    @default("AGUARDANDO") @map("status_preparo") @db.VarChar(20)
+  preparoAtualizadoEm DateTime? @map("preparo_atualizado_em") @db.Timestamptz(6)
   atualizadoEm       DateTime  @default(now()) @map("atualizado_em") @db.Timestamptz(6)
 
   usuario        Usuario         @relation("PedidoUsuario", fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: NoAction)

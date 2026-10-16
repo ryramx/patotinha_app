@@ -9,6 +9,8 @@ export interface ItemRascunho {
 }
 
 export interface Rascunho {
+  /** Nome do cliente para a comanda. */
+  cliente: string;
   itens: ItemRascunho[];
   forma: CodigoPagamento | null;
   recebidoCentavos: number | null;
@@ -23,7 +25,13 @@ export function novaChave(): string {
 }
 
 export function rascunhoVazio(): Rascunho {
-  return { itens: [], forma: null, recebidoCentavos: null, chaveIdempotencia: novaChave() };
+  return {
+    cliente: '',
+    itens: [],
+    forma: null,
+    recebidoCentavos: null,
+    chaveIdempotencia: novaChave(),
+  };
 }
 
 export function lerRascunho(): Rascunho | null {
@@ -32,7 +40,8 @@ export function lerRascunho(): Rascunho | null {
     if (!texto) return null;
     const r = JSON.parse(texto) as Rascunho;
     if (!Array.isArray(r.itens) || typeof r.chaveIdempotencia !== 'string') return null;
-    return r;
+    // Rascunho salvo antes da comanda não tem nome.
+    return { ...r, cliente: typeof r.cliente === 'string' ? r.cliente : '' };
   } catch {
     return null;
   }
@@ -40,7 +49,8 @@ export function lerRascunho(): Rascunho | null {
 
 export function salvarRascunho(r: Rascunho) {
   try {
-    if (r.itens.length === 0 && r.forma === null) localStorage.removeItem(CHAVE);
+    if (r.itens.length === 0 && r.forma === null && !r.cliente.trim())
+      localStorage.removeItem(CHAVE);
     else localStorage.setItem(CHAVE, JSON.stringify(r));
   } catch {
     // Navegador sem armazenamento: o pedido só não sobrevive a um recarregamento.

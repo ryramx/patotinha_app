@@ -87,6 +87,7 @@ export function NovoPedido() {
     aviso: number;
   } | null>(null);
   const refBusca = useRef<HTMLInputElement>(null);
+  const refCliente = useRef<HTMLInputElement>(null);
   const toqueCartao = useRef<number | null>(null);
 
   const listaCategorias = useMemo(() => categorias.data ?? [], [categorias.data]);
@@ -208,22 +209,34 @@ export function NovoPedido() {
   const dicaFinalizar =
     rascunho.itens.length === 0
       ? t('dica.semItens')
-      : !rascunho.forma
-        ? t('dica.semPagamento')
-        : faltaRecebido
-          ? t('pedido.faltam', { valor: formatarReais(totalCentavos - rascunho.recebidoCentavos!) })
-          : temIndisponivel
-            ? t('pedido.indisponivelLinha')
-            : null;
+      : !rascunho.cliente.trim()
+        ? t('dica.semCliente')
+        : !rascunho.forma
+          ? t('dica.semPagamento')
+          : faltaRecebido
+            ? t('pedido.faltam', {
+                valor: formatarReais(totalCentavos - rascunho.recebidoCentavos!),
+              })
+            : temIndisponivel
+              ? t('pedido.indisponivelLinha')
+              : null;
 
   const finalizar = useCallback(async () => {
-    if (dicaFinalizar || enviando) return;
+    if (enviando) return;
+    if (rascunho.itens.length > 0 && !rascunho.cliente.trim()) {
+      // Sem nome não há como chamar o cliente: leva o cursor até o campo.
+      refCliente.current?.focus();
+      avisos.aviso(t('dica.semCliente'));
+      return;
+    }
+    if (dicaFinalizar) return;
     setEnviando(true);
     try {
       const pedido = await api<Pedido>('/pedidos', {
         metodo: 'POST',
         corpo: {
           chaveIdempotencia: rascunho.chaveIdempotencia,
+          cliente: rascunho.cliente.trim(),
           formaPagamento: rascunho.forma,
           valorRecebido:
             rascunho.forma === 'DINHEIRO' && rascunho.recebidoCentavos !== null
@@ -237,7 +250,11 @@ export function NovoPedido() {
         },
       });
       avisos.sucesso(
-        t('sucesso.pedidoGravado', { numero: pedido.id, total: formatarReais(pedido.total) }),
+        t('sucesso.pedidoGravado', {
+          numero: pedido.id,
+          cliente: pedido.cliente ?? '',
+          total: formatarReais(pedido.total),
+        }),
       );
       setRascunho(rascunhoVazio());
       apagarRascunho();
@@ -246,6 +263,7 @@ export function NovoPedido() {
       setPainelAberto(false);
       void queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       void queryClient.invalidateQueries({ queryKey: ['inicio'] });
+      void queryClient.invalidateQueries({ queryKey: ['fila'] });
     } catch (e) {
       const erro = e as ErroDaApi;
       if (erro.semConexao) {
@@ -373,6 +391,8 @@ export function NovoPedido() {
       enviando={enviando}
       semConexao={semConexao}
       dicaFinalizar={dicaFinalizar}
+      refCliente={refCliente}
+      aoMudarCliente={(cliente) => atualizar((r) => ({ ...r, cliente }))}
       aoMudarQuantidade={(id, q) => {
         confirmarPreco(id);
         mudarQuantidade(id, q);

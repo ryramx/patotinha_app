@@ -14,6 +14,9 @@ funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
   para pagamento em dinheiro. O total é sempre recalculado no servidor com o preço atual; se um
   preço mudou enquanto o pedido era montado, a tela avisa. Finalizar duas vezes não duplica o
   pedido.
+- **Comanda digital:** cada pedido leva o nome do cliente, e a tela **Fila de preparo** mostra os
+  pedidos do dia por ordem de chegada (Aguardando, Preparando, Pronto), com um toque para avançar
+  cada um até a entrega. Detalhes em [docs/comanda.md](docs/comanda.md).
 - **Histórico e detalhe:** pedidos por período (hoje, ontem, últimos 7 dias, este mês ou datas
   escolhidas), com o detalhe de cada um. O administrador pode cancelar um pedido informando o motivo.
 - **Resumo de vendas** (administrador): faturamento do período, totais por forma de pagamento,
@@ -136,15 +139,16 @@ O CI (`.github/workflows/ci.yml`) roda tudo isso com um PostgreSQL 16 de serviç
 ## Estrutura
 
 ```text
-apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos, relatorios
+apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos (com a fila), relatorios
   prisma/        schema.prisma e migrações (DDL do PRD 15.5, com CHECKs e gatilhos)
   scripts/       seed-dev.ts (o seed-admin fica em src/scripts para rodar também no servidor)
   test/          testes de integração (Supertest) contra PostgreSQL real
 apps/web/        React. telas/, componentes/, layout/, estilos/tokens.css, textos.pt-BR.json
   public/        manifest.webmanifest, sw.js (app instalável), logo, ícones e favicon
 packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
-e2e/             Testes Playwright (fluxo do pedido do exemplo, tablet, preço alterado)
+e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, tablet, preço alterado)
 docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
+                 comanda.md: nome do cliente e fila de preparo
   marca/         Arte original da logo e a versão sem fundo
 scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)
 render.yaml      Serviço do Render (Docker, plano gratuito, Ohio)

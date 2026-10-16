@@ -7,6 +7,7 @@ import {
   formatarData,
   formatarHora,
   formatarReais,
+  LIMITES,
   somarDias,
   type ListaPedidos,
   type Usuario,
@@ -72,6 +73,7 @@ export function Historico() {
   const pagamento = params.get('pagamento') ?? '';
   const usuarioId = params.get('usuario') ?? '';
   const numero = params.get('numero') ?? '';
+  const cliente = params.get('cliente') ?? '';
   const pagina = Number(params.get('pagina') ?? 1) || 1;
 
   const mudar = (fn: (p: URLSearchParams) => void) => {
@@ -96,6 +98,7 @@ export function Historico() {
       pagamento,
       usuarioId,
       numero,
+      cliente,
       pagina,
     ],
     queryFn: () =>
@@ -107,6 +110,7 @@ export function Historico() {
           formaPagamento: pagamento || undefined,
           usuarioId: usuarioId || undefined,
           numero: numero || undefined,
+          cliente: cliente.trim() || undefined,
           pagina,
           tamanho: TAMANHO,
         })}`,
@@ -139,9 +143,11 @@ export function Historico() {
       });
     }
     if (numero) lista.push({ rotulo: `Nº ${numero}`, limpar: () => definir('numero', '') });
+    if (cliente.trim())
+      lista.push({ rotulo: `Cliente: ${cliente.trim()}`, limpar: () => definir('cliente', '') });
     return lista;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, pagamento, usuarioId, numero, usuarios.data, params]);
+  }, [status, pagamento, usuarioId, numero, cliente, usuarios.data, params]);
   const temFiltro = filtrosAtivos.length > 0 || periodo.atalho !== 'hoje';
 
   const select = 'h-10 rounded-padrao border border-borda bg-superficie px-2';
@@ -208,6 +214,16 @@ export function Historico() {
               className={`${select} w-[140px]`}
             />
           </label>
+          <label className="flex flex-col">
+            <span className="rotulo">{t('historico.cliente')}</span>
+            <input
+              type="search"
+              value={cliente}
+              maxLength={LIMITES.clienteNome.max}
+              onChange={(e) => definir('cliente', e.target.value)}
+              className={`${select} w-[180px]`}
+            />
+          </label>
           {temFiltro && (
             <Botao
               variante="texto"
@@ -254,10 +270,11 @@ export function Historico() {
               )}
             </Vazio>
           ) : (
-            <table className="w-full min-w-[720px] text-left">
+            <table className="w-full min-w-[860px] text-left">
               <thead className="legenda sticky top-0 z-10 bg-superficie shadow-[0_1px_0_var(--cor-borda)]">
                 <tr>
                   <th className="w-20 px-4 py-3 font-semibold">Nº</th>
+                  <th className="py-3 font-semibold">{t('historico.cliente')}</th>
                   <th className="w-[110px] py-3 font-semibold">Data</th>
                   <th className="w-[70px] py-3 font-semibold">Hora</th>
                   <th className="w-[120px] py-3 pr-6 text-right font-semibold">Total</th>
@@ -279,6 +296,7 @@ export function Historico() {
                       className="h-12 cursor-pointer border-t border-borda even:bg-creme-escuro/50 hover:bg-creme-escuro focus-visible:outline-[3px]"
                     >
                       <td className="px-4 font-bold">{p.id}</td>
+                      <td className="max-w-[180px] truncate pr-3">{p.cliente ?? '—'}</td>
                       <td>{dataAmigavel(p.criadoEm)}</td>
                       <td>{formatarHora(p.criadoEm)}</td>
                       <td

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   ChartColumnBig,
+  ChefHat,
   ChevronDown,
   Cookie,
   House,
@@ -26,6 +27,7 @@ import { temRascunho } from '../telas/novo-pedido/rascunho';
 
 const ITENS_MENU = [
   { para: '/pedidos/novo', rotulo: t('menu.novoPedido'), Icone: PlusCircle, admin: false },
+  { para: '/fila', rotulo: t('menu.fila'), Icone: ChefHat, admin: false },
   { para: '/pedidos', rotulo: t('menu.historico'), Icone: Receipt, admin: false, fim: true },
   { para: '/', rotulo: t('menu.inicio'), Icone: House, admin: false, fim: true },
   { para: '/resumo', rotulo: t('menu.resumo'), Icone: ChartColumnBig, admin: true },
@@ -38,6 +40,7 @@ const TITULOS: [RegExp, string][] = [
   [/^\/pedidos\/novo/, 'Novo pedido'],
   [/^\/pedidos\/\d+/, 'Detalhe do pedido'],
   [/^\/pedidos/, 'Histórico de pedidos'],
+  [/^\/fila/, 'Fila de preparo'],
   [/^\/resumo/, 'Resumo de vendas'],
   [/^\/produtos/, 'Produtos'],
   [/^\/categorias/, 'Categorias'],

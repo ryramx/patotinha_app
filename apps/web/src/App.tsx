@@ -7,6 +7,7 @@ import { Inicio } from './telas/Inicio';
 import { NovoPedido } from './telas/novo-pedido/NovoPedido';
 import { Historico } from './telas/Historico';
 import { DetalhePedido } from './telas/DetalhePedido';
+import { Fila } from './telas/Fila';
 import { Resumo } from './telas/Resumo';
 import { Produtos } from './telas/cadastros/Produtos';
 import { Categorias } from './telas/cadastros/Categorias';
@@ -54,6 +55,7 @@ export function App() {
         <Route path="pedidos/novo" element={<NovoPedido />} />
         <Route path="pedidos" element={<Historico />} />
         <Route path="pedidos/:id" element={<DetalhePedido />} />
+        <Route path="fila" element={<Fila />} />
         <Route
           path="resumo"
           element={

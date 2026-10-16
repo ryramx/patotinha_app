@@ -13,6 +13,7 @@ export const LIMITES = {
   login: { min: 3, max: 30 },
   senha: { min: 8, max: 128 },
   motivo: { min: 5, max: 200 },
+  clienteNome: { min: 1, max: 40 },
   precoMaxCentavos: 999_999,
   tamanhoPaginaMax: 100,
 } as const;
@@ -22,6 +23,10 @@ export type Perfil = (typeof PERFIS)[number];
 
 export const STATUS_PEDIDO = ['ABERTO', 'FINALIZADO', 'CANCELADO'] as const;
 export type StatusPedido = (typeof STATUS_PEDIDO)[number];
+
+/** Fila de preparo da comanda: a ordem é sempre esta. */
+export const STATUS_PREPARO = ['AGUARDANDO', 'PREPARANDO', 'PRONTO', 'ENTREGUE'] as const;
+export type StatusPreparo = (typeof STATUS_PREPARO)[number];
 
 export const CODIGOS_PAGAMENTO = ['DINHEIRO', 'PIX', 'DEBITO', 'CREDITO'] as const;
 export type CodigoPagamento = (typeof CODIGOS_PAGAMENTO)[number];
@@ -135,8 +140,15 @@ export const esquemaItemPedido = z.strictObject({
   precoExibido: esquemaPreco,
 });
 
+export const esquemaClienteNome = texto(
+  LIMITES.clienteNome.min,
+  LIMITES.clienteNome.max,
+  'o nome do cliente',
+).transform((v) => v.replace(/\s+/g, ' '));
+
 export const esquemaNovoPedido = z.strictObject({
   chaveIdempotencia: z.uuid(),
+  cliente: esquemaClienteNome,
   formaPagamento: z.string().trim().min(1).max(20),
   valorRecebido: dinheiro(8).nullish(),
   itens: z.array(esquemaItemPedido).max(200),
@@ -149,6 +161,7 @@ export const esquemaFiltroPedidos = z.strictObject({
   formaPagamento: z.enum(CODIGOS_PAGAMENTO).optional(),
   usuarioId: esquemaId.optional(),
   numero: esquemaId.optional(),
+  cliente: z.string().trim().max(LIMITES.clienteNome.max).optional(),
   pagina: z.coerce.number().int().min(1).default(1),
   tamanho: z.coerce.number().int().min(1).max(LIMITES.tamanhoPaginaMax).default(50),
 });
@@ -159,6 +172,10 @@ export const esquemaCancelamento = z.strictObject({
     .trim()
     .min(LIMITES.motivo.min, 'Escreva o motivo (pelo menos 5 letras)')
     .max(LIMITES.motivo.max, `Use no máximo ${LIMITES.motivo.max} caracteres`),
+});
+
+export const esquemaPreparo = z.strictObject({
+  status: z.enum(STATUS_PREPARO, { error: 'Status de preparo inválido' }),
 });
 
 /* ---------- Relatórios ---------- */

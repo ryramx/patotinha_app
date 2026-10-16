@@ -1,4 +1,4 @@
-import type { CodigoPagamento, Perfil, StatusPedido } from './esquemas.js';
+import type { CodigoPagamento, Perfil, StatusPedido, StatusPreparo } from './esquemas.js';
 
 /** Formatos das respostas da API (PRD 14). Dinheiro como string "33.00", datas ISO 8601. */
 
@@ -55,9 +55,18 @@ export interface ItemPedido {
   subtotal: string;
 }
 
+/** Comanda: em que pé está o preparo do pedido. */
+export interface Preparo {
+  status: StatusPreparo;
+  atualizadoEm: string | null;
+}
+
 export interface Pedido {
   id: number;
   status: StatusPedido;
+  /** Nome dito no balcão. Pedidos de antes da comanda não têm. */
+  cliente: string | null;
+  preparo: Preparo;
   criadoEm: string;
   finalizadoEm: string | null;
   usuario: { id: number; nome: string };
@@ -71,6 +80,8 @@ export interface Pedido {
 
 export interface PedidoResumido {
   id: number;
+  cliente: string | null;
+  preparo: Preparo;
   criadoEm: string;
   total: string;
   formaPagamento: CodigoPagamento | null;
@@ -88,6 +99,21 @@ export interface Pagina<T> {
 export interface ListaPedidos extends Pagina<PedidoResumido> {
   somaFinalizados: string;
   quantidadeFinalizados: number;
+}
+
+/** Pedido na fila de preparo: o que a cozinha precisa ver. */
+export interface PedidoNaFila {
+  id: number;
+  cliente: string | null;
+  criadoEm: string;
+  preparo: Preparo;
+  itens: { nomeProduto: string; quantidade: number }[];
+}
+
+export interface FilaPreparo {
+  dados: PedidoNaFila[];
+  /** Últimos entregues, para desfazer um toque errado. */
+  entreguesRecentes: PedidoNaFila[];
 }
 
 export interface RelatorioVendas {
