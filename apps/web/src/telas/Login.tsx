@@ -80,7 +80,7 @@ export function Login() {
           'radial-gradient(circle at 50% 30%, rgba(242,165,26,.15) 0%, rgba(242,165,26,0) 45%)',
       }}
     >
-      <img src="/selo-completo.svg" alt="Patotinha da Vovó" className="mb-12 w-40 sm:w-[200px]" />
+      <img src="/logo.webp" alt="Patotinha da Vovó" className="mb-12 w-40 sm:w-[200px]" />
       <form
         noValidate
         onSubmit={(e) => {
