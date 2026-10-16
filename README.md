@@ -1,8 +1,35 @@
 # Sistema de Pedidos · Patotinha da Vovó
 
-Sistema web de balcão: registra pedidos, calcula o total no servidor, grava a forma de pagamento
-e mostra o histórico e um resumo das vendas. Segue o PRD, a descrição da interface e o plano de
-desenvolvimento do projeto.
+Sistema web de balcão da pastelaria Patotinha da Vovó: registra os pedidos, calcula o total no
+servidor, grava a forma de pagamento e mostra o histórico e um resumo das vendas. Segue o PRD, a
+descrição da interface e o plano de desenvolvimento do projeto.
+
+**No ar:** <https://patotinha-pedidos.onrender.com> (Render + Neon, planos gratuitos). A loja
+funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
+
+## O que o sistema faz hoje
+
+- **Novo pedido:** produtos em abas por categoria, busca, quantidades com − e +, desfazer a
+  remoção de um item, forma de pagamento (Dinheiro, PIX, Débito ou Crédito) e troco calculado
+  para pagamento em dinheiro. O total é sempre recalculado no servidor com o preço atual; se um
+  preço mudou enquanto o pedido era montado, a tela avisa. Finalizar duas vezes não duplica o
+  pedido.
+- **Histórico e detalhe:** pedidos por período (hoje, ontem, últimos 7 dias, este mês ou datas
+  escolhidas), com o detalhe de cada um. O administrador pode cancelar um pedido informando o motivo.
+- **Resumo de vendas** (administrador): faturamento do período, totais por forma de pagamento,
+  pedidos cancelados e produtos mais vendidos.
+- **Cadastros** (administrador): categorias, produtos com preço, e usuários (funcionário ou
+  administrador), com ativar e desativar em vez de apagar.
+- **Acesso:** login com sessão de 12 horas, troca da própria senha, limite de tentativas de login
+  e permissões por perfil. Um usuário desativado perde a sessão na hora.
+- **Atalhos de teclado** para o balcão (tecla `?` mostra a lista): F1 abre um novo pedido, `/`
+  vai para a busca, F2 a F5 escolhem a forma de pagamento e Ctrl+Enter finaliza.
+- **App instalável (PWA):** pode ser instalado no computador, tablet ou celular pelo navegador e
+  abre em tela cheia com o ícone da Patotinha. Só os arquivos das telas ficam guardados no
+  aparelho; pedidos e preços vêm sempre do servidor, então o sistema precisa de internet.
+- Telas em português, pensadas para computador (1366 x 768) e tablet na horizontal.
+
+## Tecnologias
 
 - **Backend:** Node.js + Fastify + Prisma (`apps/api`), API REST em `/api`
 - **Frontend:** React + Vite + Tailwind CSS + TanStack Query (`apps/web`)
@@ -12,7 +39,8 @@ desenvolvimento do projeto.
 ## Requisitos
 
 - Node.js 22 LTS ou mais novo (testado com o 24 LTS) e npm
-- PostgreSQL 16+ instalado no computador **ou** Docker Desktop com Docker Compose
+- PostgreSQL 16+ instalado no computador (o desenvolvimento usa o 18) **ou** Docker Desktop com
+  Docker Compose
 - Git
 
 ## Primeira instalação (PostgreSQL instalado no computador)
@@ -90,7 +118,7 @@ pg_restore --no-owner --no-privileges --exit-on-error -d "ENDERECO_DO_BANCO_VAZI
 ```
 
 Conferir os pedidos do dia e só então trocar a `DATABASE_URL` no Render para o banco restaurado.
-Repetir esse teste a cada 3 meses (plano 7.6).
+Repetir esse teste a cada 3 meses (plano 7.6). O primeiro teste de restauração ainda não foi feito.
 
 ## Testes e qualidade
 
@@ -113,16 +141,29 @@ apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos, 
   scripts/       seed-dev.ts (o seed-admin fica em src/scripts para rodar também no servidor)
   test/          testes de integração (Supertest) contra PostgreSQL real
 apps/web/        React. telas/, componentes/, layout/, estilos/tokens.css, textos.pt-BR.json
+  public/        manifest.webmanifest, sw.js (app instalável), ícones e selo
 packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
 e2e/             Testes Playwright (fluxo do pedido do exemplo, tablet, preço alterado)
+docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
+render.yaml      Serviço do Render (Docker, plano gratuito, Ohio)
+.github/         CI, backup diário do banco e criação do primeiro admin
 ```
+
+## Situação atual
+
+As etapas 1 a 6 do plano estão concluídas (96 de 96 testes da API e 11 de 11 ponta a ponta; ver
+`docs/verificacao.md`) e a publicação da etapa 7 está feita: o sistema está no ar, com o primeiro
+administrador criado, backup diário e monitor no horário da loja.
 
 ## Pendências conhecidas
 
 - O selo em `apps/web/public/` é **provisório**: trocar pelo arquivo original da família
   (PNG transparente ou SVG), como pede a tarefa 0.3 do plano.
+- Apagar o segredo `ADMIN_SENHA` do GitHub, agora que o primeiro administrador já entrou.
+- Cadastrar o cardápio real e os usuários dos funcionários em produção.
+- Testar no Safari (iPad ou Mac), num tablet de verdade e com alguém que nunca usou o sistema.
+- Fazer o primeiro teste de restauração do backup.
+- Piloto na loja, comparando o resumo diário com o caixa.
 - As decisões pendentes do PRD (seção 20) seguem a sugestão do próprio PRD; os limites de campo
   seguem a tabela final do plano (quantidade 1 a 99, nome de produto 2 a 80, categoria 2 a 40,
   login 3 a 30 só minúsculas, motivo 5 a 200, preço até R$ 9.999,99).
-- Publicação (etapa 7 do plano): os arquivos estão prontos; falta criar as contas e seguir os
-  passos da seção Publicação.
