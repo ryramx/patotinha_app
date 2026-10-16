@@ -95,7 +95,13 @@ aplica as migrações pendentes antes de subir.
    mesmo endereço e `ADMIN_SENHA` com a senha do primeiro administrador.
 4. **Primeiro admin:** aba Actions > "Criar primeiro admin" > Run workflow, com nome e login.
    Depois de entrar no sistema, apagar o segredo `ADMIN_SENHA`.
-5. **Monitor:** apontar um serviço de monitoramento (ex.: cron-job.org) para `/api/vivo` a cada
+5. **Cardápio oficial:** aba Actions > "Cadastrar cardápio" > Run workflow. Cadastra os produtos
+   de `apps/api/src/scripts/cardapio-oficial.ts` (com os ingredientes dos pastéis, quando o
+   campo existir). Pode rodar de novo sempre que o arquivo mudar: não duplica, só acerta preço,
+   categoria e ingredientes. Marcando "Desativar produtos que não estão no cardápio oficial", os
+   demais produtos (ex.: de teste) e as categorias que ficarem vazias são desativados, sem sumir
+   dos pedidos antigos.
+6. **Monitor:** apontar um serviço de monitoramento (ex.: cron-job.org) para `/api/vivo` a cada
    10 minutos, só no horário da loja. Essa rota não consulta o banco, então o Neon continua
    podendo desligar quando parado. O `/api/saude` testa o banco também, para conferências.
 

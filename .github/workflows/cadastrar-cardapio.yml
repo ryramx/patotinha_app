@@ -1,0 +1,38 @@
+# Cadastra ou confere o cardápio oficial (apps/api/src/scripts/cardapio-oficial.ts) no banco
+# de produção. Pode rodar mais de uma vez: não duplica produtos, só acerta preço, categoria e
+# ingredientes. Para mudar o cardápio, altere o arquivo, faça o merge e rode de novo.
+name: Cadastrar cardápio
+
+on:
+  workflow_dispatch:
+    inputs:
+      desativar_outros:
+        description: 'Desativar produtos que não estão no cardápio oficial (ex.: os de teste)'
+        type: boolean
+        default: false
+
+jobs:
+  cadastrar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w packages/shared
+      - name: Aplicar migrações e cadastrar o cardápio
+        working-directory: apps/api
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCAO_DATABASE_URL }}
+          DESATIVAR_OUTROS: ${{ inputs.desativar_outros && 'sim' || 'nao' }}
+          TZ: America/Sao_Paulo
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Configure o segredo PRODUCAO_DATABASE_URL"
+            exit 1
+          fi
+          npx prisma generate
+          npx prisma migrate deploy
+          npx tsx src/scripts/cadastrar-cardapio.ts
