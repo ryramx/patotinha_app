@@ -1,31 +1,26 @@
-# Publicação no Render (etapa 7 do plano): a aplicação em Docker e um PostgreSQL 16 gerenciado.
-# O Render cuida do HTTPS (com redirecionamento de http) e do backup diário do banco nos planos pagos.
+# Publicação no Render (etapa 7 do plano), no plano gratuito.
+# O Render roda só a aplicação (API + telas, em Docker); o banco é um PostgreSQL gerenciado no
+# Neon (região us-east-2, Ohio), ligado pela DATABASE_URL. O app fica em Ohio para ficar ao lado
+# do banco. O Render cuida do HTTPS, com redirecionamento de http.
+# Backup: o Neon gratuito só volta 6 horas no tempo, então a cópia diária é feita pelo
+# GitHub Actions (.github/workflows/backup.yml), guardada por 30 dias.
 services:
   - type: web
     name: patotinha-pedidos
     runtime: docker
-    plan: starter
-    region: virginia
+    plan: free
+    region: ohio
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/saude
+    healthCheckPath: /api/vivo # sem banco: o Render checa sempre e o Neon precisa poder desligar
     autoDeploy: true
     envVars:
+      # Endereço de conexão direta do Neon (sem "-pooler" no nome do servidor), com
+      # ?sslmode=require. Colado à mão no painel do Render; nunca vai para o repositório.
       - key: DATABASE_URL
-        fromDatabase:
-          name: patotinha-banco
-          property: connectionString
+        sync: false
       - key: JWT_SECRET
         generateValue: true
       - key: NODE_ENV
         value: production
       - key: TZ
         value: America/Sao_Paulo
-
-databases:
-  - name: patotinha-banco
-    databaseName: patotinha
-    user: patotinha_app
-    plan: basic-256mb
-    region: virginia
-    postgresMajorVersion: '16'
-    ipAllowList: [] # sem acesso público direto; só a aplicação do Render (PRD 10)
