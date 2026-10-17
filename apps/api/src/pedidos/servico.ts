@@ -1,5 +1,5 @@
 import type { DadosNovoPedido } from '@patotinha/shared';
-import { deCentavos, paraCentavos } from '@patotinha/shared';
+import { chaveCliente, deCentavos, paraCentavos } from '@patotinha/shared';
 import type { Banco } from '../banco.js';
 import { eUnicoViolado } from '../erros.js';
 import { calcularPedido, type ProdutoAtual } from './calculo.js';
@@ -50,11 +50,24 @@ export async function criarPedido(
       // 4 a 6. Confere preços e regras e calcula tudo com os valores do banco.
       const calculo = calcularPedido(dados.itens, mapa, forma, dados.valorRecebido);
 
+      // Cadastro leve de clientes: o nome vira sugestão nos próximos pedidos. A grafia mais
+      // recente vale, e o telefone só muda quando vem preenchido. ON CONFLICT evita
+      // duplicar o cliente se dois pedidos com o mesmo nome novo chegarem juntos.
+      const [cliente] = await tx.$queryRaw<{ id: bigint }[]>`
+        INSERT INTO clientes (nome, chave, telefone)
+        VALUES (${dados.cliente}, ${chaveCliente(dados.cliente)}, ${dados.telefone ?? null})
+        ON CONFLICT (chave) DO UPDATE SET
+          nome = EXCLUDED.nome,
+          telefone = COALESCE(EXCLUDED.telefone, clientes.telefone),
+          ultimo_pedido_em = now()
+        RETURNING id`;
+
       // 7. Grava pedido e itens. Usuário vem do token e a hora do servidor (RN-22, RN-23).
       const criado = await tx.pedido.create({
         data: {
           status: 'FINALIZADO',
           clienteNome: dados.cliente,
+          clienteId: cliente!.id,
           // Entra no fim da fila de preparo (comanda digital).
           statusPreparo: 'AGUARDANDO',
           preparoAtualizadoEm: new Date(),

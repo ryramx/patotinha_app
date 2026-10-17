@@ -16,6 +16,7 @@ import { rotasCategorias } from './cardapio/rotas-categorias.js';
 import { rotasProdutos } from './cardapio/rotas-produtos.js';
 import { rotasPedidos } from './pedidos/rotas.js';
 import { rotasRelatorios } from './relatorios/rotas.js';
+import { rotasClientes } from './clientes/rotas.js';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -131,6 +132,7 @@ export async function construirApp(opcoes: OpcoesApp): Promise<FastifyInstance> 
       await api.register(rotasProdutos);
       await api.register(rotasPedidos);
       await api.register(rotasRelatorios);
+      await api.register(rotasClientes);
 
       api.setNotFoundHandler((_request, reply) => {
         reply

@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
-import { Check, Minus, Plus, Trash2, TriangleAlert, UserRound, X } from 'lucide-react';
+import { Check, Minus, Plus, Trash2, TriangleAlert, X } from 'lucide-react';
 import {
   formatarReais,
   LIMITES,
+  type ClienteSugerido,
   type CodigoPagamento,
   type FormaPagamento,
 } from '@patotinha/shared';
 import { Botao } from '../../componentes/Botao';
-import { CampoDinheiro, CampoTexto } from '../../componentes/Campos';
+import { CampoDinheiro } from '../../componentes/Campos';
 import { IconePagamento, NOME_PAGAMENTO } from '../../componentes/Diversos';
 import { t } from '../../textos';
+import { CampoCliente } from './CampoCliente';
 import type { ItemRascunho, Rascunho } from './rascunho';
 
 export type Problema = { tipo: 'preco'; de: number; para: number } | { tipo: 'indisponivel' };
@@ -24,7 +26,10 @@ interface Props {
   semConexao: boolean;
   dicaFinalizar: string | null;
   refCliente: RefObject<HTMLInputElement | null>;
+  erroTelefone: string | null;
   aoMudarCliente: (nome: string) => void;
+  aoMudarTelefone: (telefone: string) => void;
+  aoEscolherCliente: (cliente: ClienteSugerido) => void;
   aoMudarQuantidade: (produtoId: number, quantidade: number) => void;
   aoRemover: (produtoId: number) => void;
   aoEscolherForma: (forma: CodigoPagamento) => void;
@@ -85,17 +90,14 @@ export function PainelPedido(props: Props) {
 
       {/* Comanda: nome para chamar o cliente quando o pedido ficar pronto. */}
       <div className="border-b border-borda px-4 py-3">
-        <CampoTexto
-          ref={props.refCliente}
-          rotulo={t('pedido.cliente')}
-          value={rascunho.cliente}
-          maxLength={LIMITES.clienteNome.max}
-          autoComplete="off"
-          autoCapitalize="words"
-          enterKeyHint="done"
-          esquerda={<UserRound size={20} aria-hidden />}
-          dica={t('pedido.clienteDica')}
-          onChange={(e) => props.aoMudarCliente(e.target.value)}
+        <CampoCliente
+          nome={rascunho.cliente}
+          telefone={rascunho.telefone}
+          erroTelefone={props.erroTelefone}
+          refNome={props.refCliente}
+          aoMudarNome={props.aoMudarCliente}
+          aoMudarTelefone={props.aoMudarTelefone}
+          aoEscolher={props.aoEscolherCliente}
         />
       </div>
 

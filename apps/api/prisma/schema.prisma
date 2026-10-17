@@ -1,5 +1,6 @@
-// Modelo de dados do MVP (PRD seções 6 e 15). São exatamente seis tabelas.
+// Modelo de dados do MVP (PRD seções 6 e 15). Eram seis tabelas; clientes é a sétima.
 // Comanda digital (nome do cliente e fila de preparo) na migração 20261016000000_comanda.
+// Clientes (sugestão de nome no novo pedido, telefone opcional) na migração 20261017000000_clientes.
 // CHECKs, índices em lower() e o gatilho de atualizado_em ficam na migração SQL,
 // porque o Prisma não os representa no schema.
 
@@ -85,6 +86,7 @@ model Pedido {
   canceladoPorId     BigInt?   @map("cancelado_por_id")
   motivoCancelamento String?   @map("motivo_cancelamento") @db.VarChar(255)
   clienteNome        String?   @map("cliente_nome") @db.VarChar(60)
+  clienteId          BigInt?   @map("cliente_id")
   statusPreparo      String    @default("AGUARDANDO") @map("status_preparo") @db.VarChar(20)
   preparoAtualizadoEm DateTime? @map("preparo_atualizado_em") @db.Timestamptz(6)
   atualizadoEm       DateTime  @default(now()) @map("atualizado_em") @db.Timestamptz(6)
@@ -92,13 +94,30 @@ model Pedido {
   usuario        Usuario         @relation("PedidoUsuario", fields: [usuarioId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   canceladoPor   Usuario?        @relation("PedidoCanceladoPor", fields: [canceladoPorId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   formaPagamento FormaPagamento? @relation(fields: [formaPagamentoId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  cliente        Cliente?        @relation(fields: [clienteId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   itens          ItemPedido[]
 
   @@index([criadoEm(sort: Desc)], map: "ix_pedidos_criado_em")
   @@index([status, criadoEm], map: "ix_pedidos_status_criado")
   @@index([usuarioId], map: "ix_pedidos_usuario")
   @@index([formaPagamentoId], map: "ix_pedidos_forma_pgto")
+  @@index([clienteId], map: "ix_pedidos_cliente")
   @@map("pedidos")
+}
+
+// Quem já pediu no balcão. "chave" é o nome sem acentos, maiúsculas nem espaços sobrando.
+model Cliente {
+  id             BigInt   @id @default(autoincrement())
+  nome           String   @db.VarChar(60)
+  chave          String   @unique @db.VarChar(60)
+  telefone       String?  @db.VarChar(11)
+  ultimoPedidoEm DateTime @default(now()) @map("ultimo_pedido_em") @db.Timestamptz(6)
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime @default(now()) @map("atualizado_em") @db.Timestamptz(6)
+
+  pedidos Pedido[]
+
+  @@map("clientes")
 }
 
 model ItemPedido {

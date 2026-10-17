@@ -118,6 +118,16 @@ export interface FilaPreparo {
   entreguesRecentes: PedidoNaFila[];
 }
 
+/** Sugestão do campo Nome do cliente no novo pedido. */
+export interface ClienteSugerido {
+  id: number;
+  nome: string;
+  /** Só números, com DDD. */
+  telefone: string | null;
+  pedidos: number;
+  ultimoPedidoEm: string;
+}
+
 export interface RelatorioVendas {
   periodo: { de: string; ate: string };
   pedidosFinalizados: number;

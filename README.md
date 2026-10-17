@@ -18,6 +18,9 @@ funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
 - **Comanda digital:** cada pedido leva o nome do cliente, e a tela **Fila de preparo** mostra os
   pedidos do dia por ordem de chegada (Aguardando, Preparando, Pronto), com um toque para avançar
   cada um até a entrega. Detalhes em [docs/comanda.md](docs/comanda.md).
+- **Clientes (versão leve):** o campo do nome sugere quem já pediu (toque ou seta + Enter), com
+  telefone opcional. Nome novo é cadastrado sozinho ao finalizar. Detalhes em
+  [docs/clientes.md](docs/clientes.md).
 - **Histórico e detalhe:** pedidos por período (hoje, ontem, últimos 7 dias, este mês ou datas
   escolhidas), com o detalhe de cada um. O administrador pode cancelar um pedido informando o motivo.
 - **Resumo de vendas** (administrador): faturamento do período, totais por forma de pagamento,
@@ -158,9 +161,10 @@ apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos (
 apps/web/        React. telas/, componentes/, layout/, estilos/tokens.css, textos.pt-BR.json
   public/        manifest.webmanifest, sw.js (app instalável), logo, ícones e favicon
 packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
-e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, tablet, preço alterado)
+e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, clientes, tablet, preço alterado)
 docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
                  comanda.md: nome do cliente e fila de preparo
+                 clientes.md: sugestão de clientes e telefone opcional
                  site-separado.md: site no Static Site, tela "Carregando…" e passo a passo
   marca/         Arte original da logo e a versão sem fundo
 scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)

@@ -11,6 +11,10 @@ export interface ItemRascunho {
 export interface Rascunho {
   /** Nome do cliente para a comanda. */
   cliente: string;
+  /** Telefone opcional, como digitado: "(11) 98765-4321". */
+  telefone: string;
+  /** O telefone veio da sugestão escolhida: sai junto se o nome mudar. */
+  telefoneDoCadastro: boolean;
   itens: ItemRascunho[];
   forma: CodigoPagamento | null;
   recebidoCentavos: number | null;
@@ -27,6 +31,8 @@ export function novaChave(): string {
 export function rascunhoVazio(): Rascunho {
   return {
     cliente: '',
+    telefone: '',
+    telefoneDoCadastro: false,
     itens: [],
     forma: null,
     recebidoCentavos: null,
@@ -40,8 +46,13 @@ export function lerRascunho(): Rascunho | null {
     if (!texto) return null;
     const r = JSON.parse(texto) as Rascunho;
     if (!Array.isArray(r.itens) || typeof r.chaveIdempotencia !== 'string') return null;
-    // Rascunho salvo antes da comanda não tem nome.
-    return { ...r, cliente: typeof r.cliente === 'string' ? r.cliente : '' };
+    // Rascunho salvo antes da comanda não tem nome, e antes dos clientes não tem telefone.
+    return {
+      ...r,
+      cliente: typeof r.cliente === 'string' ? r.cliente : '',
+      telefone: typeof r.telefone === 'string' ? r.telefone : '',
+      telefoneDoCadastro: r.telefoneDoCadastro === true,
+    };
   } catch {
     return null;
   }
@@ -49,7 +60,7 @@ export function lerRascunho(): Rascunho | null {
 
 export function salvarRascunho(r: Rascunho) {
   try {
-    if (r.itens.length === 0 && r.forma === null && !r.cliente.trim())
+    if (r.itens.length === 0 && r.forma === null && !r.cliente.trim() && !r.telefone)
       localStorage.removeItem(CHAVE);
     else localStorage.setItem(CHAVE, JSON.stringify(r));
   } catch {

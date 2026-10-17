@@ -17,11 +17,12 @@ beforeEach(async () => {
 const sql = (texto: string) => ctx.banco.$executeRawUnsafe(texto);
 
 describe('Restrições do banco', () => {
-  it('existem as seis tabelas e as quatro formas de pagamento', async () => {
+  it('existem as sete tabelas e as quatro formas de pagamento', async () => {
     const tabelas = await ctx.banco.$queryRaw<{ tablename: string }[]>`
       SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename`;
     expect(tabelas.map((t) => t.tablename)).toEqual([
       'categorias',
+      'clientes',
       'formas_pagamento',
       'itens_pedido',
       'pedidos',
