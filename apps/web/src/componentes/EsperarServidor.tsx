@@ -42,11 +42,17 @@ export function EsperarServidor({ children }: { children: ReactNode }) {
   useEffect(() => {
     let ativo = true;
     const inicio = Date.now();
-    const aviso = setTimeout(() => ativo && setEstado('acordando'), AVISAR_DEPOIS_MS);
+    // Só troca "conferindo" por "acordando": se a API já respondeu, o aviso não pode tirar a
+    // tela do ar.
+    const aviso = setTimeout(
+      () => ativo && setEstado((e) => (e === 'conferindo' ? 'acordando' : e)),
+      AVISAR_DEPOIS_MS,
+    );
 
     (async () => {
       while (ativo) {
         if (await servidorAcordado()) {
+          clearTimeout(aviso);
           if (ativo) setEstado('pronto');
           return;
         }
@@ -84,7 +90,7 @@ export function TelaCarregando({
 }) {
   return (
     <main
-      className="flex h-full flex-col items-center justify-center gap-6 bg-moldura px-6 text-center text-sobre-moldura"
+      className="flex h-full flex-col items-center justify-center gap-6 bg-marca px-6 text-center text-sobre-marca"
       aria-busy={estado !== 'falhou'}
     >
       <img
@@ -95,13 +101,13 @@ export function TelaCarregando({
       {estado === 'acordando' && (
         <div role="status" className="max-w-sm space-y-2">
           <p className="text-xl font-semibold">{t('carregando.titulo')}</p>
-          <p className="text-sobre-moldura/80">{t('carregando.acordando')}</p>
+          <p className="text-sobre-marca/80">{t('carregando.acordando')}</p>
         </div>
       )}
       {estado === 'falhou' && (
         <div role="alert" className="max-w-sm space-y-4">
           <p className="text-xl font-semibold">{t('carregando.falhouTitulo')}</p>
-          <p className="text-sobre-moldura/80">{t('carregando.falhou')}</p>
+          <p className="text-sobre-marca/80">{t('carregando.falhou')}</p>
           <Botao variante="principal" onClick={aoTentarDeNovo}>
             {t('carregando.tentarDeNovo')}
           </Botao>
