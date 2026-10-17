@@ -4,7 +4,8 @@ Sistema web de balcão da pastelaria Patotinha da Vovó: registra os pedidos, ca
 servidor, grava a forma de pagamento e mostra o histórico e um resumo das vendas. Segue o PRD, a
 descrição da interface e o plano de desenvolvimento do projeto.
 
-**No ar:** <https://patotinha-pedidos.onrender.com> (Render + Neon, planos gratuitos). A loja
+**No ar:** <https://patotinha-pedidos.onrender.com> (Render + Neon, planos gratuitos; o endereço
+do site separado entra aqui depois do passo a passo de [docs/site-separado.md](docs/site-separado.md)). A loja
 funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
 
 ## O que o sistema faz hoje
@@ -73,27 +74,32 @@ docker compose exec app npm run seed:admin
 
 ## Variáveis de ambiente
 
-| Variável             | Para quê                                                                  |
-| -------------------- | ------------------------------------------------------------------------- |
-| `DATABASE_URL`       | Conexão com o banco da aplicação                                          |
-| `DATABASE_URL_TESTE` | Banco só dos testes automáticos (é apagado e recriado a cada rodada)      |
-| `JWT_SECRET`         | Segredo da sessão: texto longo e aleatório (32+ caracteres em produção)   |
-| `NODE_ENV`           | `development`, `production` ou `test`                                     |
-| `APP_ORIGIN`         | Endereço pelo qual o sistema é acessado                                   |
-| `TZ`                 | `America/Sao_Paulo`                                                       |
-| `PORT`               | Porta da API (padrão 3000)                                                |
-| `PASTA_WEB`          | Pasta com o build das telas, servida pela API (a imagem Docker já define) |
+| Variável             | Para quê                                                                           |
+| -------------------- | ---------------------------------------------------------------------------------- |
+| `DATABASE_URL`       | Conexão com o banco da aplicação                                                   |
+| `DATABASE_URL_TESTE` | Banco só dos testes automáticos (é apagado e recriado a cada rodada)               |
+| `JWT_SECRET`         | Segredo da sessão: texto longo e aleatório (32+ caracteres em produção)            |
+| `NODE_ENV`           | `development`, `production` ou `test`                                              |
+| `APP_ORIGIN`         | Endereço pelo qual o sistema é acessado                                            |
+| `TZ`                 | `America/Sao_Paulo`                                                                |
+| `PORT`               | Porta da API (padrão 3000)                                                         |
+| `PASTA_WEB`          | Pasta com o build das telas, servida pela API (a imagem Docker já define)          |
+| `SITE_URL`           | Só em produção: endereço do site separado; as telas abertas pela API levam para lá |
 
 ## Publicação (Render + Neon, planos gratuitos)
 
-O Render roda a aplicação (imagem Docker do `Dockerfile`, descrita no `render.yaml`) e o banco
-fica num projeto do Neon na região us-east-2 (Ohio), a mesma do app. A cada publicação a imagem
+O `render.yaml` descreve dois serviços: o **site** (`patotinha`, Static Site com as telas, que
+nunca dorme) e a **API** (`patotinha-pedidos`, imagem Docker do `Dockerfile`). O site repassa
+`/api/*` para a API pelo mesmo endereço e mostra "Carregando…" com a logo enquanto ela acorda.
+Detalhes e o passo a passo no painel em [docs/site-separado.md](docs/site-separado.md). O banco
+fica num projeto do Neon na região us-east-2 (Ohio), a mesma da API. A cada publicação a imagem
 aplica as migrações pendentes antes de subir.
 
 1. **Neon:** criar um projeto (região AWS us-east-2) e copiar o endereço de conexão **direto**
    (desligar "Connection pooling", sem `-pooler` no servidor), terminado em `?sslmode=require`.
 2. **Render:** New > Blueprint, escolher este repositório. Ele pede só a `DATABASE_URL`: colar o
-   endereço do Neon. O `JWT_SECRET` é gerado pelo Render.
+   endereço do Neon. O `JWT_SECRET` é gerado pelo Render. Depois que o site existir, colar o
+   endereço dele em `SITE_URL` no serviço `patotinha-pedidos`.
 3. **GitHub** (Settings > Secrets and variables > Actions): criar `PRODUCAO_DATABASE_URL` com o
    mesmo endereço e `ADMIN_SENHA` com a senha do primeiro administrador.
 4. **Primeiro admin:** aba Actions > "Criar primeiro admin" > Run workflow, com nome e login.
@@ -108,8 +114,8 @@ aplica as migrações pendentes antes de subir.
    10 minutos, só no horário da loja. Essa rota não consulta o banco, então o Neon continua
    podendo desligar quando parado. O `/api/saude` testa o banco também, para conferências.
 
-Limites do plano gratuito: o app do Render desliga depois de 15 minutos sem acesso e leva cerca
-de 1 minuto para voltar (o monitor evita isso no horário da loja); as 750 horas mensais do Render
+Limites do plano gratuito: a API desliga depois de 15 minutos sem acesso e leva cerca de 1 minuto
+para voltar (o monitor evita isso no horário da loja; fora dele, o site mostra "Carregando…"); as 750 horas mensais do Render
 são divididas entre todos os apps gratuitos da conta. O Neon tem 1 GB e 100 horas de
 processamento por mês, desligando depois de 5 minutos parado.
 
@@ -155,9 +161,10 @@ packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
 e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, tablet, preço alterado)
 docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
                  comanda.md: nome do cliente e fila de preparo
+                 site-separado.md: site no Static Site, tela "Carregando…" e passo a passo
   marca/         Arte original da logo e a versão sem fundo
 scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)
-render.yaml      Serviço do Render (Docker, plano gratuito, Ohio)
+render.yaml      Site (Static Site) e API (Docker) no Render, plano gratuito, Ohio
 .github/         CI, backup diário do banco e criação do primeiro admin
 ```
 

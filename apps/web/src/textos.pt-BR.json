@@ -4,6 +4,13 @@
     "subtitulo": "Pedidos",
     "rodapeLogin": "Feito com carinho"
   },
+  "carregando": {
+    "titulo": "Carregando…",
+    "acordando": "O sistema estava descansando e está acordando. Isso leva até 1 minuto.",
+    "falhouTitulo": "Não foi possível abrir o sistema",
+    "falhou": "Verifique a internet e tente de novo.",
+    "tentarDeNovo": "Tentar de novo"
+  },
   "menu": {
     "novoPedido": "Novo pedido",
     "historico": "Histórico",

@@ -1,10 +1,59 @@
-# Publicação no Render (etapa 7 do plano), no plano gratuito.
-# O Render roda só a aplicação (API + telas, em Docker); o banco é um PostgreSQL gerenciado no
+# Publicação no Render (etapas 7 e 9 do plano), no plano gratuito.
+# São dois serviços: o site (telas React, Static Site, nunca dorme) e a API (Docker, dorme depois
+# de 15 minutos parada). O site repassa /api/* para a API pelo mesmo endereço, então o cookie de
+# login continua na mesma origem (SameSite=Strict, sem CORS). Enquanto a API acorda, o site mostra
+# a tela "Carregando…" em vez da tela do Render. O banco é um PostgreSQL gerenciado no
 # Neon (região us-east-2, Ohio), ligado pela DATABASE_URL. O app fica em Ohio para ficar ao lado
 # do banco. O Render cuida do HTTPS, com redirecionamento de http.
 # Backup: o Neon gratuito só volta 6 horas no tempo, então a cópia diária é feita pelo
 # GitHub Actions (.github/workflows/backup.yml), guardada por 30 dias.
 services:
+  # Site: as telas já compiladas, servidas pela CDN do Render.
+  - type: web
+    name: patotinha
+    runtime: static
+    buildCommand: npm ci --workspace packages/shared --workspace apps/web --include-workspace-root && npm run build -w packages/shared && npm run build -w apps/web
+    staticPublishPath: ./apps/web/dist
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+    routes:
+      # A API, pelo mesmo endereço do site. O endereço é o do serviço patotinha-pedidos abaixo.
+      - type: rewrite
+        source: /api/*
+        destination: https://patotinha-pedidos.onrender.com/api/*
+      # Rotas do React (ex.: /pedidos/novo) abrem o index.html.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      # Os mesmos cuidados que a API aplicava às telas (helmet).
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'; upgrade-insecure-requests"
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      # Arquivos com hash no nome nunca mudam; o resto é conferido a cada abertura.
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
+
+  # API: dorme quando parada; o monitor (cron-job.org em /api/vivo) a mantém acordada no horário
+  # da loja. Abrir as telas por este endereço leva ao site (SITE_URL).
   - type: web
     name: patotinha-pedidos
     runtime: docker
@@ -24,3 +73,7 @@ services:
         value: production
       - key: TZ
         value: America/Sao_Paulo
+      # Endereço do site acima, como aparece no painel do Render (ex.: https://patotinha.onrender.com).
+      # Colado à mão depois que o site existir; sem ele, a API continua servindo as telas.
+      - key: SITE_URL
+        sync: false
