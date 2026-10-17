@@ -55,3 +55,6 @@ ultimoPedidoEm }`, para qualquer usuário logado.
   `role="combobox"` e `listbox`). O rascunho do pedido guarda o telefone junto.
 - Testes: `apps/api/test/clientes.test.ts` (9 cenários, incluindo a migração) e
   `e2e/pedido-clientes.spec.ts`.
+
+Registrado também no PRD (4.11, 6.8, 8.12, 14.11 e CA-15), na Interface (Novo pedido) e no Plano
+(etapa 11).
