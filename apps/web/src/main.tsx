@@ -4,9 +4,10 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@fontsource/oswald/500.css';
 import '@fontsource/oswald/600.css';
-import '@fontsource/nunito-sans/400.css';
-import '@fontsource/nunito-sans/600.css';
-import '@fontsource/nunito-sans/700.css';
+import '@fontsource/plus-jakarta-sans/400.css';
+import '@fontsource/plus-jakarta-sans/600.css';
+import '@fontsource/plus-jakarta-sans/700.css';
+import '@fontsource/plus-jakarta-sans/800.css';
 import '@fontsource/pacifico/400.css';
 import './estilos/tokens.css';
 import './index.css';
@@ -15,6 +16,10 @@ import { ProvedorSessao } from './auth/sessao';
 import { ProvedorAvisos } from './componentes/Avisos';
 import { EsperarServidor } from './componentes/EsperarServidor';
 import type { ErroDaApi } from './api/cliente';
+import { iniciarTema } from './tema';
+
+// Antes da primeira tela, para não piscar o tema errado.
+iniciarTema();
 
 const queryClient = new QueryClient({
   defaultOptions: {

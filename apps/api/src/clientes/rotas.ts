@@ -10,7 +10,7 @@ export async function rotasClientes(app: FastifyInstance) {
   // aparecem no nome (sem diferenciar acentos), primeiro quem pediu por último.
   app.get(
     '/clientes',
-    { preHandler: app.autenticar },
+    { preHandler: app.exigir('PEDIDOS_REGISTRAR') },
     async (request): Promise<{ dados: ClienteSugerido[] }> => {
       const resultado = esquemaBuscaClientes.safeParse(request.query);
       if (!resultado.success) {

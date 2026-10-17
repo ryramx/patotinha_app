@@ -41,8 +41,8 @@ export const CampoTexto = forwardRef<HTMLInputElement, PropsCampo>(function Camp
           aria-invalid={erro ? true : undefined}
           aria-describedby={erro ? idErro : undefined}
           {...resto}
-          className={`h-12 w-full rounded-padrao border bg-superficie px-3 text-[16px] outline-none transition-colors
-            hover:border-texto focus:border-2 focus:border-acao disabled:bg-desab-fundo
+          className={`h-12 w-full rounded-padrao border bg-superficie-campo px-3 text-[16px] outline-none transition-colors
+            hover:border-texto-suave focus:border-2 focus:border-moldura disabled:bg-desab-fundo
             ${erro ? 'border-2 border-erro hover:border-erro focus:border-erro' : 'border-borda'}
             ${esquerda ? 'pl-10' : ''} ${direita ? 'pr-12' : ''}`}
         />

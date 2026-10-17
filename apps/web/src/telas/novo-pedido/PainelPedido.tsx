@@ -66,9 +66,9 @@ export function PainelPedido(props: Props) {
       : null;
 
   return (
-    <div className="cartao flex h-full min-h-0 w-full flex-col">
-      <div className="flex items-center justify-between border-b border-borda px-4 py-3">
-        <h2 className="titulo-secao">{t('pedido.titulo')}</h2>
+    <div className="cartao flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <div className="flex items-center justify-between px-5 pb-2 pt-4">
+        <h2 className="titulo-secao text-[20px]">{t('pedido.titulo')}</h2>
         <div className="flex items-center gap-2">
           {rascunho.itens.length > 0 && (
             <span className="legenda">
@@ -89,7 +89,7 @@ export function PainelPedido(props: Props) {
       </div>
 
       {/* Comanda: nome para chamar o cliente quando o pedido ficar pronto. */}
-      <div className="border-b border-borda px-4 py-3">
+      <div className="border-b border-borda px-5 pb-4">
         <CampoCliente
           nome={rascunho.cliente}
           telefone={rascunho.telefone}
@@ -124,14 +124,12 @@ export function PainelPedido(props: Props) {
         </ul>
       )}
 
-      <div className="shrink-0 border-t border-borda px-4 pb-3 pt-3">
-        <div className="flex items-center justify-between rounded-padrao border-l-4 border-acao bg-creme-escuro px-4 py-2">
-          <span className="font-titulo text-[16px] font-semibold uppercase">
-            {t('pedido.total')}
-          </span>
+      <div className="shrink-0 border-t border-borda px-5 pb-4 pt-3">
+        <div className="flex items-baseline justify-between px-1">
+          <span className="text-[15px] font-bold text-texto-suave">{t('pedido.total')}</span>
           <span
             key={totalCentavos}
-            className="anim-total font-titulo text-[40px] font-semibold leading-[48px] tabular-nums"
+            className="anim-total font-titulo text-[44px] font-semibold leading-[52px] text-total tabular-nums"
             data-testid="total"
           >
             {formatarReais(totalCentavos)}
@@ -154,10 +152,10 @@ export function PainelPedido(props: Props) {
                 title={`${NOME_PAGAMENTO[codigo]} · ${TECLA[codigo]}`}
                 disabled={rascunho.itens.length === 0}
                 onClick={() => props.aoEscolherForma(codigo)}
-                className={`relative flex min-h-14 items-center justify-center gap-2 rounded-padrao border font-bold transition-colors disabled:border-borda disabled:bg-desab-fundo disabled:text-desab-texto ${
+                className={`relative flex min-h-14 items-center justify-center gap-2 rounded-padrao font-bold transition-colors disabled:border-borda disabled:bg-desab-fundo disabled:text-desab-texto ${
                   sel
-                    ? 'border-moldura bg-moldura text-sobre-moldura'
-                    : 'border-borda bg-superficie hover:border-moldura active:bg-moldura/12'
+                    ? 'border-2 border-moldura bg-moldura/12 text-moldura'
+                    : 'border border-borda bg-superficie text-texto-suave hover:border-moldura hover:text-texto active:bg-moldura/12'
                 }`}
               >
                 <IconePagamento codigo={codigo} tamanho={24} />
@@ -200,7 +198,7 @@ export function PainelPedido(props: Props) {
         <Botao
           variante="principal"
           tamanho="grande"
-          className="mt-2 min-h-16 w-full"
+          className="mt-2 min-h-15 w-full rounded-grande shadow-padrao"
           title={`${t('pedido.finalizar')} · Ctrl+Enter`}
           disabled={Boolean(props.dicaFinalizar)}
           aria-describedby={props.dicaFinalizar ? 'dica-finalizar' : undefined}
@@ -262,14 +260,14 @@ function LinhaItem({
   return (
     <li
       key={piscar ? piscar.vez : undefined}
-      className={`border-b border-borda px-3 py-2 ${problema ? 'bg-aviso-fundo' : ''} ${animacao}`}
+      className={`border-b border-borda px-4 py-2 ${problema ? 'bg-aviso-fundo' : ''} ${animacao}`}
     >
       <div className="flex min-h-10 items-center gap-1">
         <button
           type="button"
           onClick={() => aoMudar(item.quantidade - 1)}
           aria-label={t('pedido.diminuir', { nome: item.nome })}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-padrao border border-borda hover:border-moldura"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-borda hover:border-moldura hover:text-moldura"
         >
           <Minus size={20} />
         </button>
@@ -315,7 +313,7 @@ function LinhaItem({
           type="button"
           onClick={() => aoMudar(item.quantidade + 1)}
           aria-label={t('pedido.aumentar', { nome: item.nome })}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-padrao border border-borda hover:border-moldura"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-borda hover:border-moldura hover:text-moldura"
         >
           <Plus size={20} />
         </button>

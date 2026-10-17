@@ -38,7 +38,7 @@ repetirem bastante.
 
 ## Técnico
 
-- Migração `apps/api/prisma/migrations/20261017000000_clientes`: tabela `clientes` (`nome`,
+- Migração `apps/api/prisma/migrations/20261017010000_clientes`: tabela `clientes` (`nome`,
   `chave` única, `telefone` com CHECK de 10 ou 11 dígitos, `ultimo_pedido_em`) e coluna
   `cliente_id` em `pedidos` (com índice `ix_pedidos_cliente`). A função SQL `chave_cliente`
   calcula a mesma chave que `chaveCliente` em `packages/shared/src/texto.ts` (há teste
@@ -50,7 +50,7 @@ repetirem bastante.
     atualizado na mesma transação do pedido, com `INSERT ... ON CONFLICT (chave)`, então dois
     pedidos ao mesmo tempo com um nome novo não duplicam o cliente.
   - `GET /api/clientes?busca=jo`: até 6 sugestões `{ id, nome, telefone, pedidos,
-ultimoPedidoEm }`, para qualquer usuário logado.
+ultimoPedidoEm }`, para quem pode registrar pedidos (permissão `PEDIDOS_REGISTRAR`; o Chef não vê).
 - Tela: `apps/web/src/telas/novo-pedido/CampoCliente.tsx` (combobox acessível, com
   `role="combobox"` e `listbox`). O rascunho do pedido guarda o telefone junto.
 - Testes: `apps/api/test/clientes.test.ts` (9 cenários, incluindo a migração) e

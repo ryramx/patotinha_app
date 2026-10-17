@@ -22,19 +22,27 @@ funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
   telefone opcional. Nome novo é cadastrado sozinho ao finalizar. Detalhes em
   [docs/clientes.md](docs/clientes.md).
 - **Histórico e detalhe:** pedidos por período (hoje, ontem, últimos 7 dias, este mês ou datas
-  escolhidas), com o detalhe de cada um. O administrador pode cancelar um pedido informando o motivo.
-- **Resumo de vendas** (administrador): faturamento do período, totais por forma de pagamento,
+  escolhidas), com o detalhe de cada um. Quem tem a permissão pode cancelar um pedido informando o
+  motivo.
+- **Resumo de vendas** (permissão Financeiro): faturamento do período, totais por forma de pagamento,
   pedidos cancelados e produtos mais vendidos.
-- **Cadastros** (administrador): categorias, produtos com preço, e usuários (funcionário ou
-  administrador), com ativar e desativar em vez de apagar.
-- **Acesso:** login com sessão de 12 horas, troca da própria senha, limite de tentativas de login
-  e permissões por perfil. Um usuário desativado perde a sessão na hora.
+- **Cadastros:** categorias, produtos com preço, e usuários (Administrador, Gerente, Chef ou
+  Funcionário), com ativar e desativar em vez de apagar.
+- **Perfis e permissões:** Administrador (tudo), Gerente (pedidos e financeiro), Chef (fila de
+  preparo) e Funcionário (só registra pedidos). O administrador liga e desliga o que cada perfil
+  pode fazer na tela **Perfis e permissões**, e a API confere em toda requisição. Detalhes em
+  [docs/perfis.md](docs/perfis.md).
+- **Acesso:** login com sessão de 12 horas, troca da própria senha e limite de tentativas de
+  login. Um usuário desativado perde a sessão na hora.
 - **Atalhos de teclado** para o balcão (tecla `?` mostra a lista): F1 abre um novo pedido, `/`
   vai para a busca, F2 a F5 escolhem a forma de pagamento e Ctrl+Enter finaliza.
 - **App instalável (PWA):** pode ser instalado no computador, tablet ou celular pelo navegador e
   abre em tela cheia com o ícone da Patotinha. Só os arquivos das telas ficam guardados no
   aparelho; pedidos e preços vêm sempre do servidor, então o sistema precisa de internet.
-- Telas em português, pensadas para computador (1366 x 768) e tablet na horizontal.
+- **Modo Claro e Modo Escuro:** botão de lua/sol no cabeçalho; o aparelho lembra a escolha e,
+  sem escolha, segue o tema do sistema. Menu em pílulas no topo (cadastros no menu "Cadastros")
+  e, no celular, barra de abas no rodapé. Detalhes em [docs/visual.md](docs/visual.md).
+- Telas em português, pensadas para computador (1366 x 768), tablet na horizontal e celular.
 
 ## Tecnologias
 
@@ -91,7 +99,7 @@ docker compose exec app npm run seed:admin
 
 ## Publicação (Render + Neon, planos gratuitos)
 
-O `render.yaml` descreve dois serviços: o **site** (`patotinha`, Static Site com as telas, que
+O `render.yaml` descreve dois serviços: o **site** (`patotinha-da-vovo`, Static Site com as telas, que
 nunca dorme) e a **API** (`patotinha-pedidos`, imagem Docker do `Dockerfile`). O site repassa
 `/api/*` para a API pelo mesmo endereço e mostra "Carregando…" com a logo enquanto ela acorda.
 Detalhes e o passo a passo no painel em [docs/site-separado.md](docs/site-separado.md). O banco
@@ -165,6 +173,7 @@ e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, cliente
 docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
                  comanda.md: nome do cliente e fila de preparo
                  clientes.md: sugestão de clientes e telefone opcional
+                 perfis.md: perfis de acesso e a tela de permissões (etapa 10)
                  site-separado.md: site no Static Site, tela "Carregando…" e passo a passo
   marca/         Arte original da logo e a versão sem fundo
 scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)
@@ -193,7 +202,8 @@ administrador criado, backup diário e monitor no horário da loja.
 ## Pendências conhecidas
 
 - Apagar o segredo `ADMIN_SENHA` do GitHub, agora que o primeiro administrador já entrou.
-- Cadastrar o cardápio real e os usuários dos funcionários em produção.
+- Cadastrar o cardápio real e os usuários dos funcionários em produção (Chef, Gerente e
+  Funcionário; ver [docs/perfis.md](docs/perfis.md)).
 - Testar no Safari (iPad ou Mac), num tablet de verdade e com alguém que nunca usou o sistema.
 - Fazer o primeiro teste de restauração do backup.
 - Piloto na loja, comparando o resumo diário com o caixa.

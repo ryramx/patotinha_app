@@ -7,6 +7,7 @@ import { criarBanco, type Banco } from '../src/banco.js';
 import { gerarHash } from '../src/auth/senha.js';
 import { LimiteLogin } from '../src/auth/limite-login.js';
 import type { Config } from '../src/config.js';
+import { PERMISSOES_PADRAO, type Perfil } from '@patotinha/shared';
 
 try {
   process.loadEnvFile(path.resolve(import.meta.dirname, '../../../.env'));
@@ -52,6 +53,17 @@ export async function limparBanco(banco: Banco) {
     'TRUNCATE itens_pedido, pedidos, clientes, produtos, categorias, usuarios RESTART IDENTITY CASCADE',
   );
   await banco.$executeRawUnsafe('UPDATE formas_pagamento SET ativo = true');
+  for (const [codigo, permissoes] of Object.entries(PERMISSOES_PADRAO)) {
+    await banco.perfil.update({ where: { codigo }, data: { permissoes: [...permissoes] } });
+  }
+}
+
+/** Funcionário com registrar, ver pedidos e fila: o acesso que tinha antes dos perfis. */
+export async function liberarFuncionario(banco: Banco) {
+  await banco.perfil.update({
+    where: { codigo: 'FUNCIONARIO' },
+    data: { permissoes: ['PEDIDOS_REGISTRAR', 'PEDIDOS_VER', 'FILA'] },
+  });
 }
 
 let hashPadrao: Promise<string> | null = null;
@@ -59,7 +71,7 @@ let hashPadrao: Promise<string> | null = null;
 export async function criarUsuario(
   banco: Banco,
   login: string,
-  perfil: 'ADMIN' | 'FUNCIONARIO' = 'FUNCIONARIO',
+  perfil: Perfil = 'FUNCIONARIO',
   nome = login[0]!.toUpperCase() + login.slice(1),
 ) {
   hashPadrao ??= gerarHash(SENHA);

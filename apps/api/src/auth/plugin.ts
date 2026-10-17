@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import fastifyJwt from '@fastify/jwt';
-import type { Perfil } from '@patotinha/shared';
+import { PERMISSOES, type Perfil, type Permissao } from '@patotinha/shared';
 import { erros } from '../erros.js';
 
 export const NOME_COOKIE = 'sessao';
@@ -12,6 +12,8 @@ export interface UsuarioAutenticado {
   nome: string;
   login: string;
   perfil: Perfil;
+  /** Lidas do banco a cada requisição: mudar na tela de perfis vale na hora. */
+  permissoes: Permissao[];
 }
 
 interface TokenSessao {
@@ -31,11 +33,25 @@ declare module 'fastify' {
     usuario?: UsuarioAutenticado;
   }
   interface FastifyInstance {
-    /** Qualquer usuário logado e ativo (funcionário ou administrador). */
+    /** Qualquer usuário logado e ativo, de qualquer perfil. */
     autenticar: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
-    /** Somente administrador. */
+    /** Somente o perfil Administrador (ex.: tela de perfis e permissões). */
     exigirAdmin: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
+    /** Usuário logado cujo perfil tem a permissão; o administrador sempre passa. */
+    exigir: (
+      permissao: Permissao,
+    ) => (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }
+}
+
+/** O administrador pode tudo, mesmo o que não estiver gravado no perfil. */
+export function permissoesDoPerfil(perfil: string, gravadas: string[]): Permissao[] {
+  if (perfil === 'ADMIN') return [...PERMISSOES];
+  return PERMISSOES.filter((p) => gravadas.includes(p));
+}
+
+export function pode(usuario: UsuarioAutenticado | undefined, permissao: Permissao) {
+  return !!usuario && (usuario.perfil === 'ADMIN' || usuario.permissoes.includes(permissao));
 }
 
 /** O usuário da requisição; só chamar em rotas protegidas por `autenticar`. */
@@ -60,7 +76,10 @@ async function pluginAutenticacao(app: FastifyInstance, opcoes: { segredo: strin
       throw erros.naoAutenticado();
     }
     // A cada requisição, confere no banco se o usuário continua ativo e com o mesmo perfil (RN-18).
-    const usuario = await app.banco.usuario.findUnique({ where: { id: BigInt(token.sub) } });
+    const usuario = await app.banco.usuario.findUnique({
+      where: { id: BigInt(token.sub) },
+      include: { dadosPerfil: true },
+    });
     if (!usuario || !usuario.ativo || usuario.perfil !== token.perfil) {
       throw erros.naoAutenticado();
     }
@@ -69,12 +88,20 @@ async function pluginAutenticacao(app: FastifyInstance, opcoes: { segredo: strin
       nome: usuario.nome,
       login: usuario.login,
       perfil: usuario.perfil as Perfil,
+      permissoes: permissoesDoPerfil(usuario.perfil, usuario.dadosPerfil.permissoes),
     };
   });
 
   app.decorate('exigirAdmin', async (request: FastifyRequest, reply: FastifyReply) => {
     await app.autenticar(request, reply);
     if (request.usuario?.perfil !== 'ADMIN') throw erros.semPermissao();
+  });
+
+  app.decorate('exigir', (permissao: Permissao) => {
+    return async (request: FastifyRequest, reply: FastifyReply) => {
+      await app.autenticar(request, reply);
+      if (!pode(request.usuario, permissao)) throw erros.semPermissao();
+    };
   });
 }
 

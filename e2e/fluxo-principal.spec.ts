@@ -1,9 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ADMIN, FUNCIONARIO } from './dados';
+import { ADMIN, CHEF, FUNCIONARIO, GERENTE } from './dados';
 
 /**
  * Tarefa 6.1 (PRD 7.2): login; registrar o pedido do exemplo (R$ 33,00, troco de R$ 17,00
  * para R$ 50,00); ver no histórico; cancelar como admin e ver sair do resumo.
+ * Etapa 10: cada perfil vê só a sua parte (Funcionário registra, Gerente vê pedidos e
+ * financeiro, Chef cuida da fila).
  */
 
 async function entrar(page: Page, u: { login: string; senha: string }) {
@@ -90,9 +92,26 @@ test('CA-05 a CA-07: funcionário registra o pedido do exemplo em dinheiro', asy
   await expect(page.getByLabel('Nome do cliente')).toHaveValue('');
 });
 
-test('CA-08: o pedido aparece no histórico e no detalhe, como gravado', async ({ page }) => {
+test('Funcionário só vê o Novo pedido', async ({ page }) => {
   await entrar(page, FUNCIONARIO);
-  await page.getByRole('link', { name: 'Histórico' }).click();
+  await expect(page).toHaveURL(/\/pedidos\/novo$/);
+  const menu = page.getByRole('navigation', { name: 'Menu principal' }).first();
+  await expect(menu.getByRole('link')).toHaveText(['Novo pedido']);
+  await expect(page.getByRole('button', { name: 'Cadastros' })).toHaveCount(0);
+  for (const tela of ['/pedidos', '/fila', '/resumo']) {
+    await page.goto(tela);
+    await expect(page.getByText('Seu perfil não tem acesso a esta tela')).toBeVisible();
+  }
+  // Início sem nada para mostrar leva de volta ao Novo pedido.
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/pedidos\/novo$/);
+});
+
+test('CA-08: o pedido aparece no histórico e no detalhe, como gravado', async ({ page }) => {
+  // O Gerente vê os pedidos e o financeiro.
+  await entrar(page, GERENTE);
+  await expect(page).toHaveURL(/\/$/);
+  await page.getByRole('link', { name: 'Histórico', exact: true }).first().click();
   const linha = page.getByRole('row', { name: new RegExp(`^${numeroPedido} `) });
   await expect(linha).toContainText('R$ 33,00');
   await expect(linha).toContainText('Dinheiro');
@@ -105,17 +124,20 @@ test('CA-08: o pedido aparece no histórico e no detalhe, como gravado', async (
   await expect(page.getByRole('heading', { name: `Pedido nº ${numeroPedido}` })).toBeVisible();
   await expect(page.getByText('Recebido R$ 50,00 · Troco R$ 17,00')).toBeVisible();
   await expect(page.getByText('Cliente: Dona Joana')).toBeVisible();
-  // Funcionário não vê o botão de cancelar (CA-09).
+  // Por padrão o Gerente não cancela (CA-09).
   await expect(page.getByRole('button', { name: 'Cancelar pedido' })).toHaveCount(0);
 
-  // Tela de administrador pelo endereço direto (CA-01).
+  // Tela fora do perfil pelo endereço direto (CA-01).
   await page.goto('/produtos');
-  await expect(page.getByText('Esta área é só para administradores')).toBeVisible();
+  await expect(page.getByText('Seu perfil não tem acesso a esta tela')).toBeVisible();
 });
 
-test('Comanda: o pedido entra na fila e anda até ser entregue', async ({ page }) => {
-  await entrar(page, FUNCIONARIO);
-  await page.getByRole('link', { name: 'Fila de preparo' }).click();
+test('Comanda: o Chef vê o pedido na fila e anda até ser entregue', async ({ page }) => {
+  // O Chef cai direto na fila e só tem ela no menu.
+  await entrar(page, CHEF);
+  await expect(page).toHaveURL(/\/fila$/);
+  const menu = page.getByRole('navigation', { name: 'Menu principal' }).first();
+  await expect(menu.getByRole('link')).toHaveText(['Fila de preparo']);
   const comanda = page.getByRole('article', { name: `Pedido nº ${numeroPedido}, Dona Joana` });
   const coluna = (nome: string) => page.getByRole('region', { name: nome });
   await expect(coluna('Aguardando').getByRole('article')).toHaveCount(1);

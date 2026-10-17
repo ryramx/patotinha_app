@@ -23,7 +23,7 @@ const SUGESTOES = ['Cliente desistiu', 'Lançado errado', 'Pedido duplicado'];
 
 export function DetalhePedido() {
   const { id } = useParams();
-  const { eAdmin } = useSessao();
+  const { pode } = useSessao();
   const local = useLocation();
   const voltar = (local.state as { voltar?: string } | null)?.voltar ?? '/pedidos';
   const [cancelando, setCancelando] = useState(false);
@@ -53,7 +53,7 @@ export function DetalhePedido() {
       ) : (
         <ConteudoPedido
           p={pedido.data}
-          podeCancelar={eAdmin}
+          podeCancelar={pode('PEDIDOS_CANCELAR')}
           aoCancelar={() => setCancelando(true)}
         />
       )}
@@ -161,12 +161,10 @@ function ConteudoPedido({
             ))}
           </tbody>
         </table>
-        <div className="m-3 flex items-center justify-between rounded-padrao border-l-4 border-acao bg-creme-escuro px-4 py-2">
-          <span className="font-titulo text-[16px] font-semibold uppercase">
-            {t('pedido.total')}
-          </span>
+        <div className="flex items-baseline justify-between border-t border-borda px-5 py-3">
+          <span className="text-[15px] font-bold text-texto-suave">{t('pedido.total')}</span>
           <span
-            className={`font-titulo text-[40px] font-semibold leading-[48px] tabular-nums ${cancelado ? 'text-desab-texto line-through' : ''}`}
+            className={`font-titulo text-[40px] font-semibold leading-[48px] tabular-nums ${cancelado ? 'text-desab-texto line-through' : 'text-total'}`}
           >
             {formatarReais(p.total)}
           </span>

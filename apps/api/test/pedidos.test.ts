@@ -4,6 +4,7 @@ import {
   criarCardapio,
   criarContexto,
   criarUsuario,
+  liberarFuncionario,
   entrar,
   limparBanco,
   pedidoExemplo,
@@ -26,6 +27,8 @@ beforeEach(async () => {
   await criarUsuario(ctx.banco, 'admin', 'ADMIN', 'Ana');
   await criarUsuario(ctx.banco, 'maria', 'FUNCIONARIO', 'Maria');
   admin = await entrar(ctx, 'admin');
+  // Estes testes usam a funcionária com o acesso de antes dos perfis (etapa 10).
+  await liberarFuncionario(ctx.banco);
   func = await entrar(ctx, 'maria');
   c = await criarCardapio(ctx.banco);
 });
@@ -210,7 +213,11 @@ describe('CA-08 Histórico e detalhe', () => {
     const r = await ctx.http().get('/api/pedidos').set('Cookie', func);
     expect(r.status).toBe(200);
     expect(r.body.dados.map((p: { id: number }) => p.id)).toEqual([p2.body.id, p1.body.id]);
-    expect(r.body).toMatchObject({ pagina: 1, tamanho: 50, total: 2, somaFinalizados: '33.00' });
+    expect(r.body).toMatchObject({ pagina: 1, tamanho: 50, total: 2 });
+    // A soma em reais só vai para quem tem Financeiro.
+    expect(r.body.somaFinalizados).toBeUndefined();
+    const doAdmin = await ctx.http().get('/api/pedidos').set('Cookie', admin);
+    expect(doAdmin.body.somaFinalizados).toBe('33.00');
     expect(r.body.dados[0]).toMatchObject({
       total: '33.00',
       formaPagamento: 'DEBITO',

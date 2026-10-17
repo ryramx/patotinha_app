@@ -62,7 +62,7 @@ export async function rotasCategorias(app: FastifyInstance) {
     paraCategoriaApi(await carregar(request.params)),
   );
 
-  app.post('/categorias', { preHandler: app.exigirAdmin }, async (request, reply) => {
+  app.post('/categorias', { preHandler: app.exigir('CARDAPIO') }, async (request, reply) => {
     const { nome } = esquemaCategoria.parse(request.body);
     if (await nomeEmUso(nome)) throw nomeDuplicado();
     try {
@@ -74,7 +74,7 @@ export async function rotasCategorias(app: FastifyInstance) {
     }
   });
 
-  app.put('/categorias/:id', { preHandler: app.exigirAdmin }, async (request) => {
+  app.put('/categorias/:id', { preHandler: app.exigir('CARDAPIO') }, async (request) => {
     const atual = await carregar(request.params);
     const { nome } = esquemaCategoria.parse(request.body);
     if (await nomeEmUso(nome, atual.id)) throw nomeDuplicado();
@@ -91,7 +91,7 @@ export async function rotasCategorias(app: FastifyInstance) {
     }
   });
 
-  app.patch('/categorias/:id/status', { preHandler: app.exigirAdmin }, async (request) => {
+  app.patch('/categorias/:id/status', { preHandler: app.exigir('CARDAPIO') }, async (request) => {
     const atual = await carregar(request.params);
     const { ativo } = esquemaStatus.parse(request.body);
     const salva = await app.banco.categoria.update({

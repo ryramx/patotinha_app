@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useSessao } from './auth/sessao';
+import type { Permissao } from '@patotinha/shared';
+import { telaInicial, useSessao } from './auth/sessao';
 import { Moldura } from './layout/Moldura';
 import { Login } from './telas/Login';
 import { Inicio } from './telas/Inicio';
@@ -12,12 +13,13 @@ import { Resumo } from './telas/Resumo';
 import { Produtos } from './telas/cadastros/Produtos';
 import { Categorias } from './telas/cadastros/Categorias';
 import { Usuarios } from './telas/cadastros/Usuarios';
+import { Perfis } from './telas/cadastros/Perfis';
 import { Vazio } from './componentes/Diversos';
 import { t } from './textos';
 
 function Carregando() {
   return (
-    <div className="flex h-full items-center justify-center bg-moldura">
+    <div className="flex h-full items-center justify-center bg-marca">
       <img src="/logo.webp" alt="Patotinha da Vovó" className="w-40 animate-pulse" />
     </div>
   );
@@ -31,11 +33,22 @@ function ExigeLogin({ children }: { children: ReactNode }) {
   return children;
 }
 
-/** Telas de administrador: escondidas do menu e bloqueadas aqui; a API também bloqueia. */
-function ExigeAdmin({ children }: { children: ReactNode }) {
-  const { eAdmin } = useSessao();
-  if (!eAdmin) return <Vazio texto={t('erro.semPermissao')} />;
+/** Telas fora do perfil: escondidas do menu e bloqueadas aqui; a API também bloqueia. */
+function Exige({ permissao, children }: { permissao: Permissao | 'ADMIN'; children: ReactNode }) {
+  const { eAdmin, pode } = useSessao();
+  const liberado = permissao === 'ADMIN' ? eAdmin : pode(permissao);
+  if (!liberado) return <Vazio texto={t('erro.semPermissao')} />;
   return children;
+}
+
+/** Início mostra pedidos e números do dia; sem isso no perfil, vai para a tela dele. */
+function TelaInicio() {
+  const { usuario, pode } = useSessao();
+  if (usuario && !pode('PEDIDOS_VER') && !pode('FINANCEIRO')) {
+    const destino = telaInicial(usuario);
+    if (destino !== '/') return <Navigate to={destino} replace />;
+  }
+  return <Inicio />;
 }
 
 export function App() {
@@ -51,41 +64,77 @@ export function App() {
           </ExigeLogin>
         }
       >
-        <Route index element={<Inicio />} />
-        <Route path="pedidos/novo" element={<NovoPedido />} />
-        <Route path="pedidos" element={<Historico />} />
-        <Route path="pedidos/:id" element={<DetalhePedido />} />
-        <Route path="fila" element={<Fila />} />
+        <Route index element={<TelaInicio />} />
+        <Route
+          path="pedidos/novo"
+          element={
+            <Exige permissao="PEDIDOS_REGISTRAR">
+              <NovoPedido />
+            </Exige>
+          }
+        />
+        <Route
+          path="pedidos"
+          element={
+            <Exige permissao="PEDIDOS_VER">
+              <Historico />
+            </Exige>
+          }
+        />
+        <Route
+          path="pedidos/:id"
+          element={
+            <Exige permissao="PEDIDOS_VER">
+              <DetalhePedido />
+            </Exige>
+          }
+        />
+        <Route
+          path="fila"
+          element={
+            <Exige permissao="FILA">
+              <Fila />
+            </Exige>
+          }
+        />
         <Route
           path="resumo"
           element={
-            <ExigeAdmin>
+            <Exige permissao="FINANCEIRO">
               <Resumo />
-            </ExigeAdmin>
+            </Exige>
           }
         />
         <Route
           path="produtos"
           element={
-            <ExigeAdmin>
+            <Exige permissao="CARDAPIO">
               <Produtos />
-            </ExigeAdmin>
+            </Exige>
           }
         />
         <Route
           path="categorias"
           element={
-            <ExigeAdmin>
+            <Exige permissao="CARDAPIO">
               <Categorias />
-            </ExigeAdmin>
+            </Exige>
           }
         />
         <Route
           path="usuarios"
           element={
-            <ExigeAdmin>
+            <Exige permissao="USUARIOS">
               <Usuarios />
-            </ExigeAdmin>
+            </Exige>
+          }
+        />
+        <Route
+          path="perfis"
+          element={
+            <Exige permissao="ADMIN">
+              <Perfis />
+            </Exige>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />

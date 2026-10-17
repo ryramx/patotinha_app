@@ -20,7 +20,13 @@ describe('CA-01 Login', () => {
     const r = await ctx.http().post('/api/auth/login').send({ login: 'Maria', senha: SENHA });
     expect(r.status).toBe(200);
     expect(r.body).toEqual({
-      usuario: { id: expect.any(Number), nome: 'Maria', login: 'maria', perfil: 'FUNCIONARIO' },
+      usuario: {
+        id: expect.any(Number),
+        nome: 'Maria',
+        login: 'maria',
+        perfil: 'FUNCIONARIO',
+        permissoes: ['PEDIDOS_REGISTRAR'],
+      },
     });
     const cookie = (r.headers['set-cookie'] as unknown as string[])[0]!;
     expect(cookie).toMatch(/^sessao=/);

@@ -12,6 +12,7 @@ import pluginAutenticacao from './auth/plugin.js';
 import { rotasAuth } from './auth/rotas.js';
 import { LimiteLogin } from './auth/limite-login.js';
 import { rotasUsuarios } from './usuarios/rotas.js';
+import { rotasPerfis } from './perfis/rotas.js';
 import { rotasCategorias } from './cardapio/rotas-categorias.js';
 import { rotasProdutos } from './cardapio/rotas-produtos.js';
 import { rotasPedidos } from './pedidos/rotas.js';
@@ -128,6 +129,7 @@ export async function construirApp(opcoes: OpcoesApp): Promise<FastifyInstance> 
 
       await api.register(rotasAuth, { limite: opcoes.limiteLogin ?? new LimiteLogin() });
       await api.register(rotasUsuarios);
+      await api.register(rotasPerfis);
       await api.register(rotasCategorias);
       await api.register(rotasProdutos);
       await api.register(rotasPedidos);

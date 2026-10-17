@@ -101,8 +101,12 @@ describe('Clientes: sugestões no campo do nome', () => {
     expect((await sugestoes('cliente')).body.dados).toHaveLength(6);
   });
 
-  it('pede login e uma busca', async () => {
+  it('pede login, permissão de registrar pedidos e uma busca', async () => {
     expect((await ctx.http().get('/api/clientes?busca=a')).status).toBe(401);
+    await criarUsuario(ctx.banco, 'chef', 'CHEF');
+    const chef = await entrar(ctx, 'chef');
+    const r = await ctx.http().get('/api/clientes?busca=a').set('Cookie', chef);
+    expect(r.status).toBe(403);
     expect((await sugestoes('')).status).toBe(422);
   });
 });
@@ -132,7 +136,7 @@ describe('Clientes: migração', () => {
     const sql = readFileSync(
       path.resolve(
         import.meta.dirname,
-        '../prisma/migrations/20261017000000_clientes/migration.sql',
+        '../prisma/migrations/20261017010000_clientes/migration.sql',
       ),
       'utf8',
     );

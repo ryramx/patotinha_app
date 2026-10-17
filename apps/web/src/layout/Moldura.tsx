@@ -1,39 +1,115 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   ChartColumnBig,
   ChefHat,
   ChevronDown,
   Cookie,
+  Ellipsis,
   House,
   KeyRound,
   LogOut,
-  Menu,
+  Moon,
   PlusCircle,
   Receipt,
+  ShieldCheck,
+  Sun,
   Tags,
   Users,
-  Wifi,
-  WifiOff,
   Keyboard,
+  type LucideIcon,
 } from 'lucide-react';
+import type { Permissao } from '@patotinha/shared';
 import { primeiroNome, useSessao } from '../auth/sessao';
 import { aoMudarConexao } from '../api/cliente';
 import { t } from '../textos';
+import { useTema } from '../tema';
 import { Confirmacao } from '../componentes/Janela';
 import { JanelaTrocarSenha } from './JanelaTrocarSenha';
 import { JanelaAtalhos } from './JanelaAtalhos';
 import { temRascunho } from '../telas/novo-pedido/rascunho';
 
-const ITENS_MENU = [
-  { para: '/pedidos/novo', rotulo: t('menu.novoPedido'), Icone: PlusCircle, admin: false },
-  { para: '/fila', rotulo: t('menu.fila'), Icone: ChefHat, admin: false },
-  { para: '/pedidos', rotulo: t('menu.historico'), Icone: Receipt, admin: false, fim: true },
-  { para: '/', rotulo: t('menu.inicio'), Icone: House, admin: false, fim: true },
-  { para: '/resumo', rotulo: t('menu.resumo'), Icone: ChartColumnBig, admin: true },
-  { para: '/produtos', rotulo: t('menu.produtos'), Icone: Cookie, admin: true },
-  { para: '/categorias', rotulo: t('menu.categorias'), Icone: Tags, admin: true },
-  { para: '/usuarios', rotulo: t('menu.usuarios'), Icone: Users, admin: true },
+interface ItemMenu {
+  para: string;
+  rotulo: string;
+  curto: string;
+  Icone: LucideIcon;
+  fim?: boolean;
+  /** Aparece para quem tem alguma destas permissões; 'ADMIN' é só o administrador. */
+  exige: (Permissao | 'ADMIN')[];
+}
+
+/** Sempre à vista: no topo (computador e tablet) e nas abas de baixo (celular). */
+const PRINCIPAIS: ItemMenu[] = [
+  {
+    para: '/pedidos/novo',
+    rotulo: t('menu.novoPedido'),
+    curto: t('menu.novo'),
+    Icone: PlusCircle,
+    exige: ['PEDIDOS_REGISTRAR'],
+  },
+  {
+    para: '/fila',
+    rotulo: t('menu.fila'),
+    curto: t('menu.filaCurta'),
+    Icone: ChefHat,
+    exige: ['FILA'],
+  },
+  {
+    para: '/pedidos',
+    rotulo: t('menu.historico'),
+    curto: t('menu.historico'),
+    Icone: Receipt,
+    fim: true,
+    exige: ['PEDIDOS_VER'],
+  },
+  {
+    para: '/',
+    rotulo: t('menu.inicio'),
+    curto: t('menu.inicio'),
+    Icone: House,
+    fim: true,
+    exige: ['PEDIDOS_VER', 'FINANCEIRO'],
+  },
+];
+
+/** Conforme o perfil: Resumo no topo; os cadastros num menu "Cadastros". */
+const RESUMO: ItemMenu = {
+  para: '/resumo',
+  rotulo: t('menu.resumo'),
+  curto: t('menu.resumo'),
+  Icone: ChartColumnBig,
+  exige: ['FINANCEIRO'],
+};
+const CADASTROS: ItemMenu[] = [
+  {
+    para: '/produtos',
+    rotulo: t('menu.produtos'),
+    curto: t('menu.produtos'),
+    Icone: Cookie,
+    exige: ['CARDAPIO'],
+  },
+  {
+    para: '/categorias',
+    rotulo: t('menu.categorias'),
+    curto: t('menu.categorias'),
+    Icone: Tags,
+    exige: ['CARDAPIO'],
+  },
+  {
+    para: '/usuarios',
+    rotulo: t('menu.usuarios'),
+    curto: t('menu.usuarios'),
+    Icone: Users,
+    exige: ['USUARIOS'],
+  },
+  {
+    para: '/perfis',
+    rotulo: t('menu.perfis'),
+    curto: t('menu.perfis'),
+    Icone: ShieldCheck,
+    exige: ['ADMIN'],
+  },
 ];
 
 const TITULOS: [RegExp, string][] = [
@@ -45,6 +121,7 @@ const TITULOS: [RegExp, string][] = [
   [/^\/produtos/, 'Produtos'],
   [/^\/categorias/, 'Categorias'],
   [/^\/usuarios/, 'Usuários'],
+  [/^\/perfis/, 'Perfis e permissões'],
   [/^\/$/, 'Início'],
 ];
 
@@ -71,17 +148,60 @@ function useConexao() {
   return online;
 }
 
+/** Fecha um menu suspenso ao clicar fora dele. */
+function useFecharFora(aberto: boolean, fechar: () => void) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!aberto) return;
+    const fora = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) fechar();
+    };
+    document.addEventListener('mousedown', fora);
+    return () => document.removeEventListener('mousedown', fora);
+  }, [aberto, fechar]);
+  return ref;
+}
+
+const pilula = (ativo: boolean) =>
+  `flex h-11 items-center gap-2 rounded-full px-3 text-[14px] font-bold whitespace-nowrap transition-colors xl:px-4 ${
+    ativo
+      ? 'bg-moldura text-sobre-moldura'
+      : 'text-texto-suave hover:bg-creme-escuro hover:text-texto'
+  }`;
+
+function ItemSuspenso({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+  return (
+    <button
+      role="menuitem"
+      type="button"
+      className="flex h-12 w-full items-center gap-3 px-4 text-left hover:bg-creme-escuro"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+
 export function Moldura() {
-  const { usuario, eAdmin, sair } = useSessao();
+  const { usuario, eAdmin, pode, sair } = useSessao();
+  const { tema, alternar } = useTema();
   const navegar = useNavigate();
   const local = useLocation();
   const online = useConexao();
   const [menuUsuario, setMenuUsuario] = useState(false);
+  const [menuCadastros, setMenuCadastros] = useState(false);
   const [gaveta, setGaveta] = useState(false);
   const [trocarSenha, setTrocarSenha] = useState(false);
   const [atalhos, setAtalhos] = useState(false);
   const [confirmarSaida, setConfirmarSaida] = useState(false);
-  const refMenu = useRef<HTMLDivElement>(null);
+  const refUsuario = useFecharFora(
+    menuUsuario,
+    useCallback(() => setMenuUsuario(false), []),
+  );
+  const refCadastros = useFecharFora(
+    menuCadastros,
+    useCallback(() => setMenuCadastros(false), []),
+  );
 
   const titulo = TITULOS.find(([re]) => re.test(local.pathname))?.[1] ?? '';
 
@@ -95,7 +215,7 @@ export function Moldura() {
   useEffect(() => {
     const tratar = (e: KeyboardEvent) => {
       if (['F1', 'F2', 'F3', 'F4', 'F5'].includes(e.key)) e.preventDefault();
-      if (e.key === 'F1') navegar('/pedidos/novo');
+      if (e.key === 'F1' && pode('PEDIDOS_REGISTRAR')) navegar('/pedidos/novo');
       const alvo = e.target as HTMLElement;
       const digitando = alvo.closest('input, textarea, select, [contenteditable="true"]');
       if (e.key === '?' && !digitando && !document.querySelector('[role="dialog"]')) {
@@ -105,148 +225,221 @@ export function Moldura() {
     };
     window.addEventListener('keydown', tratar);
     return () => window.removeEventListener('keydown', tratar);
-  }, [navegar]);
+  }, [navegar, pode]);
 
   useEffect(() => {
-    if (!menuUsuario) return;
-    const fora = (e: MouseEvent) => {
-      if (!refMenu.current?.contains(e.target as Node)) setMenuUsuario(false);
-    };
-    document.addEventListener('mousedown', fora);
-    return () => document.removeEventListener('mousedown', fora);
-  }, [menuUsuario]);
-
-  useEffect(() => setGaveta(false), [local.pathname]);
+    setGaveta(false);
+    setMenuCadastros(false);
+  }, [local.pathname]);
 
   if (!usuario) return null;
-  const itens = ITENS_MENU.filter((i) => !i.admin || eAdmin);
-
-  const menu = (recolhivel: boolean) => (
-    <nav aria-label="Menu principal" className="flex flex-col gap-1 p-2">
-      {itens.map(({ para, rotulo, Icone, fim }) => (
-        <NavLink
-          key={para}
-          to={para}
-          end={fim}
-          title={rotulo}
-          className={({ isActive }) =>
-            `flex min-h-12 items-center gap-3 rounded-padrao px-3 font-bold text-sobre-moldura transition-colors ${
-              isActive ? 'bg-selecionado' : 'hover:bg-moldura-escura'
-            } ${recolhivel ? 'lg:justify-start max-lg:justify-center' : ''}`
-          }
-        >
-          <Icone size={24} aria-hidden className="shrink-0" />
-          <span className={recolhivel ? 'max-lg:sr-only' : ''}>{rotulo}</span>
-        </NavLink>
-      ))}
-    </nav>
-  );
+  const ve = (i: ItemMenu) => i.exige.some((p) => (p === 'ADMIN' ? eAdmin : pode(p)));
+  const abas = PRINCIPAIS.filter(ve);
+  const principais = ve(RESUMO) ? [...abas, RESUMO] : abas;
+  const cadastros = CADASTROS.filter(ve);
+  const extras = [RESUMO, ...CADASTROS].filter(ve);
+  const emCadastros = cadastros.some((c) => local.pathname.startsWith(c.para));
+  const rotuloTema = tema === 'escuro' ? t('menu.modoClaro') : t('menu.modoEscuro');
 
   return (
     <div className="flex h-full flex-col">
-      <header className="nao-imprimir flex h-16 shrink-0 items-center gap-3 bg-moldura px-3 text-sobre-moldura md:px-4">
-        <button
-          type="button"
-          className="flex h-12 w-12 items-center justify-center rounded-padrao hover:bg-moldura-escura md:hidden"
-          aria-label={t('menu.abrirMenu')}
-          aria-expanded={gaveta}
-          onClick={() => setGaveta((g) => !g)}
+      <header className="nao-imprimir flex h-16 shrink-0 items-center gap-2 border-b border-borda bg-cabecalho px-3 md:gap-3 md:px-4 lg:px-6">
+        <div className="flex shrink-0 items-center gap-2">
+          <img src="/logo-pequeno.webp" alt="Patotinha da Vovó" className="h-11 w-auto" />
+          <span className="hidden text-[15px] font-extrabold leading-[17px] 2xl:block">
+            Patotinha
+            <br />
+            <span className="text-[13px] font-semibold text-texto-suave">da Vovó</span>
+          </span>
+        </div>
+        {/* No celular o título fica no cabeçalho; no computador o menu mostra onde se está. */}
+        <h1 className="truncate text-[18px] font-extrabold md:sr-only">{titulo}</h1>
+
+        <nav
+          aria-label="Menu principal"
+          className="ml-2 hidden items-center gap-1 rounded-full bg-creme-escuro p-1 md:flex"
         >
-          <Menu size={24} />
-        </button>
-        <img src="/logo-pequeno.webp" alt="Patotinha da Vovó" className="h-12 w-auto" />
-        <span className="hidden font-titulo text-[18px] font-semibold uppercase tracking-wide sm:inline">
-          {t('sistema.nome')}
-        </span>
-        <span className="hidden h-6 w-px bg-sobre-moldura/40 sm:inline" aria-hidden />
-        <h1 className="truncate font-titulo text-[20px] font-medium uppercase">{titulo}</h1>
-        <div className="ml-auto flex items-center gap-2">
+          {principais.map(({ para, rotulo, Icone, fim }) => (
+            <NavLink
+              key={para}
+              to={para}
+              end={fim}
+              title={rotulo}
+              className={({ isActive }) => pilula(isActive)}
+            >
+              <Icone size={18} aria-hidden className="shrink-0" />
+              <span className="max-lg:sr-only">{rotulo}</span>
+            </NavLink>
+          ))}
+          {cadastros.length > 0 && (
+            <div className="relative" ref={refCadastros}>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={menuCadastros}
+                title={t('menu.cadastros')}
+                onClick={() => setMenuCadastros((m) => !m)}
+                className={pilula(emCadastros)}
+              >
+                <Cookie size={18} aria-hidden className="shrink-0 lg:hidden" />
+                <span className="max-lg:sr-only">{t('menu.cadastros')}</span>
+                <ChevronDown size={16} aria-hidden />
+              </button>
+              {menuCadastros && (
+                <div
+                  role="menu"
+                  className="absolute left-0 top-13 z-20 w-56 overflow-hidden rounded-grande border border-borda bg-superficie py-1 shadow-elevada"
+                >
+                  {cadastros.map(({ para, rotulo, Icone }) => (
+                    <NavLink
+                      key={para}
+                      to={para}
+                      role="menuitem"
+                      className={({ isActive }) =>
+                        `flex h-12 items-center gap-3 px-4 font-semibold hover:bg-creme-escuro ${isActive ? 'text-moldura' : ''}`
+                      }
+                    >
+                      <Icone size={20} aria-hidden /> {rotulo}
+                    </NavLink>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-1 md:gap-2">
           <span
-            className="flex items-center gap-1.5 rounded-full px-2 py-1 text-[13px]"
+            className={`flex items-center gap-1.5 rounded-full px-2 py-1 text-[13px] font-bold ${online ? 'text-sucesso' : 'text-erro'}`}
             title={online ? t('menu.conectado') : t('menu.semConexao')}
             role="status"
             aria-label={online ? t('menu.conectado') : t('menu.semConexao')}
           >
-            <span className={`h-2 w-2 rounded-full ${online ? 'bg-[#4caf50]' : 'bg-[#ff5252]'}`} />
-            {online ? <Wifi size={18} aria-hidden /> : <WifiOff size={18} aria-hidden />}
+            <span className={`h-2 w-2 rounded-full ${online ? 'bg-sucesso' : 'bg-erro'}`} />
+            <span className="hidden xl:inline">{online ? 'Online' : 'Sem conexão'}</span>
           </span>
-          <div className="relative" ref={refMenu}>
+          <button
+            type="button"
+            onClick={alternar}
+            aria-label={rotuloTema}
+            title={rotuloTema}
+            className="flex h-11 w-11 items-center justify-center rounded-full text-texto-suave hover:bg-creme-escuro hover:text-texto"
+          >
+            {tema === 'escuro' ? <Sun size={20} aria-hidden /> : <Moon size={20} aria-hidden />}
+          </button>
+          <div className="relative" ref={refUsuario}>
             <button
               type="button"
               aria-haspopup="menu"
               aria-expanded={menuUsuario}
               onClick={() => setMenuUsuario((m) => !m)}
-              className="flex h-12 items-center gap-1 rounded-padrao px-3 font-bold hover:bg-moldura-escura"
+              className="flex h-11 items-center gap-2 rounded-full border border-borda py-1 pl-1 pr-3 font-bold hover:bg-creme-escuro"
             >
-              {primeiroNome(usuario.nome)} <ChevronDown size={18} aria-hidden />
+              <span
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-moldura/12 font-extrabold text-moldura"
+                aria-hidden
+              >
+                {primeiroNome(usuario.nome).charAt(0).toUpperCase()}
+              </span>
+              <span className="max-sm:sr-only">{primeiroNome(usuario.nome)}</span>
+              <ChevronDown size={16} aria-hidden />
             </button>
             {menuUsuario && (
               <div
                 role="menu"
-                className="absolute right-0 top-14 z-20 w-56 overflow-hidden rounded-padrao bg-superficie py-1 text-texto shadow-elevada"
+                className="absolute right-0 top-13 z-20 w-60 overflow-hidden rounded-grande border border-borda bg-superficie py-1 text-texto shadow-elevada"
               >
-                <button
-                  role="menuitem"
-                  type="button"
-                  className="flex h-12 w-full items-center gap-3 px-4 hover:bg-creme-escuro"
+                <ItemSuspenso
                   onClick={() => {
                     setMenuUsuario(false);
                     setTrocarSenha(true);
                   }}
                 >
                   <KeyRound size={20} aria-hidden /> {t('menu.trocarSenha')}
-                </button>
-                <button
-                  role="menuitem"
-                  type="button"
-                  className="flex h-12 w-full items-center gap-3 px-4 hover:bg-creme-escuro"
+                </ItemSuspenso>
+                <ItemSuspenso
                   onClick={() => {
                     setMenuUsuario(false);
                     setAtalhos(true);
                   }}
                 >
                   <Keyboard size={20} aria-hidden /> {t('menu.atalhos')}
-                </button>
-                <button
-                  role="menuitem"
-                  type="button"
-                  className="flex h-12 w-full items-center gap-3 px-4 hover:bg-creme-escuro"
-                  onClick={pedirSaida}
-                >
+                </ItemSuspenso>
+                <ItemSuspenso onClick={pedirSaida}>
                   <LogOut size={20} aria-hidden /> {t('menu.sair')}
-                </button>
+                </ItemSuspenso>
               </div>
             )}
           </div>
           <button
             type="button"
             onClick={pedirSaida}
-            className="hidden h-12 items-center gap-2 rounded-padrao px-3 font-bold hover:bg-moldura-escura sm:flex"
+            className="hidden h-11 items-center gap-2 rounded-full px-3 font-bold text-texto-suave hover:bg-creme-escuro hover:text-texto xl:flex"
           >
             <LogOut size={20} aria-hidden /> {t('menu.sair')}
           </button>
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1">
-        {/* Computador: 220 px; tablet: recolhido em ícones de 72 px; celular: gaveta. */}
-        <aside className="nao-imprimir hidden w-[72px] shrink-0 overflow-y-auto bg-moldura md:block lg:w-[220px]">
-          {menu(true)}
-        </aside>
-        {gaveta && (
-          <div
-            className="fixed inset-0 top-16 z-30 bg-texto/40 md:hidden"
-            onClick={() => setGaveta(false)}
+      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto max-md:pb-[var(--altura-abas-celular)]">
+        <Outlet />
+      </main>
+
+      {/* Celular: abas fixas embaixo; "Mais" abre Resumo e cadastros, conforme o perfil. */}
+      <nav
+        aria-label="Menu principal"
+        className="nao-imprimir fixed inset-x-0 bottom-0 z-10 grid h-[var(--altura-abas-celular)] border-t border-borda bg-cabecalho md:hidden"
+        style={{
+          gridTemplateColumns: `repeat(${abas.length + (extras.length > 0 ? 1 : 0)}, minmax(0, 1fr))`,
+        }}
+      >
+        {abas.map(({ para, curto, rotulo, Icone, fim }) => (
+          <NavLink
+            key={para}
+            to={para}
+            end={fim}
+            aria-label={rotulo}
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center gap-1 text-[11.5px] font-bold ${isActive ? 'text-moldura' : 'text-texto-suave'}`
+            }
           >
-            <aside className="h-full w-[260px] bg-moldura" onClick={(e) => e.stopPropagation()}>
-              {menu(false)}
-            </aside>
-          </div>
+            <Icone size={22} aria-hidden />
+            <span aria-hidden>{curto}</span>
+          </NavLink>
+        ))}
+        {extras.length > 0 && (
+          <button
+            type="button"
+            aria-expanded={gaveta}
+            onClick={() => setGaveta((g) => !g)}
+            className={`flex flex-col items-center justify-center gap-1 text-[11.5px] font-bold ${gaveta ? 'text-moldura' : 'text-texto-suave'}`}
+          >
+            <Ellipsis size={22} aria-hidden />
+            {t('menu.mais')}
+          </button>
         )}
-        <main className="min-w-0 flex-1 overflow-y-auto">
-          <Outlet />
-        </main>
-      </div>
+      </nav>
+      {gaveta && (
+        <div className="fixed inset-0 z-30 bg-veu md:hidden" onClick={() => setGaveta(false)}>
+          <nav
+            aria-label={t('menu.mais')}
+            className="anim-toast absolute inset-x-0 bottom-0 rounded-t-[24px] bg-superficie p-3 pb-6 shadow-elevada"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {extras.map(({ para, rotulo, Icone }) => (
+              <NavLink
+                key={para}
+                to={para}
+                className={({ isActive }) =>
+                  `flex h-14 items-center gap-3 rounded-padrao px-4 text-[16px] font-bold ${isActive ? 'bg-moldura/12 text-moldura' : 'hover:bg-creme-escuro'}`
+                }
+              >
+                <Icone size={22} aria-hidden /> {rotulo}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      )}
 
       {trocarSenha && <JanelaTrocarSenha aoFechar={() => setTrocarSenha(false)} />}
       {atalhos && <JanelaAtalhos aoFechar={() => setAtalhos(false)} />}

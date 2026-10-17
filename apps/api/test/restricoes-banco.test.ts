@@ -17,7 +17,7 @@ beforeEach(async () => {
 const sql = (texto: string) => ctx.banco.$executeRawUnsafe(texto);
 
 describe('Restrições do banco', () => {
-  it('existem as sete tabelas e as quatro formas de pagamento', async () => {
+  it('existem as oito tabelas, as quatro formas de pagamento e os quatro perfis', async () => {
     const tabelas = await ctx.banco.$queryRaw<{ tablename: string }[]>`
       SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename`;
     expect(tabelas.map((t) => t.tablename)).toEqual([
@@ -26,9 +26,12 @@ describe('Restrições do banco', () => {
       'formas_pagamento',
       'itens_pedido',
       'pedidos',
+      'perfis',
       'produtos',
       'usuarios',
     ]);
+    const perfis = await ctx.banco.perfil.findMany({ orderBy: { codigo: 'asc' } });
+    expect(perfis.map((p) => p.codigo)).toEqual(['ADMIN', 'CHEF', 'FUNCIONARIO', 'GERENTE']);
     const formas = await ctx.banco.formaPagamento.findMany({ orderBy: { id: 'asc' } });
     expect(formas.map((f) => [f.id, f.codigo])).toEqual([
       [1, 'DINHEIRO'],

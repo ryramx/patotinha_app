@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { CircleAlert } from 'lucide-react';
-import { useSessao } from '../auth/sessao';
+import { telaInicial, useSessao } from '../auth/sessao';
 import { ErroDaApi } from '../api/cliente';
 import { Botao } from '../componentes/Botao';
 import { CampoSenha, CampoTexto } from '../componentes/Campos';
@@ -18,11 +18,6 @@ function ultimoUsuario() {
   }
 }
 
-export function telaInicial(perfil: string) {
-  // Funcionário vai direto para Novo pedido; administrador para Início (PRD 8.1).
-  return perfil === 'ADMIN' ? '/' : '/pedidos/novo';
-}
-
 export function Login() {
   const { usuario, entrar, expirou } = useSessao();
   const navegar = useNavigate();
@@ -33,7 +28,7 @@ export function Login() {
   const [enviando, setEnviando] = useState(false);
   const refSenha = useRef<HTMLInputElement>(null);
 
-  if (usuario) return <Navigate to={telaInicial(usuario.perfil)} replace />;
+  if (usuario) return <Navigate to={telaInicial(usuario)} replace />;
 
   const enviar = async () => {
     const faltando = {
@@ -52,7 +47,7 @@ export function Login() {
         // ignora
       }
       marcarRascunhoRetomado(false);
-      navegar(telaInicial(u.perfil), { replace: true });
+      navegar(telaInicial(u), { replace: true });
     } catch (e) {
       const falha = e as ErroDaApi;
       setErro(
@@ -74,7 +69,7 @@ export function Login() {
 
   return (
     <div
-      className="flex min-h-full flex-col items-center justify-center bg-moldura px-4 py-10"
+      className="flex min-h-full flex-col items-center justify-center bg-marca px-4 py-10"
       style={{
         backgroundImage:
           'radial-gradient(circle at 50% 30%, rgba(242,165,26,.15) 0%, rgba(242,165,26,0) 45%)',
@@ -87,9 +82,9 @@ export function Login() {
           e.preventDefault();
           void enviar();
         }}
-        className="w-[360px] max-w-full rounded-padrao bg-fundo p-8 shadow-elevada"
+        className="w-[360px] max-w-full rounded-[20px] bg-superficie p-8 shadow-elevada"
       >
-        <h1 className="mb-4 font-titulo text-[20px] font-semibold">{t('login.titulo')}</h1>
+        <h1 className="mb-4 text-[22px] font-extrabold tracking-[-0.3px]">{t('login.titulo')}</h1>
         {(erro || expirou) && (
           <div
             role="alert"
@@ -133,7 +128,7 @@ export function Login() {
           </Botao>
         </div>
       </form>
-      <p className="enfeite mt-6 text-[16px] text-acao">{t('sistema.rodapeLogin')}</p>
+      <p className="enfeite mt-6 text-[16px] text-dourado">{t('sistema.rodapeLogin')}</p>
     </div>
   );
 }

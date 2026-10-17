@@ -10,6 +10,7 @@ import {
   type StatusPreparo,
 } from '@patotinha/shared';
 import { api, ErroDaApi } from '../api/cliente';
+import { useSessao } from '../auth/sessao';
 import { useAvisos } from '../componentes/Avisos';
 import { Botao } from '../componentes/Botao';
 import { EtiquetaPreparo, LinhasEsqueleto, NOME_PREPARO, Vazio } from '../componentes/Diversos';
@@ -180,10 +181,12 @@ function CartaoComanda({
   aoVoltar?: () => void;
 }) {
   const pronto = pedido.preparo.status === 'PRONTO';
+  // O Chef vê a comanda; o detalhe do pedido (valores, pagamento) depende de "Ver pedidos".
+  const verPedido = useSessao().pode('PEDIDOS_VER');
   return (
     <article
       aria-label={`Pedido nº ${pedido.id}, ${pedido.cliente ?? t('fila.semNome')}`}
-      className={`cartao flex flex-col gap-2 p-4 ${pronto ? 'border-l-4 border-sucesso' : ''}`}
+      className={`cartao flex flex-col gap-2 p-4 ${pronto ? 'border-2 border-sucesso' : ''}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
@@ -191,13 +194,17 @@ function CartaoComanda({
             {pedido.cliente ?? t('fila.semNome')}
           </p>
           <p className="legenda tabular-nums">
-            <Link
-              to={`/pedidos/${pedido.id}`}
-              state={{ voltar: '/fila' }}
-              className="font-bold text-moldura underline-offset-4 hover:underline"
-            >
-              Nº {pedido.id}
-            </Link>{' '}
+            {verPedido ? (
+              <Link
+                to={`/pedidos/${pedido.id}`}
+                state={{ voltar: '/fila' }}
+                className="font-bold text-moldura underline-offset-4 hover:underline"
+              >
+                Nº {pedido.id}
+              </Link>
+            ) : (
+              <span className="font-bold">Nº {pedido.id}</span>
+            )}{' '}
             · {formatarHora(pedido.criadoEm)} · {espera(pedido.criadoEm, agora)}
           </p>
         </div>

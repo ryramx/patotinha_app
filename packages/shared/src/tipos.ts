@@ -1,4 +1,5 @@
-import type { CodigoPagamento, Perfil, StatusPedido, StatusPreparo } from './esquemas.js';
+import type { CodigoPagamento, StatusPedido, StatusPreparo } from './esquemas.js';
+import type { Perfil, Permissao } from './perfis.js';
 
 /** Formatos das respostas da API (PRD 14). Dinheiro como string "33.00", datas ISO 8601. */
 
@@ -20,7 +21,20 @@ export interface Usuario {
   atualizadoEm: string;
 }
 
-export type UsuarioSessao = Pick<Usuario, 'id' | 'nome' | 'login' | 'perfil'>;
+export type UsuarioSessao = Pick<Usuario, 'id' | 'nome' | 'login' | 'perfil'> & {
+  /** O que o perfil do usuário pode fazer agora; o administrador tem todas. */
+  permissoes: Permissao[];
+};
+
+export interface PerfilAcesso {
+  codigo: Perfil;
+  nome: string;
+  permissoes: Permissao[];
+  /** O perfil Administrador é fixo: sempre tem todas as permissões. */
+  editavel: boolean;
+  usuariosAtivos: number;
+  atualizadoEm: string;
+}
 
 export interface Categoria {
   id: number;
@@ -99,7 +113,8 @@ export interface Pagina<T> {
 }
 
 export interface ListaPedidos extends Pagina<PedidoResumido> {
-  somaFinalizados: string;
+  /** Só para quem tem a permissão Financeiro. */
+  somaFinalizados?: string;
   quantidadeFinalizados: number;
 }
 
