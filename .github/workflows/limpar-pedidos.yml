@@ -1,0 +1,55 @@
+# Uso único: confere e apaga os pedidos de teste do banco de produção.
+# MODO=listar só mostra; MODO=apagar guarda uma cópia e apaga pedidos e itens.
+name: Limpar pedidos de teste
+
+on:
+  push:
+    branches: [limpar-pedidos-teste]
+
+env:
+  MODO: listar
+
+jobs:
+  limpar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Listar pedidos
+        env:
+          URL: ${{ secrets.PRODUCAO_DATABASE_URL }}
+        run: |
+          if [ -z "$URL" ]; then echo "::error::Segredo PRODUCAO_DATABASE_URL não configurado"; exit 1; fi
+          docker run --rm -e URL="$URL" -e PGTZ=America/Sao_Paulo postgres:18 psql "$URL" -v ON_ERROR_STOP=1 -c "
+            SELECT (SELECT count(*) FROM pedidos) AS pedidos, (SELECT count(*) FROM itens_pedido) AS itens,
+                   (SELECT count(*) FROM produtos) AS produtos, (SELECT count(*) FROM usuarios) AS usuarios,
+                   (SELECT count(*) FROM clientes) AS clientes;" -c "
+            SELECT to_char(criado_em, 'YYYY-MM-DD Dy') AS dia, count(*) AS pedidos,
+                   to_char(min(criado_em), 'HH24:MI') AS primeiro, to_char(max(criado_em), 'HH24:MI') AS ultimo,
+                   count(*) FILTER (WHERE extract(isodow FROM criado_em) IN (6,7) AND extract(hour FROM criado_em) BETWEEN 19 AND 21) AS no_horario_da_loja,
+                   sum(total) AS total
+            FROM pedidos GROUP BY 1 ORDER BY 1;" -c "
+            SELECT p.id, to_char(p.criado_em, 'YYYY-MM-DD Dy HH24:MI') AS criado, p.status, p.total, p.cliente_nome, u.login
+            FROM pedidos p JOIN usuarios u ON u.id = p.usuario_id ORDER BY p.id;"
+
+      - name: Guardar cópia e apagar
+        if: env.MODO == 'apagar'
+        env:
+          URL: ${{ secrets.PRODUCAO_DATABASE_URL }}
+        run: |
+          mkdir copia
+          docker run --rm -e URL="$URL" -v "$PWD/copia:/copia" postgres:18 \
+            sh -c 'pg_dump --format=custom --no-owner --no-privileges --dbname="$URL" --file=/copia/antes-de-limpar.dump'
+          ls -lh copia
+          docker run --rm -e URL="$URL" postgres:18 psql "$URL" -v ON_ERROR_STOP=1 -c "
+            BEGIN;
+            TRUNCATE itens_pedido, pedidos RESTART IDENTITY;
+            COMMIT;" -c "
+            SELECT (SELECT count(*) FROM pedidos) AS pedidos, (SELECT count(*) FROM itens_pedido) AS itens,
+                   (SELECT count(*) FROM produtos) AS produtos, (SELECT count(*) FROM usuarios) AS usuarios,
+                   (SELECT count(*) FROM perfis) AS perfis, (SELECT count(*) FROM clientes) AS clientes;"
+
+      - uses: actions/upload-artifact@v4
+        if: env.MODO == 'apagar'
+        with:
+          name: copia-antes-de-limpar
+          path: copia/
+          retention-days: 30
