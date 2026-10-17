@@ -60,7 +60,7 @@ export function Janela({ titulo, aoFechar, children, rodape, largura = 440 }: Pr
   const ref = useFocoPreso(aoFechar);
   return createPortal(
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-texto/40 p-4"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-veu p-4"
       onMouseDown={aoFechar}
     >
       <div
@@ -69,7 +69,7 @@ export function Janela({ titulo, aoFechar, children, rodape, largura = 440 }: Pr
         aria-modal="true"
         aria-labelledby="titulo-janela"
         style={{ width: largura }}
-        className="anim-janela max-w-full rounded-padrao bg-fundo p-6 shadow-elevada"
+        className="anim-janela max-w-full rounded-grande bg-superficie p-6 shadow-elevada"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <h2 id="titulo-janela" className="titulo-secao mb-3 normal-case">
@@ -146,13 +146,13 @@ interface PropsPainel {
 export function PainelLateral({ titulo, aoFechar, children, rodape }: PropsPainel) {
   const ref = useFocoPreso(aoFechar);
   return createPortal(
-    <div className="fixed inset-0 z-30 flex justify-end bg-texto/40" onMouseDown={aoFechar}>
+    <div className="fixed inset-0 z-30 flex justify-end bg-veu" onMouseDown={aoFechar}>
       <div
         ref={ref}
         role="dialog"
         aria-modal="true"
         aria-labelledby="titulo-painel"
-        className="anim-painel flex h-full w-[420px] max-w-full flex-col bg-fundo shadow-elevada"
+        className="anim-painel flex h-full w-[420px] max-w-full flex-col bg-superficie shadow-elevada"
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-borda px-6 py-4">

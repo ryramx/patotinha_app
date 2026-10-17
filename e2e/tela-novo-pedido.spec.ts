@@ -117,7 +117,9 @@ test('CA-04: preço alterado durante o pedido é recusado e a linha mostra o nov
   const admin = await outra.newPage();
   await entrar(admin, ADMIN);
   await expect(admin).toHaveURL(/\/$/);
-  await admin.getByRole('link', { name: 'Produtos' }).click();
+  // Os cadastros ficam no menu "Cadastros" do topo.
+  await admin.getByRole('button', { name: 'Cadastros' }).click();
+  await admin.getByRole('menuitem', { name: 'Produtos' }).click();
   await admin
     .getByRole('row', { name: /Pastel de Chocolate/ })
     .getByRole('button', { name: 'Editar' })

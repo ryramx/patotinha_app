@@ -74,7 +74,7 @@ export function Login() {
 
   return (
     <div
-      className="flex min-h-full flex-col items-center justify-center bg-moldura px-4 py-10"
+      className="flex min-h-full flex-col items-center justify-center bg-marca px-4 py-10"
       style={{
         backgroundImage:
           'radial-gradient(circle at 50% 30%, rgba(242,165,26,.15) 0%, rgba(242,165,26,0) 45%)',
@@ -87,9 +87,9 @@ export function Login() {
           e.preventDefault();
           void enviar();
         }}
-        className="w-[360px] max-w-full rounded-padrao bg-fundo p-8 shadow-elevada"
+        className="w-[360px] max-w-full rounded-[20px] bg-superficie p-8 shadow-elevada"
       >
-        <h1 className="mb-4 font-titulo text-[20px] font-semibold">{t('login.titulo')}</h1>
+        <h1 className="mb-4 text-[22px] font-extrabold tracking-[-0.3px]">{t('login.titulo')}</h1>
         {(erro || expirou) && (
           <div
             role="alert"
@@ -133,7 +133,7 @@ export function Login() {
           </Botao>
         </div>
       </form>
-      <p className="enfeite mt-6 text-[16px] text-acao">{t('sistema.rodapeLogin')}</p>
+      <p className="enfeite mt-6 text-[16px] text-dourado">{t('sistema.rodapeLogin')}</p>
     </div>
   );
 }

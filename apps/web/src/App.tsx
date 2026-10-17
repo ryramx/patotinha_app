@@ -17,7 +17,7 @@ import { t } from './textos';
 
 function Carregando() {
   return (
-    <div className="flex h-full items-center justify-center bg-moldura">
+    <div className="flex h-full items-center justify-center bg-marca">
       <img src="/logo.webp" alt="Patotinha da Vovó" className="w-40 animate-pulse" />
     </div>
   );

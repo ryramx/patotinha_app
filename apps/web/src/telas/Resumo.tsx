@@ -86,9 +86,9 @@ export function Resumo() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {r ? (
           <>
-            <div className="cartao border-l-4 border-acao p-4">
+            <div className="cartao border-moldura/40 p-4">
               <p className="legenda">{t('resumo.faturamento')}</p>
-              <p className="font-titulo text-[32px] font-semibold leading-10 tabular-nums">
+              <p className="font-titulo text-[32px] font-semibold leading-10 text-total tabular-nums">
                 {formatarReais(r.faturamento)}
               </p>
             </div>
