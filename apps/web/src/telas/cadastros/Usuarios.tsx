@@ -6,6 +6,8 @@ import {
   esquemaUsuarioEdicao,
   esquemaUsuarioNovo,
   LIMITES,
+  NOMES_PERFIL,
+  PERFIS,
   type Perfil,
   type Usuario,
 } from '@patotinha/shared';
@@ -36,7 +38,7 @@ function gerarSenha() {
 }
 
 export function Usuarios() {
-  const { usuario: eu } = useSessao();
+  const { usuario: eu, eAdmin } = useSessao();
   const avisos = useAvisos();
   const queryClient = useQueryClient();
   const [busca, setBusca] = useState('');
@@ -105,6 +107,8 @@ export function Usuarios() {
             <tbody>
               {lista.map((u) => {
                 const souEu = u.id === eu?.id;
+                // Só o administrador mexe em administradores (a API também confere).
+                const podeMexer = eAdmin || u.perfil !== 'ADMIN';
                 return (
                   <tr key={u.id} className={classeLinha}>
                     <td className="px-4 font-bold">
@@ -122,16 +126,14 @@ export function Usuarios() {
                             : 'bg-desab-fundo text-texto-suave'
                         }`}
                       >
-                        {u.perfil === 'ADMIN'
-                          ? t('cadastro.administrador')
-                          : t('cadastro.funcionario')}
+                        {NOMES_PERFIL[u.perfil]}
                       </span>
                     </td>
                     <td>
                       <EtiquetaAtivo ativo={u.ativo} />
                     </td>
                     <td className="pr-4 text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className={`flex justify-end gap-2 ${podeMexer ? '' : 'hidden'}`}>
                         <Botao className="!min-h-10" onClick={() => setEditando(u)}>
                           {t('cadastro.editar')}
                         </Botao>
@@ -194,6 +196,8 @@ function FormularioUsuario({
 }) {
   const avisos = useAvisos();
   const queryClient = useQueryClient();
+  const { eAdmin } = useSessao();
+  const opcoesPerfil = PERFIS.filter((p) => eAdmin || p !== 'ADMIN');
   const [nome, setNome] = useState(usuario?.nome ?? '');
   const [login, setLogin] = useState(usuario?.login ?? '');
   const [perfil, setPerfil] = useState<Perfil>(usuario?.perfil ?? 'FUNCIONARIO');
@@ -233,7 +237,8 @@ function FormularioUsuario({
     onError: (e: ErroDaApi) => {
       if (e.codigo === 'LOGIN_DUPLICADO') setErros({ login: e.message });
       else if (e.codigo === 'SENHA_FRACA') setErros({ senha: e.message });
-      else if (e.codigo === 'ULTIMO_ADMIN') setErros({ perfil: e.message });
+      else if (e.codigo === 'ULTIMO_ADMIN' || e.codigo === 'SO_ADMIN')
+        setErros({ perfil: e.message });
       else avisos.erro(e.message);
       focarPrimeiroErro();
     },
@@ -270,7 +275,7 @@ function FormularioUsuario({
       <fieldset>
         <legend className="rotulo mb-1">Perfil</legend>
         <div className="grid grid-cols-2 gap-2" role="radiogroup">
-          {(['FUNCIONARIO', 'ADMIN'] as const).map((p) => (
+          {opcoesPerfil.map((p) => (
             <button
               key={p}
               type="button"
@@ -283,7 +288,7 @@ function FormularioUsuario({
                   : 'border-borda bg-superficie hover:border-moldura'
               }`}
             >
-              {p === 'ADMIN' ? t('cadastro.administrador') : t('cadastro.funcionario')}
+              {NOMES_PERFIL[p]}
             </button>
           ))}
         </div>

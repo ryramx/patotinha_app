@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { CircleAlert } from 'lucide-react';
-import { useSessao } from '../auth/sessao';
+import { telaInicial, useSessao } from '../auth/sessao';
 import { ErroDaApi } from '../api/cliente';
 import { Botao } from '../componentes/Botao';
 import { CampoSenha, CampoTexto } from '../componentes/Campos';
@@ -18,11 +18,6 @@ function ultimoUsuario() {
   }
 }
 
-export function telaInicial(perfil: string) {
-  // Funcionário vai direto para Novo pedido; administrador para Início (PRD 8.1).
-  return perfil === 'ADMIN' ? '/' : '/pedidos/novo';
-}
-
 export function Login() {
   const { usuario, entrar, expirou } = useSessao();
   const navegar = useNavigate();
@@ -33,7 +28,7 @@ export function Login() {
   const [enviando, setEnviando] = useState(false);
   const refSenha = useRef<HTMLInputElement>(null);
 
-  if (usuario) return <Navigate to={telaInicial(usuario.perfil)} replace />;
+  if (usuario) return <Navigate to={telaInicial(usuario)} replace />;
 
   const enviar = async () => {
     const faltando = {
@@ -52,7 +47,7 @@ export function Login() {
         // ignora
       }
       marcarRascunhoRetomado(false);
-      navegar(telaInicial(u.perfil), { replace: true });
+      navegar(telaInicial(u), { replace: true });
     } catch (e) {
       const falha = e as ErroDaApi;
       setErro(

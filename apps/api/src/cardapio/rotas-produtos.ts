@@ -93,7 +93,7 @@ export async function rotasProdutos(app: FastifyInstance) {
     paraProdutoApi(await carregar(request.params)),
   );
 
-  app.post('/produtos', { preHandler: app.exigirAdmin }, async (request, reply) => {
+  app.post('/produtos', { preHandler: app.exigir('CARDAPIO') }, async (request, reply) => {
     const { dados, categoria, precoNormalizado } = await validar(request.body);
     if (!categoria.ativo) throw categoriaInativa();
     try {
@@ -113,7 +113,7 @@ export async function rotasProdutos(app: FastifyInstance) {
     }
   });
 
-  app.put('/produtos/:id', { preHandler: app.exigirAdmin }, async (request) => {
+  app.put('/produtos/:id', { preHandler: app.exigir('CARDAPIO') }, async (request) => {
     const atual = await carregar(request.params);
     const { dados, categoria, precoNormalizado } = await validar(request.body, atual.id);
     // Mover para categoria inativa não é permitido; manter a categoria atual é.
@@ -149,7 +149,7 @@ export async function rotasProdutos(app: FastifyInstance) {
     }
   });
 
-  app.patch('/produtos/:id/status', { preHandler: app.exigirAdmin }, async (request) => {
+  app.patch('/produtos/:id/status', { preHandler: app.exigir('CARDAPIO') }, async (request) => {
     const atual = await carregar(request.params);
     const { ativo } = esquemaStatus.parse(request.body);
     if (ativo && !atual.categoria.ativo) throw categoriaInativa();

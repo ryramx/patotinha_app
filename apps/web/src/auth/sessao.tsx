@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { UsuarioSessao } from '@patotinha/shared';
+import type { Permissao, UsuarioSessao } from '@patotinha/shared';
 import { aoExpirarSessao, api } from '../api/cliente';
 
 interface ContextoSessao {
@@ -18,6 +18,8 @@ interface ContextoSessao {
   entrar: (login: string, senha: string) => Promise<UsuarioSessao>;
   sair: () => Promise<void>;
   eAdmin: boolean;
+  /** O perfil do usuário pode fazer isso? Só esconde a tela; quem bloqueia é a API. */
+  pode: (permissao: Permissao) => boolean;
 }
 
 const Contexto = createContext<ContextoSessao | null>(null);
@@ -68,7 +70,15 @@ export function ProvedorSessao({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const valor = useMemo(
-    () => ({ usuario, carregando, expirou, entrar, sair, eAdmin: usuario?.perfil === 'ADMIN' }),
+    () => ({
+      usuario,
+      carregando,
+      expirou,
+      entrar,
+      sair,
+      eAdmin: usuario?.perfil === 'ADMIN',
+      pode: (permissao: Permissao) => podeFazer(usuario, permissao),
+    }),
     [usuario, carregando, expirou, entrar, sair],
   );
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
@@ -78,6 +88,19 @@ export function useSessao() {
   const ctx = useContext(Contexto);
   if (!ctx) throw new Error('useSessao fora do ProvedorSessao');
   return ctx;
+}
+
+export function podeFazer(usuario: UsuarioSessao | null, permissao: Permissao) {
+  return !!usuario && (usuario.perfil === 'ADMIN' || usuario.permissoes.includes(permissao));
+}
+
+/** Primeira tela depois do login, conforme o que o perfil pode fazer (etapa 10). */
+export function telaInicial(usuario: UsuarioSessao) {
+  if (podeFazer(usuario, 'FINANCEIRO')) return '/';
+  if (podeFazer(usuario, 'PEDIDOS_REGISTRAR')) return '/pedidos/novo';
+  if (podeFazer(usuario, 'FILA')) return '/fila';
+  if (podeFazer(usuario, 'PEDIDOS_VER')) return '/pedidos';
+  return '/';
 }
 
 export function primeiroNome(nome: string) {

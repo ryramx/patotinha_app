@@ -14,7 +14,7 @@ interface LinhaMaisVendido {
 export async function rotasRelatorios(app: FastifyInstance) {
   app.get(
     '/relatorios/vendas',
-    { preHandler: app.exigirAdmin },
+    { preHandler: app.exigir('FINANCEIRO') },
     async (request): Promise<RelatorioVendas> => {
       const resultado = esquemaFiltroRelatorio.safeParse(request.query);
       if (!resultado.success) {

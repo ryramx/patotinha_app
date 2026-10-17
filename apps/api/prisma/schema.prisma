@@ -1,5 +1,6 @@
-// Modelo de dados do MVP (PRD seções 6 e 15). São exatamente seis tabelas.
+// Modelo de dados do MVP (PRD seções 6 e 15): seis tabelas, mais a de perfis de acesso.
 // Comanda digital (nome do cliente e fila de preparo) na migração 20261016000000_comanda.
+// Perfis e permissões (etapa 10) na migração 20261017000000_perfis.
 // CHECKs, índices em lower() e o gatilho de atualizado_em ficam na migração SQL,
 // porque o Prisma não os representa no schema.
 
@@ -24,10 +25,23 @@ model Usuario {
   criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
   atualizadoEm DateTime @default(now()) @map("atualizado_em") @db.Timestamptz(6)
 
+  dadosPerfil       Perfil   @relation(fields: [perfil], references: [codigo], onDelete: Restrict, onUpdate: NoAction, map: "fk_usuarios_perfil")
   pedidos           Pedido[] @relation("PedidoUsuario")
   pedidosCancelados Pedido[] @relation("PedidoCanceladoPor")
 
+  @@index([perfil], map: "ix_usuarios_perfil")
   @@map("usuarios")
+}
+
+model Perfil {
+  codigo       String   @id @db.VarChar(20)
+  nome         String   @db.VarChar(40)
+  permissoes   String[] @default([]) @db.VarChar(30)
+  atualizadoEm DateTime @default(now()) @map("atualizado_em") @db.Timestamptz(6)
+
+  usuarios Usuario[]
+
+  @@map("perfis")
 }
 
 model Categoria {

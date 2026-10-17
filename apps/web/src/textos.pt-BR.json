@@ -31,7 +31,8 @@
     "modoEscuro": "Modo escuro",
     "modoClaro": "Modo claro",
     "novo": "Novo",
-    "filaCurta": "Fila"
+    "filaCurta": "Fila",
+    "perfis": "Perfis e permissões"
   },
   "sucesso": {
     "pedidoGravado": "Pedido nº {numero} de {cliente} registrado, {total}",
@@ -53,7 +54,7 @@
     "semConexaoCarregar": "Não foi possível carregar. Verifique a internet e tente de novo",
     "inesperado": "Algo deu errado do nosso lado. Tente de novo; se continuar, avise o administrador",
     "sessaoExpirada": "Sua sessão expirou. Entre de novo para continuar",
-    "semPermissao": "Esta área é só para administradores",
+    "semPermissao": "Seu perfil não tem acesso a esta tela. Peça ao administrador para liberar",
     "precoMudou": "O preço de {nome} mudou de {de} para {para}. Confira o total e finalize de novo",
     "produtoIndisponivel": "{nome} não está mais disponível. Remova-o para finalizar",
     "pedidoJaCancelado": "Este pedido já foi cancelado",
@@ -227,7 +228,17 @@
     "voce": "(você)",
     "administrador": "Administrador",
     "funcionario": "Funcionário",
-    "inativa": "(inativa)"
+    "inativa": "(inativa)",
+    "soAdminCriaAdmin": "Só um administrador pode criar ou alterar administradores"
+  },
+  "perfis": {
+    "intro": "Escolha o que cada perfil pode fazer. Vale na hora para todos os usuários do perfil.",
+    "adminFixo": "O administrador sempre tem acesso a tudo, inclusive a esta tela.",
+    "usuarios": "{quantidade} usuário(s) ativo(s)",
+    "salvar": "Salvar permissões",
+    "padrao": "Voltar ao padrão",
+    "salvo": "Permissões do perfil {nome} salvas",
+    "nenhuma": "Sem nenhuma permissão, quem tem este perfil só consegue entrar e trocar a senha."
   },
   "senha": {
     "atual": "Senha atual",

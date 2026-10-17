@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PERFIS, PERMISSOES } from './perfis.js';
 
 /**
  * Esquemas Zod usados ao mesmo tempo nos formulários e na API (PRD 7.1).
@@ -18,9 +19,6 @@ export const LIMITES = {
   precoMaxCentavos: 999_999,
   tamanhoPaginaMax: 100,
 } as const;
-
-export const PERFIS = ['ADMIN', 'FUNCIONARIO'] as const;
-export type Perfil = (typeof PERFIS)[number];
 
 export const STATUS_PEDIDO = ['ABERTO', 'FINALIZADO', 'CANCELADO'] as const;
 export type StatusPedido = (typeof STATUS_PEDIDO)[number];
@@ -134,6 +132,17 @@ export const esquemaRedefinirSenha = z.strictObject({ novaSenha: esquemaSenhaNov
 export const esquemaFiltroUsuarios = z.strictObject({
   ativo: esquemaBooleanoQuery.optional(),
   perfil: z.enum(PERFIS).optional(),
+});
+
+/* ---------- Perfis e permissões ---------- */
+
+export const esquemaParamPerfil = z.strictObject({ codigo: z.enum(PERFIS) });
+
+export const esquemaPermissoesPerfil = z.strictObject({
+  permissoes: z
+    .array(z.enum(PERMISSOES, { error: 'Permissão desconhecida' }))
+    .max(PERMISSOES.length)
+    .transform((lista) => PERMISSOES.filter((p) => lista.includes(p))),
 });
 
 /* ---------- Pedidos ---------- */

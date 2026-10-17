@@ -19,6 +19,7 @@ export function paraUsuarioApi(u: UsuarioBanco): Usuario {
 export function buscarPorLogin(banco: Banco, login: string) {
   return banco.usuario.findFirst({
     where: { login: { equals: login, mode: 'insensitive' } },
+    include: { dadosPerfil: true },
   });
 }
 

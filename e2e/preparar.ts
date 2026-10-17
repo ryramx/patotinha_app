@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import pg from 'pg';
 import argon2 from 'argon2';
-import { ADMIN, FUNCIONARIO } from './dados';
+import { ADMIN, CHEF, FUNCIONARIO, GERENTE } from './dados';
 
 /**
  * Antes dos testes de ponta a ponta: recria o banco, aplica as migrações e cadastra
@@ -28,6 +28,8 @@ export default async function preparar() {
     for (const [u, perfil] of [
       [ADMIN, 'ADMIN'],
       [FUNCIONARIO, 'FUNCIONARIO'],
+      [GERENTE, 'GERENTE'],
+      [CHEF, 'CHEF'],
     ] as const) {
       await cliente.query(
         'INSERT INTO usuarios (nome, login, senha_hash, perfil) VALUES ($1, $2, $3, $4)',

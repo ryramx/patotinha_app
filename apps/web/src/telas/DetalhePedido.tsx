@@ -23,7 +23,7 @@ const SUGESTOES = ['Cliente desistiu', 'Lançado errado', 'Pedido duplicado'];
 
 export function DetalhePedido() {
   const { id } = useParams();
-  const { eAdmin } = useSessao();
+  const { pode } = useSessao();
   const local = useLocation();
   const voltar = (local.state as { voltar?: string } | null)?.voltar ?? '/pedidos';
   const [cancelando, setCancelando] = useState(false);
@@ -53,7 +53,7 @@ export function DetalhePedido() {
       ) : (
         <ConteudoPedido
           p={pedido.data}
-          podeCancelar={eAdmin}
+          podeCancelar={pode('PEDIDOS_CANCELAR')}
           aoCancelar={() => setCancelando(true)}
         />
       )}
