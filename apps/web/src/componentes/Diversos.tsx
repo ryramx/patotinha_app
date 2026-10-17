@@ -86,7 +86,7 @@ export function IconePagamento({
     <span className="relative inline-flex" aria-hidden>
       <CreditCard size={tamanho} />
       <span className="absolute -bottom-1 -right-1.5 rounded-sm bg-current px-0.5 text-[9px] font-bold leading-none">
-        <span className="text-branco">C</span>
+        <span className="text-superficie">C</span>
       </span>
     </span>
   );

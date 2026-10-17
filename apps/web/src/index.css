@@ -8,7 +8,7 @@
   --color-fundo: var(--cor-fundo);
   --color-superficie: var(--cor-superficie);
   --color-moldura: var(--cor-moldura);
-  --color-moldura-escura: var(--marca-vinho-escuro);
+  --color-moldura-escura: var(--cor-moldura-hover);
   --color-texto: var(--cor-texto);
   --color-texto-suave: var(--cor-texto-suave);
   --color-sobre-moldura: var(--cor-texto-sobre-moldura);
@@ -18,7 +18,17 @@
   --color-texto-acao: var(--cor-texto-acao-principal);
   --color-selecionado: var(--cor-selecionado);
   --color-foco: var(--cor-foco);
-  --color-creme-escuro: var(--marca-creme-escuro);
+  --color-creme-escuro: var(--cor-zebra);
+  --color-superficie-campo: var(--cor-superficie-campo);
+  --color-cabecalho: var(--cor-cabecalho);
+  --color-aba-sel: var(--cor-aba-selecionada);
+  --color-texto-aba-sel: var(--cor-texto-aba-selecionada);
+  --color-veu: var(--cor-veu);
+  --color-marca: var(--cor-marca-fundo);
+  --color-sobre-marca: var(--cor-texto-sobre-marca);
+  --color-dourado: var(--marca-dourado-claro);
+  --color-preco: var(--cor-preco);
+  --color-total: var(--cor-total);
   --color-desab-fundo: var(--cor-desabilitado-fundo);
   --color-desab-texto: var(--cor-desabilitado-texto);
   --color-sucesso: var(--cor-sucesso);
@@ -28,11 +38,14 @@
   --color-erro: var(--cor-erro);
   --color-erro-fundo: var(--cor-erro-fundo);
 
-  --font-titulo: var(--fonte-titulo);
+  /* font-titulo: números grandes e nomes na fila (Oswald) */
+  --font-titulo: var(--fonte-numero);
+  --font-preco: var(--fonte-preco);
   --font-texto: var(--fonte-texto);
   --font-enfeite: var(--fonte-enfeite);
 
   --radius-padrao: var(--raio);
+  --radius-grande: var(--raio-grande);
   --shadow-padrao: var(--sombra);
   --shadow-elevada: var(--sombra-elevada);
 }
@@ -71,17 +84,17 @@
   }
   .titulo-tela {
     font-family: var(--fonte-titulo);
-    font-weight: 600;
-    font-size: 28px;
-    line-height: 36px;
-    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 26px;
+    line-height: 34px;
+    letter-spacing: -0.4px;
   }
   .titulo-secao {
     font-family: var(--fonte-titulo);
-    font-weight: 500;
-    font-size: 20px;
-    line-height: 28px;
-    text-transform: uppercase;
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 26px;
+    letter-spacing: -0.2px;
   }
   .rotulo {
     font-size: 14px;
@@ -98,15 +111,22 @@
   }
   .cartao {
     background: var(--cor-superficie);
-    border-radius: var(--raio);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio-grande);
     box-shadow: var(--sombra);
+  }
+  /* Preço no cartão do produto: negrito no claro, Oswald dourado no escuro. */
+  .preco {
+    font-family: var(--fonte-preco);
+    color: var(--cor-preco);
+    font-variant-numeric: tabular-nums;
   }
   .esqueleto {
     background: linear-gradient(
       90deg,
-      var(--marca-creme-escuro) 0%,
-      #fbf1de 50%,
-      var(--marca-creme-escuro) 100%
+      var(--cor-zebra) 0%,
+      var(--cor-superficie) 50%,
+      var(--cor-zebra) 100%
     );
     background-size: 200% 100%;
     animation: brilho 1.2s linear infinite;
@@ -124,7 +144,7 @@
 }
 @keyframes piscar-dourado {
   from {
-    background-color: #ffe8a8;
+    background-color: var(--cor-piscar);
   }
   to {
     background-color: transparent;
@@ -160,7 +180,7 @@
 }
 @keyframes borda-dourada {
   0% {
-    border-color: var(--marca-dourado);
+    border-color: var(--cor-moldura);
   }
   100% {
     border-color: var(--cor-borda);

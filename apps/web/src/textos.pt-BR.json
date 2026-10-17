@@ -25,7 +25,13 @@
     "abrirMenu": "Abrir menu",
     "conectado": "Conectado ao servidor",
     "semConexao": "Sem conexão com o servidor",
-    "fila": "Fila de preparo"
+    "fila": "Fila de preparo",
+    "cadastros": "Cadastros",
+    "mais": "Mais",
+    "modoEscuro": "Modo escuro",
+    "modoClaro": "Modo claro",
+    "novo": "Novo",
+    "filaCurta": "Fila"
   },
   "sucesso": {
     "pedidoGravado": "Pedido nº {numero} de {cliente} registrado, {total}",

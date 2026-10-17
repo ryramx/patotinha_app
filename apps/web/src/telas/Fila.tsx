@@ -183,7 +183,7 @@ function CartaoComanda({
   return (
     <article
       aria-label={`Pedido nº ${pedido.id}, ${pedido.cliente ?? t('fila.semNome')}`}
-      className={`cartao flex flex-col gap-2 p-4 ${pronto ? 'border-l-4 border-sucesso' : ''}`}
+      className={`cartao flex flex-col gap-2 p-4 ${pronto ? 'border-2 border-sucesso' : ''}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">

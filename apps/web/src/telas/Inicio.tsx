@@ -99,7 +99,7 @@ export function Inicio() {
                   <Link
                     key={c.rotulo}
                     to="/resumo"
-                    className={`cartao flex flex-col gap-1 p-4 hover:shadow-elevada ${c.destaque ? 'border-l-4 border-acao' : ''}`}
+                    className={`cartao flex flex-col gap-1 p-4 hover:shadow-elevada ${c.destaque ? 'border-moldura/40 [&>span:last-child]:text-total' : ''}`}
                   >
                     <span className="legenda">{c.rotulo}</span>
                     <span className="font-titulo text-[32px] font-semibold leading-10 tabular-nums">

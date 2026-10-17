@@ -1,45 +1,66 @@
 /*
  * Tokens da interface (seção "Variáveis CSS"). Carregado antes de qualquer outro estilo.
  * Os componentes usam só os nomes semânticos, nunca o hex direto.
+ *
+ * Dois temas: Modo Claro ("Balcão Limpo", padrão) e Modo Escuro ("Noite no Balcão"), escolhido
+ * pelo botão do cabeçalho e guardado no aparelho (src/tema.ts). O escuro só vale na tela: na
+ * impressão o sistema sempre usa o claro.
  */
 :root {
+  color-scheme: light;
+
   /* Marca (valores aproximados, confirmar com a família) */
   --marca-vinho: #6e0f14;
-  --marca-vinho-escuro: #4f0a0e; /* hover sobre vinho */
   --marca-vermelho: #b3161b;
+  --marca-vermelho-escuro: #8f1116;
   --marca-dourado: #f2a51a;
-  --marca-dourado-claro: #ffc93c;
+  --marca-dourado-claro: #ffc23d;
   --marca-marrom: #2b0e0b;
   --marca-creme: #fff6e6;
-  --marca-creme-escuro: #f6e7cc; /* faixa do total, linhas zebradas */
 
-  /* Semânticas */
-  --cor-fundo: var(--marca-creme);
+  /* Semânticas: Modo Claro */
+  --cor-fundo: #f6f3ef;
   --cor-superficie: #ffffff;
-  --cor-moldura: var(--marca-vinho);
-  --cor-texto: var(--marca-marrom);
-  --cor-texto-suave: #6b4a44;
+  --cor-superficie-campo: #fbf9f7; /* fundo dos campos de texto */
+  --cor-cabecalho: #ffffff;
+  --cor-zebra: #f1ece6; /* hover, linhas zebradas, trilho das abas */
+  --cor-texto: #1f1412;
+  --cor-texto-suave: #6b5953;
+  --cor-borda: #e8e1d8;
+  /* Destaque: item ativo do menu, seleção, links. Vermelho no claro, dourado no escuro. */
+  --cor-moldura: var(--marca-vermelho);
+  --cor-moldura-hover: var(--marca-vermelho-escuro);
   --cor-texto-sobre-moldura: #ffffff;
-  --cor-borda: #e3d3ba;
-  --cor-acao-principal: var(--marca-dourado);
-  --cor-acao-principal-hover: var(--marca-dourado-claro);
-  --cor-texto-acao-principal: var(--marca-marrom);
+  --cor-acao-principal: var(--marca-vermelho);
+  --cor-acao-principal-hover: var(--marca-vermelho-escuro);
+  --cor-texto-acao-principal: #ffffff;
   --cor-selecionado: var(--marca-vermelho);
-  --cor-foco: var(--marca-dourado-claro);
-  --cor-desabilitado-fundo: #ede6dc;
-  --cor-desabilitado-texto: #9c8f84;
+  --cor-aba-selecionada: #ffffff;
+  --cor-texto-aba-selecionada: #1f1412;
+  --cor-foco: var(--marca-dourado);
+  --cor-desabilitado-fundo: #ede6de;
+  --cor-desabilitado-texto: #8f817b;
+  --cor-preco: #1f1412;
+  --cor-total: #1f1412;
+  --cor-piscar: #ffe8a8;
+  --cor-veu: rgba(31, 20, 18, 0.45); /* fundo atrás de janelas */
+  /* Telas da marca (login e carregando): vinho nos dois temas */
+  --cor-marca-fundo: var(--marca-vinho);
+  --cor-texto-sobre-marca: #ffffff;
 
   /* Estados */
   --cor-sucesso: #2e7d32;
   --cor-sucesso-fundo: #e8f5e9;
-  --cor-aviso: #b26a00;
+  --cor-aviso: #a35f00;
   --cor-aviso-fundo: #fff3e0;
   --cor-erro: #c62828;
   --cor-erro-fundo: #fdecea;
 
-  /* Tipografia */
-  --fonte-titulo: 'Oswald', 'Arial Narrow', sans-serif;
-  --fonte-texto: 'Nunito Sans', 'Segoe UI', Arial, sans-serif;
+  /* Tipografia: texto e títulos em Plus Jakarta Sans; números grandes em Oswald */
+  --fonte-titulo: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+  --fonte-texto: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+  --fonte-numero: 'Oswald', 'Arial Narrow', sans-serif;
+  --fonte-preco: var(--fonte-texto);
   --fonte-enfeite: 'Pacifico', cursive;
 
   /* Espaçamento (grade de 8 px) */
@@ -52,15 +73,15 @@
   --esp-7: 48px;
 
   /* Formas */
-  --raio: 8px;
+  --raio: 12px;
+  --raio-grande: 16px; /* cartões e painéis */
   --raio-etiqueta: 999px;
-  --sombra: 0 1px 3px rgba(43, 14, 11, 0.15);
-  --sombra-elevada: 0 8px 24px rgba(43, 14, 11, 0.25); /* janelas e painéis */
+  --sombra: 0 1px 2px rgba(43, 14, 11, 0.06), 0 1px 3px rgba(43, 14, 11, 0.06);
+  --sombra-elevada: 0 12px 32px rgba(43, 14, 11, 0.18); /* janelas e painéis */
 
   /* Medidas fixas */
   --altura-cabecalho: 64px;
-  --largura-menu: 220px;
-  --largura-menu-recolhido: 72px;
+  --altura-abas-celular: 64px;
   --altura-toque: 48px;
 
   /* Movimento */
@@ -68,6 +89,52 @@
   --tempo-medio: 300ms;
   --tempo-lento: 500ms;
   --curva: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Modo Escuro: só na tela. */
+@media screen {
+  :root[data-tema='escuro'] {
+    color-scheme: dark;
+
+    --cor-fundo: #140d0b;
+    --cor-superficie: #231715;
+    --cor-superficie-campo: #1c1210;
+    --cor-cabecalho: #1c1210;
+    --cor-zebra: #2d1e1b;
+    --cor-texto: #f7ede4;
+    --cor-texto-suave: #b9a59c;
+    --cor-borda: #3a2824;
+    --cor-moldura: var(--marca-dourado-claro);
+    --cor-moldura-hover: #ffd166;
+    --cor-texto-sobre-moldura: var(--marca-marrom);
+    --cor-acao-principal: var(--marca-dourado-claro);
+    --cor-acao-principal-hover: #ffd166;
+    --cor-texto-acao-principal: var(--marca-marrom);
+    --cor-selecionado: var(--marca-dourado-claro);
+    --cor-aba-selecionada: #f7ede4;
+    --cor-texto-aba-selecionada: #1c1210;
+    --cor-foco: var(--marca-dourado-claro);
+    --cor-desabilitado-fundo: #2d1e1b;
+    --cor-desabilitado-texto: #7f6b64;
+    --cor-preco: var(--marca-dourado-claro);
+    --cor-total: var(--marca-dourado-claro);
+    --cor-piscar: rgba(255, 194, 61, 0.28);
+    --cor-veu: rgba(0, 0, 0, 0.6);
+    --cor-marca-fundo: var(--marca-vinho);
+    --cor-texto-sobre-marca: #ffffff;
+
+    --cor-sucesso: #7bd88a;
+    --cor-sucesso-fundo: rgba(123, 216, 138, 0.14);
+    --cor-aviso: #ffb74d;
+    --cor-aviso-fundo: rgba(255, 183, 77, 0.14);
+    --cor-erro: #ff7b7b;
+    --cor-erro-fundo: rgba(255, 123, 123, 0.14);
+
+    --fonte-preco: var(--fonte-numero);
+
+    --sombra: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --sombra-elevada: 0 12px 32px rgba(0, 0, 0, 0.55);
+  }
 }
 
 /* Tablet: alvos de toque de 64 px (interface, "Tamanhos de tela"). */

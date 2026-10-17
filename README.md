@@ -31,7 +31,10 @@ funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
 - **App instalável (PWA):** pode ser instalado no computador, tablet ou celular pelo navegador e
   abre em tela cheia com o ícone da Patotinha. Só os arquivos das telas ficam guardados no
   aparelho; pedidos e preços vêm sempre do servidor, então o sistema precisa de internet.
-- Telas em português, pensadas para computador (1366 x 768) e tablet na horizontal.
+- **Modo Claro e Modo Escuro:** botão de lua/sol no cabeçalho; o aparelho lembra a escolha e,
+  sem escolha, segue o tema do sistema. Menu em pílulas no topo (cadastros no menu "Cadastros")
+  e, no celular, barra de abas no rodapé. Detalhes em [docs/visual.md](docs/visual.md).
+- Telas em português, pensadas para computador (1366 x 768), tablet na horizontal e celular.
 
 ## Tecnologias
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Search, X } from 'lucide-react';
+import { Plus, Search, X } from 'lucide-react';
 import {
   combinaBusca,
   formatarReais,
@@ -416,7 +416,7 @@ export function NovoPedido() {
         <div className="relative">
           <Search
             size={20}
-            className="pointer-events-none absolute left-3 top-3.5 text-texto-suave"
+            className="pointer-events-none absolute left-4 top-3.5 text-texto-suave"
             aria-hidden
           />
           <input
@@ -437,7 +437,7 @@ export function NovoPedido() {
                 setBusca('');
               }
             }}
-            className="h-12 w-full rounded-padrao border border-borda bg-superficie pl-10 pr-10 outline-none hover:border-texto focus:border-2 focus:border-acao"
+            className="h-12 w-full rounded-padrao border border-borda bg-superficie pl-11 pr-10 outline-none hover:border-texto-suave focus:border-2 focus:border-moldura"
           />
           {busca && (
             <button
@@ -454,10 +454,10 @@ export function NovoPedido() {
         <div
           role="tablist"
           aria-label="Categorias"
-          className={`mt-4 flex shrink-0 gap-2 overflow-x-auto pb-1 transition-opacity ${busca.trim() ? 'opacity-40' : ''}`}
+          className={`mt-4 flex shrink-0 gap-1 self-start overflow-x-auto rounded-[14px] bg-creme-escuro p-1 transition-opacity max-md:self-stretch ${busca.trim() ? 'opacity-40' : ''}`}
         >
           {carregando
-            ? [1, 2, 3, 4].map((i) => <Esqueleto key={i} className="h-12 w-28 shrink-0" />)
+            ? [1, 2, 3, 4].map((i) => <Esqueleto key={i} className="h-11 w-28 shrink-0" />)
             : listaCategorias.map((c, indice) => {
                 const sel = c.id === categoriaAtual;
                 return (
@@ -489,10 +489,10 @@ export function NovoPedido() {
                         ] as HTMLElement | undefined
                       )?.focus();
                     }}
-                    className={`h-12 shrink-0 rounded-padrao px-5 font-titulo text-[16px] font-medium uppercase tracking-[0.5px] transition-colors ${
+                    className={`h-11 shrink-0 rounded-[10px] px-5 text-[15px] font-bold transition-colors max-md:flex-1 ${
                       sel
-                        ? 'bg-selecionado text-branco'
-                        : 'border-b-[3px] border-transparent hover:border-acao active:bg-creme-escuro'
+                        ? 'bg-aba-sel text-texto-aba-sel shadow-padrao'
+                        : 'text-texto-suave hover:text-texto'
                     }`}
                   >
                     {c.nome}
@@ -501,11 +501,11 @@ export function NovoPedido() {
               })}
         </div>
 
-        <div className="mt-4 min-h-0 flex-1 overflow-y-auto pb-24 md:pb-0" role="tabpanel">
+        <div className="mt-4 min-h-0 flex-1 overflow-y-auto pb-24 md:pb-1" role="tabpanel">
           {carregando ? (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-4">
               {Array.from({ length: 8 }, (_, i) => (
-                <Esqueleto key={i} className="h-24" />
+                <Esqueleto key={i} className="h-32" />
               ))}
             </div>
           ) : erroCarga ? (
@@ -537,7 +537,7 @@ export function NovoPedido() {
               <Botao onClick={() => setBusca('')}>{t('pedido.limparBusca')}</Botao>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-4">
               {visiveis.map((p) => {
                 const qtd = quantidades.get(p.id);
                 return (
@@ -548,24 +548,34 @@ export function NovoPedido() {
                     type="button"
                     title={p.ingredientes ? `${p.nome}: ${p.ingredientes}` : p.nome}
                     onClick={() => adicionar(p)}
-                    className={`botao-produto relative flex min-h-[88px] flex-col items-start justify-between rounded-padrao border border-borda bg-superficie p-3 text-left shadow-padrao transition-colors hover:border-acao md:min-h-24 ${
-                      p.id === toqueCartao.current && piscando ? 'anim-toque' : ''
-                    }`}
+                    className={`botao-produto relative flex min-h-28 flex-col items-stretch justify-between gap-2 rounded-grande bg-superficie p-4 text-left transition-colors ${
+                      qtd
+                        ? 'border-2 border-moldura shadow-padrao'
+                        : 'border border-borda hover:border-moldura'
+                    } ${p.id === toqueCartao.current && piscando ? 'anim-toque' : ''}`}
                   >
-                    <span className="flex flex-col gap-1 pr-6">
-                      <span className="line-clamp-2 text-[16px] leading-5">{p.nome}</span>
+                    <span className="flex flex-col gap-1 pr-7">
+                      <span className="line-clamp-2 text-[15px] font-bold leading-5">{p.nome}</span>
                       {p.ingredientes && (
-                        <span className="line-clamp-3 text-[13px] leading-4 text-texto-suave">
+                        <span className="line-clamp-2 text-[12.5px] leading-[17px] text-texto-suave">
                           {p.ingredientes}
                         </span>
                       )}
                     </span>
-                    <span className="mt-2 text-[18px] font-bold tabular-nums">
-                      {formatarReais(p.preco)}
+                    <span className="flex items-center justify-between">
+                      <span className="preco text-[18px] font-extrabold">
+                        {formatarReais(p.preco)}
+                      </span>
+                      <span
+                        className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-moldura/12 text-moldura"
+                        aria-hidden
+                      >
+                        <Plus size={18} strokeWidth={2.5} />
+                      </span>
                     </span>
                     {qtd ? (
                       <span
-                        className="absolute right-2 top-2 flex h-6 min-w-6 items-center justify-center rounded-full bg-selecionado px-1 text-[13px] font-bold text-branco"
+                        className="absolute right-3 top-3 flex h-[26px] min-w-[26px] items-center justify-center rounded-full bg-moldura px-1.5 text-[13px] font-extrabold text-sobre-moldura"
                         aria-label={`${qtd} no pedido`}
                       >
                         {qtd}
@@ -583,22 +593,26 @@ export function NovoPedido() {
       <section
         aria-label={t('pedido.titulo')}
         className={`${
-          painelAberto ? 'fixed inset-0 top-16 z-20 flex bg-fundo p-4' : 'hidden'
+          painelAberto ? 'fixed inset-0 top-16 z-20 flex bg-fundo p-3' : 'hidden'
         } min-h-0 flex-col md:static md:flex md:w-[38%] md:min-w-[360px] md:max-w-[440px] md:p-0`}
       >
         {painel}
       </section>
       {!painelAberto && (
-        <div className="fixed inset-x-0 bottom-0 z-10 flex items-center justify-between gap-3 border-t-4 border-acao bg-superficie px-4 py-3 shadow-elevada md:hidden">
-          <div>
-            <p className="legenda uppercase">{t('pedido.total')}</p>
-            <p className="font-titulo text-[28px] font-semibold tabular-nums">
+        <div className="fixed inset-x-3 bottom-[calc(var(--altura-abas-celular)+12px)] z-10 md:hidden">
+          <button
+            type="button"
+            onClick={() => setPainelAberto(true)}
+            className="flex h-15 w-full items-center gap-3 rounded-grande bg-acao px-4 text-texto-acao shadow-elevada active:translate-y-px"
+          >
+            <span className="flex h-8 min-w-8 items-center justify-center rounded-full bg-texto-acao px-2 text-[14px] font-extrabold text-acao">
+              {rascunho.itens.length}
+            </span>
+            <span className="flex-1 text-left text-[16px] font-bold">{t('pedido.verPedido')}</span>
+            <span className="font-titulo text-[24px] font-semibold tabular-nums">
               {formatarReais(totalCentavos)}
-            </p>
-          </div>
-          <Botao variante="principal" onClick={() => setPainelAberto(true)}>
-            {t('pedido.verPedido')} ({rascunho.itens.length})
-          </Botao>
+            </span>
+          </button>
         </div>
       )}
 

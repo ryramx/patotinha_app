@@ -12,13 +12,13 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const estilos: Record<Variante, string> = {
-  // Dourado só na ação principal da tela; texto sempre Marrom Torrado (contraste AA).
+  // Ação principal da tela: vermelho no Modo Claro, dourado no Modo Escuro (contraste AA nos dois).
   principal:
     'bg-acao text-texto-acao font-bold hover:bg-acao-hover active:brightness-[.92] active:translate-y-px disabled:bg-desab-fundo disabled:text-desab-texto disabled:hover:bg-desab-fundo',
   secundario:
-    'border-[1.5px] border-moldura text-moldura bg-transparent hover:bg-moldura/6 active:bg-moldura/12 disabled:border-desab-texto disabled:text-desab-texto',
+    'border border-borda bg-superficie text-texto hover:border-moldura hover:text-moldura active:bg-moldura/12 disabled:border-borda disabled:text-desab-texto disabled:hover:text-desab-texto',
   perigo:
-    'border-[1.5px] border-erro text-erro bg-transparent hover:bg-erro/6 active:bg-erro/12 disabled:border-desab-texto disabled:text-desab-texto',
+    'border border-erro text-erro bg-transparent hover:bg-erro/6 active:bg-erro/12 disabled:border-desab-texto disabled:text-desab-texto',
   texto: 'text-moldura underline-offset-4 hover:underline disabled:text-desab-texto',
   moldura: 'text-sobre-moldura hover:bg-moldura-escura',
 };
