@@ -20,12 +20,14 @@ def quadrado(lado, ocupa, fundo=None):
 a = np.asarray(logo.getchannel('A')) > 128
 ys, xs = np.nonzero(a); h, w = a.shape
 r = np.sqrt((xs - w / 2) ** 2 + (ys - h / 2) ** 2).max() / w
-ocupa_mask = 0.40 / r
-BRANCO = (255, 255, 255, 255)
+# 0,44 passa um pouco da área segura (0,40) só nas pontas da faixa, para o selo encher o ícone.
+ocupa_mask = 0.44 / r
+# Fundo vinho da marca (o mesmo da tela de abertura) nos ícones que não podem ser transparentes.
+VINHO = (0x6E, 0x0F, 0x14, 255)
 quadrado(192, 0.96).save(f'{pub}/icones/icone-192.png', optimize=True)
 quadrado(512, 0.96).save(f'{pub}/icones/icone-512.png', optimize=True)
-quadrado(180, 0.90, BRANCO).convert('RGB').save(f'{pub}/icones/icone-180.png', optimize=True)
-quadrado(512, ocupa_mask, BRANCO).convert('RGB').save(f'{pub}/icones/icone-maskable-512.png', optimize=True)
+quadrado(180, 0.94, VINHO).convert('RGB').save(f'{pub}/icones/icone-180.png', optimize=True)
+quadrado(512, ocupa_mask, VINHO).convert('RGB').save(f'{pub}/icones/icone-maskable-512.png', optimize=True)
 quadrado(32, 1.0).save(f'{pub}/favicon-32.png', optimize=True)
 quadrado(256, 1.0).save(f'{pub}/favicon.ico', sizes=[(16, 16), (32, 32), (48, 48)])
 print('mask ocupa', round(ocupa_mask, 3))
