@@ -26,6 +26,7 @@ describe('CA-01 Login', () => {
         login: 'maria',
         perfil: 'FUNCIONARIO',
         permissoes: ['PEDIDOS_REGISTRAR'],
+        tutorialVisto: false,
       },
     });
     const cookie = (r.headers['set-cookie'] as unknown as string[])[0]!;
@@ -202,5 +203,33 @@ describe('Proteções gerais', () => {
     const r = await ctx.http().get('/api/saude');
     expect(r.headers['x-content-type-options']).toBe('nosniff');
     expect(r.headers['content-security-policy']).toBeDefined();
+  });
+});
+
+describe('Tutorial de primeiro acesso', () => {
+  it('começa não visto e, marcado, fica visto no login e no /auth/me', async () => {
+    const login = await ctx.http().post('/api/auth/login').send({ login: 'maria', senha: SENHA });
+    expect(login.body.usuario.tutorialVisto).toBe(false);
+    const cookie = await entrar(ctx, 'maria');
+
+    expect((await ctx.http().put('/api/auth/tutorial').set('Cookie', cookie).send({})).status).toBe(
+      204,
+    );
+    const me = await ctx.http().get('/api/auth/me').set('Cookie', cookie);
+    expect(me.body.usuario.tutorialVisto).toBe(true);
+    // Marcar de novo não muda a data da primeira vez.
+    const antes = await ctx.banco.usuario.findFirstOrThrow({ where: { login: 'maria' } });
+    expect((await ctx.http().put('/api/auth/tutorial').set('Cookie', cookie).send({})).status).toBe(
+      204,
+    );
+    const depois = await ctx.banco.usuario.findFirstOrThrow({ where: { login: 'maria' } });
+    expect(depois.tutorialVistoEm).toEqual(antes.tutorialVistoEm);
+
+    const outra = await ctx.http().post('/api/auth/login').send({ login: 'admin', senha: SENHA });
+    expect(outra.body.usuario.tutorialVisto).toBe(false);
+  });
+
+  it('exige login', async () => {
+    expect((await ctx.http().put('/api/auth/tutorial').send({})).status).toBe(401);
   });
 });

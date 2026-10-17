@@ -5,7 +5,7 @@ import { Botao } from './Botao';
 import { t } from '../textos';
 
 /** Prende o foco dentro da janela e fecha com Esc. */
-function useFocoPreso(aoFechar: () => void) {
+export function useFocoPreso(aoFechar: () => void) {
   const ref = useRef<HTMLDivElement>(null);
   // Guarda a função num ref: o efeito roda só ao abrir, senão cada nova renderização
   // devolveria o foco ao elemento anterior no meio da digitação.

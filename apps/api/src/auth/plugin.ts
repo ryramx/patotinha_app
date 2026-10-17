@@ -14,6 +14,7 @@ export interface UsuarioAutenticado {
   perfil: Perfil;
   /** Lidas do banco a cada requisição: mudar na tela de perfis vale na hora. */
   permissoes: Permissao[];
+  tutorialVisto: boolean;
 }
 
 interface TokenSessao {
@@ -89,6 +90,7 @@ async function pluginAutenticacao(app: FastifyInstance, opcoes: { segredo: strin
       login: usuario.login,
       perfil: usuario.perfil as Perfil,
       permissoes: permissoesDoPerfil(usuario.perfil, usuario.dadosPerfil.permissoes),
+      tutorialVisto: usuario.tutorialVistoEm !== null,
     };
   });
 

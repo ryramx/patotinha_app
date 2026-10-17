@@ -57,6 +57,7 @@ export async function rotasAuth(app: FastifyInstance, opcoes: { limite: LimiteLo
         login: usuario.login,
         perfil: usuario.perfil,
         permissoes: permissoesDoPerfil(usuario.perfil, usuario.dadosPerfil.permissoes),
+        tutorialVisto: usuario.tutorialVistoEm !== null,
       },
     });
   });
@@ -74,8 +75,19 @@ export async function rotasAuth(app: FastifyInstance, opcoes: { limite: LimiteLo
         login: u.login,
         perfil: u.perfil,
         permissoes: u.permissoes,
+        tutorialVisto: u.tutorialVisto,
       },
     };
+  });
+
+  // Tutorial de primeiro acesso: fechou ou terminou os cards, não aparecem mais sozinhos.
+  app.put('/auth/tutorial', { preHandler: app.autenticar }, async (request, reply) => {
+    const u = usuarioDa(request);
+    await app.banco.usuario.updateMany({
+      where: { id: u.id, tutorialVistoEm: null },
+      data: { tutorialVistoEm: new Date() },
+    });
+    return reply.status(204).send();
   });
 
   app.put('/auth/senha', { preHandler: app.autenticar }, async (request, reply) => {

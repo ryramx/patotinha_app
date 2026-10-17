@@ -24,6 +24,8 @@ export interface Usuario {
 export type UsuarioSessao = Pick<Usuario, 'id' | 'nome' | 'login' | 'perfil'> & {
   /** O que o perfil do usuário pode fazer agora; o administrador tem todas. */
   permissoes: Permissao[];
+  /** Já viu os cards do tutorial de primeiro acesso (guardado no servidor, vale em todo aparelho). */
+  tutorialVisto: boolean;
 };
 
 export interface PerfilAcesso {

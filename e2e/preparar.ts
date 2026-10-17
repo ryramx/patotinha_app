@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import pg from 'pg';
 import argon2 from 'argon2';
-import { ADMIN, CHEF, FUNCIONARIO, GERENTE } from './dados';
+import { ADMIN, CHEF, CHEF_NOVO, FUNCIONARIO, GERENTE, NOVATO } from './dados';
 
 /**
  * Antes dos testes de ponta a ponta: recria o banco, aplica as migrações e cadastra
@@ -30,9 +30,14 @@ export default async function preparar() {
       [FUNCIONARIO, 'FUNCIONARIO'],
       [GERENTE, 'GERENTE'],
       [CHEF, 'CHEF'],
+      [NOVATO, 'FUNCIONARIO'],
+      [CHEF_NOVO, 'CHEF'],
     ] as const) {
+      // Só os novatos abrem o tutorial de primeiro acesso; os outros testes seguem direto.
+      const novato = u === NOVATO || u === CHEF_NOVO;
       await cliente.query(
-        'INSERT INTO usuarios (nome, login, senha_hash, perfil) VALUES ($1, $2, $3, $4)',
+        `INSERT INTO usuarios (nome, login, senha_hash, perfil, tutorial_visto_em)
+         VALUES ($1, $2, $3, $4, ${novato ? 'NULL' : 'now()'})`,
         [u.nome, u.login, await argon2.hash(u.senha, { type: argon2.argon2id }), perfil],
       );
     }
