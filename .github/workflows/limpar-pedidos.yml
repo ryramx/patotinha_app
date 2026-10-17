@@ -7,7 +7,7 @@ on:
     branches: [limpar-pedidos-teste]
 
 env:
-  MODO: listar
+  MODO: apagar
 
 jobs:
   limpar:
