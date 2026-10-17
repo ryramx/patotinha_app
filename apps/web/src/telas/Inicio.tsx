@@ -28,22 +28,25 @@ function saudacao() {
 }
 
 export function Inicio() {
-  const { usuario, eAdmin } = useSessao();
+  const { usuario, pode } = useSessao();
+  const financeiro = pode('FINANCEIRO');
+  const verPedidos = pode('PEDIDOS_VER');
   const navegar = useNavigate();
   const hoje = diaEmSaoPaulo();
 
   const pedidos = useQuery({
     queryKey: ['pedidos', 'inicio', hoje],
     queryFn: () => api<ListaPedidos>(`/pedidos${query({ de: hoje, ate: hoje, tamanho: 10 })}`),
+    enabled: verPedidos,
   });
-  // Cartões do dia (só administrador), atualizados a cada 60 s.
+  // Cartões do dia (só com Financeiro), atualizados a cada 60 s.
   const resumo = useQuery({
     queryKey: ['inicio', 'resumo', hoje],
     queryFn: () =>
       api<RelatorioVendas>(
         `/relatorios/vendas${query({ de: hoje, ate: hoje, limiteProdutos: 1 })}`,
       ),
-    enabled: eAdmin,
+    enabled: financeiro,
     refetchInterval: 60_000,
   });
 
@@ -73,25 +76,29 @@ export function Inicio() {
             {formatarDiaPorExtenso(new Date())}
           </p>
         </div>
-        <Botao
-          variante="principal"
-          className="min-h-[72px] w-full text-[18px] sm:w-80"
-          icone={<CirclePlus size={28} aria-hidden />}
-          title="Novo pedido · F1"
-          onClick={() => navegar('/pedidos/novo')}
-        >
-          {t('menu.novoPedido')}
-        </Botao>
+        {pode('PEDIDOS_REGISTRAR') && (
+          <Botao
+            variante="principal"
+            className="min-h-[72px] w-full text-[18px] sm:w-80"
+            icone={<CirclePlus size={28} aria-hidden />}
+            title="Novo pedido · F1"
+            onClick={() => navegar('/pedidos/novo')}
+          >
+            {t('menu.novoPedido')}
+          </Botao>
+        )}
       </div>
-      <Botao
-        className="w-full sm:w-80 sm:self-end"
-        icone={<ChefHat size={22} aria-hidden />}
-        onClick={() => navegar('/fila')}
-      >
-        {t('menu.fila')}
-      </Botao>
+      {pode('FILA') && (
+        <Botao
+          className="w-full sm:w-80 sm:self-end"
+          icone={<ChefHat size={22} aria-hidden />}
+          onClick={() => navegar('/fila')}
+        >
+          {t('menu.fila')}
+        </Botao>
+      )}
 
-      {eAdmin && (
+      {financeiro && (
         <section aria-label="Números de hoje">
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {cartoes
@@ -118,66 +125,71 @@ export function Inicio() {
         </section>
       )}
 
-      <section className="cartao p-4" aria-labelledby="titulo-hoje">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 id="titulo-hoje" className="titulo-secao">
-            {t('inicio.pedidosHoje')}
-          </h2>
-          <Link to="/pedidos" className="font-bold text-moldura underline-offset-4 hover:underline">
-            {t('inicio.verTodos')}
-          </Link>
-        </div>
-        {pedidos.isPending ? (
-          <LinhasEsqueleto linhas={5} />
-        ) : pedidos.isError ? (
-          <p className="text-erro">{t('erro.semConexaoCarregar')}</p>
-        ) : pedidos.data.dados.length === 0 ? (
-          <Vazio texto={t('dica.inicioVazio')} />
-        ) : (
-          <table className="w-full text-left">
-            <thead className="legenda">
-              <tr>
-                <th className="py-2 pr-3 font-semibold">Nº</th>
-                <th className="py-2 pr-3 font-semibold">Cliente</th>
-                <th className="hidden py-2 pr-3 font-semibold sm:table-cell">Hora</th>
-                <th className="py-2 text-right font-semibold">Total</th>
-                <th className="hidden py-2 pl-6 font-semibold sm:table-cell">Pagamento</th>
-                <th className="py-2 pl-4 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pedidos.data.dados.map((p) => (
-                <tr
-                  key={p.id}
-                  tabIndex={0}
-                  onClick={() => navegar(`/pedidos/${p.id}`)}
-                  onKeyDown={(e) => e.key === 'Enter' && navegar(`/pedidos/${p.id}`)}
-                  className="h-11 cursor-pointer border-t border-borda even:bg-creme-escuro/50 hover:bg-creme-escuro"
-                >
-                  <td className="pr-3 font-bold tabular-nums">{p.id}</td>
-                  <td className="max-w-[120px] truncate pr-3 sm:max-w-[160px]">
-                    {p.cliente ?? '—'}
-                  </td>
-                  <td className="hidden whitespace-nowrap pr-3 sm:table-cell">
-                    {formatarHora(p.criadoEm)}
-                  </td>
-                  <td
-                    className={`whitespace-nowrap text-right tabular-nums ${p.status === 'CANCELADO' ? 'text-desab-texto line-through' : ''}`}
-                  >
-                    {formatarReais(p.total)}
-                  </td>
-                  <td className="hidden pl-6 sm:table-cell">
-                    <Pagamento codigo={p.formaPagamento} />
-                  </td>
-                  <td className="pl-4">
-                    <EtiquetaStatus status={p.status} />
-                  </td>
+      {verPedidos && (
+        <section className="cartao p-4" aria-labelledby="titulo-hoje">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 id="titulo-hoje" className="titulo-secao">
+              {t('inicio.pedidosHoje')}
+            </h2>
+            <Link
+              to="/pedidos"
+              className="font-bold text-moldura underline-offset-4 hover:underline"
+            >
+              {t('inicio.verTodos')}
+            </Link>
+          </div>
+          {pedidos.isPending ? (
+            <LinhasEsqueleto linhas={5} />
+          ) : pedidos.isError ? (
+            <p className="text-erro">{t('erro.semConexaoCarregar')}</p>
+          ) : pedidos.data.dados.length === 0 ? (
+            <Vazio texto={t('dica.inicioVazio')} />
+          ) : (
+            <table className="w-full text-left">
+              <thead className="legenda">
+                <tr>
+                  <th className="py-2 pr-3 font-semibold">Nº</th>
+                  <th className="py-2 pr-3 font-semibold">Cliente</th>
+                  <th className="hidden py-2 pr-3 font-semibold sm:table-cell">Hora</th>
+                  <th className="py-2 text-right font-semibold">Total</th>
+                  <th className="hidden py-2 pl-6 font-semibold sm:table-cell">Pagamento</th>
+                  <th className="py-2 pl-4 font-semibold">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+              </thead>
+              <tbody>
+                {pedidos.data.dados.map((p) => (
+                  <tr
+                    key={p.id}
+                    tabIndex={0}
+                    onClick={() => navegar(`/pedidos/${p.id}`)}
+                    onKeyDown={(e) => e.key === 'Enter' && navegar(`/pedidos/${p.id}`)}
+                    className="h-11 cursor-pointer border-t border-borda even:bg-creme-escuro/50 hover:bg-creme-escuro"
+                  >
+                    <td className="pr-3 font-bold tabular-nums">{p.id}</td>
+                    <td className="max-w-[120px] truncate pr-3 sm:max-w-[160px]">
+                      {p.cliente ?? '—'}
+                    </td>
+                    <td className="hidden whitespace-nowrap pr-3 sm:table-cell">
+                      {formatarHora(p.criadoEm)}
+                    </td>
+                    <td
+                      className={`whitespace-nowrap text-right tabular-nums ${p.status === 'CANCELADO' ? 'text-desab-texto line-through' : ''}`}
+                    >
+                      {formatarReais(p.total)}
+                    </td>
+                    <td className="hidden pl-6 sm:table-cell">
+                      <Pagamento codigo={p.formaPagamento} />
+                    </td>
+                    <td className="pl-4">
+                      <EtiquetaStatus status={p.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      )}
     </div>
   );
 }

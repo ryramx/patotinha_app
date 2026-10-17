@@ -12,12 +12,14 @@ import {
   Moon,
   PlusCircle,
   Receipt,
+  ShieldCheck,
   Sun,
   Tags,
   Users,
   Keyboard,
   type LucideIcon,
 } from 'lucide-react';
+import type { Permissao } from '@patotinha/shared';
 import { primeiroNome, useSessao } from '../auth/sessao';
 import { aoMudarConexao } from '../api/cliente';
 import { t } from '../textos';
@@ -33,33 +35,81 @@ interface ItemMenu {
   curto: string;
   Icone: LucideIcon;
   fim?: boolean;
+  /** Aparece para quem tem alguma destas permissões; 'ADMIN' é só o administrador. */
+  exige: (Permissao | 'ADMIN')[];
 }
 
 /** Sempre à vista: no topo (computador e tablet) e nas abas de baixo (celular). */
 const PRINCIPAIS: ItemMenu[] = [
-  { para: '/pedidos/novo', rotulo: t('menu.novoPedido'), curto: t('menu.novo'), Icone: PlusCircle },
-  { para: '/fila', rotulo: t('menu.fila'), curto: t('menu.filaCurta'), Icone: ChefHat },
+  {
+    para: '/pedidos/novo',
+    rotulo: t('menu.novoPedido'),
+    curto: t('menu.novo'),
+    Icone: PlusCircle,
+    exige: ['PEDIDOS_REGISTRAR'],
+  },
+  {
+    para: '/fila',
+    rotulo: t('menu.fila'),
+    curto: t('menu.filaCurta'),
+    Icone: ChefHat,
+    exige: ['FILA'],
+  },
   {
     para: '/pedidos',
     rotulo: t('menu.historico'),
     curto: t('menu.historico'),
     Icone: Receipt,
     fim: true,
+    exige: ['PEDIDOS_VER'],
   },
-  { para: '/', rotulo: t('menu.inicio'), curto: t('menu.inicio'), Icone: House, fim: true },
+  {
+    para: '/',
+    rotulo: t('menu.inicio'),
+    curto: t('menu.inicio'),
+    Icone: House,
+    fim: true,
+    exige: ['PEDIDOS_VER', 'FINANCEIRO'],
+  },
 ];
 
-/** Só administrador: Resumo no topo; os cadastros num menu "Cadastros". */
+/** Conforme o perfil: Resumo no topo; os cadastros num menu "Cadastros". */
 const RESUMO: ItemMenu = {
   para: '/resumo',
   rotulo: t('menu.resumo'),
   curto: t('menu.resumo'),
   Icone: ChartColumnBig,
+  exige: ['FINANCEIRO'],
 };
 const CADASTROS: ItemMenu[] = [
-  { para: '/produtos', rotulo: t('menu.produtos'), curto: t('menu.produtos'), Icone: Cookie },
-  { para: '/categorias', rotulo: t('menu.categorias'), curto: t('menu.categorias'), Icone: Tags },
-  { para: '/usuarios', rotulo: t('menu.usuarios'), curto: t('menu.usuarios'), Icone: Users },
+  {
+    para: '/produtos',
+    rotulo: t('menu.produtos'),
+    curto: t('menu.produtos'),
+    Icone: Cookie,
+    exige: ['CARDAPIO'],
+  },
+  {
+    para: '/categorias',
+    rotulo: t('menu.categorias'),
+    curto: t('menu.categorias'),
+    Icone: Tags,
+    exige: ['CARDAPIO'],
+  },
+  {
+    para: '/usuarios',
+    rotulo: t('menu.usuarios'),
+    curto: t('menu.usuarios'),
+    Icone: Users,
+    exige: ['USUARIOS'],
+  },
+  {
+    para: '/perfis',
+    rotulo: t('menu.perfis'),
+    curto: t('menu.perfis'),
+    Icone: ShieldCheck,
+    exige: ['ADMIN'],
+  },
 ];
 
 const TITULOS: [RegExp, string][] = [
@@ -71,6 +121,7 @@ const TITULOS: [RegExp, string][] = [
   [/^\/produtos/, 'Produtos'],
   [/^\/categorias/, 'Categorias'],
   [/^\/usuarios/, 'Usuários'],
+  [/^\/perfis/, 'Perfis e permissões'],
   [/^\/$/, 'Início'],
 ];
 
@@ -132,7 +183,7 @@ function ItemSuspenso({ children, onClick }: { children: ReactNode; onClick: () 
 }
 
 export function Moldura() {
-  const { usuario, eAdmin, sair } = useSessao();
+  const { usuario, eAdmin, pode, sair } = useSessao();
   const { tema, alternar } = useTema();
   const navegar = useNavigate();
   const local = useLocation();
@@ -164,7 +215,7 @@ export function Moldura() {
   useEffect(() => {
     const tratar = (e: KeyboardEvent) => {
       if (['F1', 'F2', 'F3', 'F4', 'F5'].includes(e.key)) e.preventDefault();
-      if (e.key === 'F1') navegar('/pedidos/novo');
+      if (e.key === 'F1' && pode('PEDIDOS_REGISTRAR')) navegar('/pedidos/novo');
       const alvo = e.target as HTMLElement;
       const digitando = alvo.closest('input, textarea, select, [contenteditable="true"]');
       if (e.key === '?' && !digitando && !document.querySelector('[role="dialog"]')) {
@@ -174,7 +225,7 @@ export function Moldura() {
     };
     window.addEventListener('keydown', tratar);
     return () => window.removeEventListener('keydown', tratar);
-  }, [navegar]);
+  }, [navegar, pode]);
 
   useEffect(() => {
     setGaveta(false);
@@ -182,8 +233,12 @@ export function Moldura() {
   }, [local.pathname]);
 
   if (!usuario) return null;
-  const principais = eAdmin ? [...PRINCIPAIS, RESUMO] : PRINCIPAIS;
-  const emCadastros = CADASTROS.some((c) => local.pathname.startsWith(c.para));
+  const ve = (i: ItemMenu) => i.exige.some((p) => (p === 'ADMIN' ? eAdmin : pode(p)));
+  const abas = PRINCIPAIS.filter(ve);
+  const principais = ve(RESUMO) ? [...abas, RESUMO] : abas;
+  const cadastros = CADASTROS.filter(ve);
+  const extras = [RESUMO, ...CADASTROS].filter(ve);
+  const emCadastros = cadastros.some((c) => local.pathname.startsWith(c.para));
   const rotuloTema = tema === 'escuro' ? t('menu.modoClaro') : t('menu.modoEscuro');
 
   return (
@@ -216,7 +271,7 @@ export function Moldura() {
               <span className="max-lg:sr-only">{rotulo}</span>
             </NavLink>
           ))}
-          {eAdmin && (
+          {cadastros.length > 0 && (
             <div className="relative" ref={refCadastros}>
               <button
                 type="button"
@@ -235,7 +290,7 @@ export function Moldura() {
                   role="menu"
                   className="absolute left-0 top-13 z-20 w-56 overflow-hidden rounded-grande border border-borda bg-superficie py-1 shadow-elevada"
                 >
-                  {CADASTROS.map(({ para, rotulo, Icone }) => (
+                  {cadastros.map(({ para, rotulo, Icone }) => (
                     <NavLink
                       key={para}
                       to={para}
@@ -330,13 +385,15 @@ export function Moldura() {
         <Outlet />
       </main>
 
-      {/* Celular: abas fixas embaixo; "Mais" abre os itens de administrador. */}
+      {/* Celular: abas fixas embaixo; "Mais" abre Resumo e cadastros, conforme o perfil. */}
       <nav
         aria-label="Menu principal"
         className="nao-imprimir fixed inset-x-0 bottom-0 z-10 grid h-[var(--altura-abas-celular)] border-t border-borda bg-cabecalho md:hidden"
-        style={{ gridTemplateColumns: `repeat(${eAdmin ? 5 : 4}, minmax(0, 1fr))` }}
+        style={{
+          gridTemplateColumns: `repeat(${abas.length + (extras.length > 0 ? 1 : 0)}, minmax(0, 1fr))`,
+        }}
       >
-        {PRINCIPAIS.map(({ para, curto, rotulo, Icone, fim }) => (
+        {abas.map(({ para, curto, rotulo, Icone, fim }) => (
           <NavLink
             key={para}
             to={para}
@@ -350,7 +407,7 @@ export function Moldura() {
             <span aria-hidden>{curto}</span>
           </NavLink>
         ))}
-        {eAdmin && (
+        {extras.length > 0 && (
           <button
             type="button"
             aria-expanded={gaveta}
@@ -369,7 +426,7 @@ export function Moldura() {
             className="anim-toast absolute inset-x-0 bottom-0 rounded-t-[24px] bg-superficie p-3 pb-6 shadow-elevada"
             onClick={(e) => e.stopPropagation()}
           >
-            {[RESUMO, ...CADASTROS].map(({ para, rotulo, Icone }) => (
+            {extras.map(({ para, rotulo, Icone }) => (
               <NavLink
                 key={para}
                 to={para}

@@ -34,7 +34,7 @@ import {
 import { PainelPedido, type Problema } from './PainelPedido';
 
 export function NovoPedido() {
-  const { eAdmin } = useSessao();
+  const { pode } = useSessao();
   const avisos = useAvisos();
   const navegar = useNavigate();
   const queryClient = useQueryClient();
@@ -525,7 +525,7 @@ export function NovoPedido() {
             </div>
           ) : listaProdutos.length === 0 ? (
             <Vazio texto={t('dica.semProdutos')}>
-              {eAdmin && (
+              {pode('CARDAPIO') && (
                 <Botao variante="principal" onClick={() => navegar('/produtos')}>
                   {t('pedido.cadastrarProdutos')}
                 </Botao>

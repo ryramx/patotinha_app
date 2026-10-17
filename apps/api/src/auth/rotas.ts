@@ -1,10 +1,10 @@
 import type { FastifyInstance } from 'fastify';
-import { esquemaLogin, esquemaTrocarSenha } from '@patotinha/shared';
+import { esquemaLogin, esquemaTrocarSenha, type Perfil } from '@patotinha/shared';
 import { ErroApp } from '../erros.js';
 import { buscarPorLogin } from '../usuarios/repositorio.js';
 import { conferirSenha, gerarHash, hashParaComparacaoFalsa } from './senha.js';
 import { LimiteLogin } from './limite-login.js';
-import { DURACAO_SESSAO_S, NOME_COOKIE, usuarioDa } from './plugin.js';
+import { DURACAO_SESSAO_S, NOME_COOKIE, permissoesDoPerfil, usuarioDa } from './plugin.js';
 
 export async function rotasAuth(app: FastifyInstance, opcoes: { limite: LimiteLogin }) {
   const { limite } = opcoes;
@@ -44,7 +44,7 @@ export async function rotasAuth(app: FastifyInstance, opcoes: { limite: LimiteLo
 
     const token = await reply.jwtSign({
       sub: String(usuario.id),
-      perfil: usuario.perfil as 'ADMIN',
+      perfil: usuario.perfil as Perfil,
     });
     request.log.info(
       { evento: 'login_sucesso', usuarioId: Number(usuario.id) },
@@ -56,6 +56,7 @@ export async function rotasAuth(app: FastifyInstance, opcoes: { limite: LimiteLo
         nome: usuario.nome,
         login: usuario.login,
         perfil: usuario.perfil,
+        permissoes: permissoesDoPerfil(usuario.perfil, usuario.dadosPerfil.permissoes),
       },
     });
   });
@@ -66,7 +67,15 @@ export async function rotasAuth(app: FastifyInstance, opcoes: { limite: LimiteLo
 
   app.get('/auth/me', { preHandler: app.autenticar }, async (request) => {
     const u = usuarioDa(request);
-    return { usuario: { id: Number(u.id), nome: u.nome, login: u.login, perfil: u.perfil } };
+    return {
+      usuario: {
+        id: Number(u.id),
+        nome: u.nome,
+        login: u.login,
+        perfil: u.perfil,
+        permissoes: u.permissoes,
+      },
+    };
   });
 
   app.put('/auth/senha', { preHandler: app.autenticar }, async (request, reply) => {

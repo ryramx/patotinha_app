@@ -8,7 +8,8 @@ qual cliente é cada pedido e em que ordem preparar.
 1. **Novo pedido:** o painel do pedido tem o campo **Nome do cliente** (obrigatório, até 40
    letras). Sem nome, o botão Finalizar fica desabilitado com a dica "Informe o nome do cliente".
    O aviso de sucesso diz o número e o nome: "Pedido nº 12 de Dona Joana registrado, R$ 33,00".
-2. **Fila de preparo** (menu ao lado, para todos os perfis): mostra os pedidos do dia ainda não
+2. **Fila de preparo** (menu, para quem tem a permissão Fila; de fábrica, Administrador e Chef,
+   ver [perfis.md](perfis.md)): mostra os pedidos do dia ainda não
    entregues, por ordem de chegada, em três colunas: **Aguardando**, **Preparando** e **Pronto**.
    Cada cartão tem o nome em destaque, o nº do pedido, a hora, há quantos minutos chegou, a
    posição na fila (1º, 2º...) e os itens com quantidade. Não mostra valores.

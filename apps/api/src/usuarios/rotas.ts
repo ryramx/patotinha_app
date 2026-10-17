@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import {
   esquemaFiltroUsuarios,
   esquemaParamId,
@@ -14,6 +14,8 @@ import { buscarPorLogin, contarAdminsAtivos, paraUsuarioApi } from './repositori
 
 const loginDuplicado = () => new ErroApp(409, 'LOGIN_DUPLICADO', 'Esse login já está em uso');
 const naoEncontrado = () => erros.naoEncontrado('USUARIO_NAO_ENCONTRADO', 'Usuário não encontrado');
+const soAdminMexeEmAdmin = () =>
+  new ErroApp(403, 'SO_ADMIN', 'Só um administrador pode criar ou alterar administradores');
 const ultimoAdmin = () =>
   new ErroApp(422, 'ULTIMO_ADMIN', 'É preciso ter pelo menos um administrador ativo');
 
@@ -31,7 +33,14 @@ function validarSenha<T>(parse: () => T): T {
 }
 
 export async function rotasUsuarios(app: FastifyInstance) {
-  app.addHook('preHandler', app.exigirAdmin);
+  app.addHook('preHandler', app.exigir('USUARIOS'));
+
+  /** Quem cuida de usuários sem ser administrador não cria nem mexe em administrador. */
+  function conferirAdmin(request: FastifyRequest, ...perfis: string[]) {
+    if (usuarioDa(request).perfil !== 'ADMIN' && perfis.includes('ADMIN')) {
+      throw soAdminMexeEmAdmin();
+    }
+  }
 
   async function carregar(idParam: unknown) {
     const { id } = esquemaParamId.parse(idParam);
@@ -53,6 +62,7 @@ export async function rotasUsuarios(app: FastifyInstance) {
 
   app.post('/usuarios', async (request, reply) => {
     const dados = validarSenha(() => esquemaUsuarioNovo.parse(request.body));
+    conferirAdmin(request, dados.perfil);
     if (await buscarPorLogin(app.banco, dados.login)) throw loginDuplicado();
     try {
       const criado = await app.banco.usuario.create({
@@ -81,6 +91,7 @@ export async function rotasUsuarios(app: FastifyInstance) {
   app.put('/usuarios/:id', async (request) => {
     const atual = await carregar(request.params);
     const dados = esquemaUsuarioEdicao.parse(request.body);
+    conferirAdmin(request, atual.perfil, dados.perfil);
     const outro = await buscarPorLogin(app.banco, dados.login);
     if (outro && outro.id !== atual.id) throw loginDuplicado();
     // Rebaixar o último administrador ativo deixaria o sistema sem admin (RN-19).
@@ -99,6 +110,7 @@ export async function rotasUsuarios(app: FastifyInstance) {
   app.patch('/usuarios/:id/status', async (request) => {
     const atual = await carregar(request.params);
     const { ativo } = esquemaStatus.parse(request.body);
+    conferirAdmin(request, atual.perfil);
     if (!ativo) {
       if (atual.id === usuarioDa(request).id) {
         throw new ErroApp(
@@ -126,6 +138,7 @@ export async function rotasUsuarios(app: FastifyInstance) {
   app.put('/usuarios/:id/senha', async (request, reply) => {
     const atual = await carregar(request.params);
     const { novaSenha } = validarSenha(() => esquemaRedefinirSenha.parse(request.body));
+    conferirAdmin(request, atual.perfil);
     await app.banco.usuario.update({
       where: { id: atual.id },
       data: { senhaHash: await gerarHash(novaSenha) },

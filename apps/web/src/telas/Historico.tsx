@@ -65,7 +65,8 @@ function dataAmigavel(iso: string) {
 }
 
 export function Historico() {
-  const { eAdmin } = useSessao();
+  const { pode } = useSessao();
+  const filtroUsuario = pode('USUARIOS');
   const navegar = useNavigate();
   const [params, setParams] = useSearchParams();
   const periodo = periodoDaUrl(params);
@@ -120,7 +121,7 @@ export function Historico() {
   const usuarios = useQuery({
     queryKey: ['usuarios', 'todos'],
     queryFn: () => api<Usuario[]>('/usuarios'),
-    enabled: eAdmin,
+    enabled: filtroUsuario,
   });
 
   const filtrosAtivos = useMemo(() => {
@@ -187,7 +188,7 @@ export function Historico() {
               ))}
             </select>
           </label>
-          {eAdmin && (
+          {filtroUsuario && (
             <label className="flex flex-col">
               <span className="rotulo">{t('historico.usuario')}</span>
               <select
@@ -320,11 +321,13 @@ export function Historico() {
         </div>
         {lista.data && lista.data.total > 0 && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-borda px-4 py-3">
+            {/* A soma em reais só vem para quem tem Financeiro. */}
             <p className="font-bold tabular-nums">
-              {t('historico.totalFiltro', {
-                total: formatarReais(lista.data.somaFinalizados),
-                quantidade: lista.data.quantidadeFinalizados,
-              })}
+              {lista.data.somaFinalizados !== undefined &&
+                t('historico.totalFiltro', {
+                  total: formatarReais(lista.data.somaFinalizados),
+                  quantidade: lista.data.quantidadeFinalizados,
+                })}
             </p>
             <Paginacao
               pagina={pagina}

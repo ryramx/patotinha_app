@@ -3,6 +3,7 @@ import {
   criarCardapio,
   criarContexto,
   criarUsuario,
+  liberarFuncionario,
   entrar,
   limparBanco,
   pedidoExemplo,
@@ -25,6 +26,8 @@ beforeEach(async () => {
   await criarUsuario(ctx.banco, 'admin', 'ADMIN', 'Ana');
   await criarUsuario(ctx.banco, 'maria', 'FUNCIONARIO', 'Maria');
   admin = await entrar(ctx, 'admin');
+  // Estes testes usam a funcionária com o acesso de antes dos perfis (etapa 10).
+  await liberarFuncionario(ctx.banco);
   func = await entrar(ctx, 'maria');
   c = await criarCardapio(ctx.banco);
 });

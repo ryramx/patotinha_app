@@ -17,7 +17,12 @@ export class ErroApp extends Error {
 export const erros = {
   naoAutenticado: () =>
     new ErroApp(401, 'NAO_AUTENTICADO', 'Sua sessão expirou. Entre de novo para continuar'),
-  semPermissao: () => new ErroApp(403, 'SEM_PERMISSAO', 'Esta área é só para administradores'),
+  semPermissao: () =>
+    new ErroApp(
+      403,
+      'SEM_PERMISSAO',
+      'Seu perfil não tem permissão para isso. Peça ao administrador para liberar',
+    ),
   naoEncontrado: (codigo: string, mensagem: string) => new ErroApp(404, codigo, mensagem),
 };
 
