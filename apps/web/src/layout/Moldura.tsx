@@ -17,6 +17,7 @@ import {
   Tags,
   Users,
   Keyboard,
+  GraduationCap,
   type LucideIcon,
 } from 'lucide-react';
 import type { Permissao } from '@patotinha/shared';
@@ -28,6 +29,8 @@ import { Confirmacao } from '../componentes/Janela';
 import { JanelaTrocarSenha } from './JanelaTrocarSenha';
 import { JanelaAtalhos } from './JanelaAtalhos';
 import { temRascunho } from '../telas/novo-pedido/rascunho';
+import { Tutorial } from '../ajuda/Tutorial';
+import { BotaoLampada } from '../ajuda/Lampada';
 
 interface ItemMenu {
   para: string;
@@ -183,7 +186,7 @@ function ItemSuspenso({ children, onClick }: { children: ReactNode; onClick: () 
 }
 
 export function Moldura() {
-  const { usuario, eAdmin, pode, sair } = useSessao();
+  const { usuario, eAdmin, pode, sair, marcarTutorialVisto } = useSessao();
   const { tema, alternar } = useTema();
   const navegar = useNavigate();
   const local = useLocation();
@@ -194,6 +197,8 @@ export function Moldura() {
   const [trocarSenha, setTrocarSenha] = useState(false);
   const [atalhos, setAtalhos] = useState(false);
   const [confirmarSaida, setConfirmarSaida] = useState(false);
+  // Primeiro acesso: os cards abrem sozinhos; depois, só pelo menu ou pela lâmpada.
+  const [tutorial, setTutorial] = useState(() => usuario?.tutorialVisto === false);
   const refUsuario = useFecharFora(
     menuUsuario,
     useCallback(() => setMenuUsuario(false), []),
@@ -308,7 +313,7 @@ export function Moldura() {
           )}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1 md:gap-2">
+        <div className="ml-auto flex items-center gap-0.5 md:gap-2">
           <span
             className={`flex items-center gap-1.5 rounded-full px-2 py-1 text-[13px] font-bold ${online ? 'text-sucesso' : 'text-erro'}`}
             title={online ? t('menu.conectado') : t('menu.semConexao')}
@@ -318,12 +323,13 @@ export function Moldura() {
             <span className={`h-2 w-2 rounded-full ${online ? 'bg-sucesso' : 'bg-erro'}`} />
             <span className="hidden xl:inline">{online ? 'Online' : 'Sem conexão'}</span>
           </span>
+          <BotaoLampada aoVerTutorial={() => setTutorial(true)} />
           <button
             type="button"
             onClick={alternar}
             aria-label={rotuloTema}
             title={rotuloTema}
-            className="flex h-11 w-11 items-center justify-center rounded-full text-texto-suave hover:bg-creme-escuro hover:text-texto"
+            className="flex h-11 w-10 items-center justify-center rounded-full text-texto-suave hover:bg-creme-escuro hover:text-texto sm:w-11"
           >
             {tema === 'escuro' ? <Sun size={20} aria-hidden /> : <Moon size={20} aria-hidden />}
           </button>
@@ -333,7 +339,7 @@ export function Moldura() {
               aria-haspopup="menu"
               aria-expanded={menuUsuario}
               onClick={() => setMenuUsuario((m) => !m)}
-              className="flex h-11 items-center gap-2 rounded-full border border-borda py-1 pl-1 pr-3 font-bold hover:bg-creme-escuro"
+              className="flex h-11 items-center gap-2 rounded-full border border-borda p-1 font-bold hover:bg-creme-escuro sm:pr-3"
             >
               <span
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-moldura/12 font-extrabold text-moldura"
@@ -342,7 +348,7 @@ export function Moldura() {
                 {primeiroNome(usuario.nome).charAt(0).toUpperCase()}
               </span>
               <span className="max-sm:sr-only">{primeiroNome(usuario.nome)}</span>
-              <ChevronDown size={16} aria-hidden />
+              <ChevronDown size={16} aria-hidden className="max-sm:hidden" />
             </button>
             {menuUsuario && (
               <div
@@ -364,6 +370,14 @@ export function Moldura() {
                   }}
                 >
                   <Keyboard size={20} aria-hidden /> {t('menu.atalhos')}
+                </ItemSuspenso>
+                <ItemSuspenso
+                  onClick={() => {
+                    setMenuUsuario(false);
+                    setTutorial(true);
+                  }}
+                >
+                  <GraduationCap size={20} aria-hidden /> {t('menu.tutorial')}
                 </ItemSuspenso>
                 <ItemSuspenso onClick={pedirSaida}>
                   <LogOut size={20} aria-hidden /> {t('menu.sair')}
@@ -443,6 +457,14 @@ export function Moldura() {
 
       {trocarSenha && <JanelaTrocarSenha aoFechar={() => setTrocarSenha(false)} />}
       {atalhos && <JanelaAtalhos aoFechar={() => setAtalhos(false)} />}
+      {tutorial && (
+        <Tutorial
+          aoFechar={() => {
+            setTutorial(false);
+            marcarTutorialVisto();
+          }}
+        />
+      )}
       {confirmarSaida && (
         <Confirmacao
           titulo={t('confirmacao.sairTitulo')}

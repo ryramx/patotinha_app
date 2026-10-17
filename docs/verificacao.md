@@ -28,6 +28,7 @@ Resultado desta execução: **96 de 96** (API e shared) e **11 de 11** (ponta a 
 | CA-11 Usuários              | `usuarios.test.ts` e `fluxo-principal.spec.ts` (menu do funcionário)                            | —                                                       |
 | CA-13 Comanda (nome e fila) | `comanda.test.ts` (9 cenários) e `fluxo-principal.spec.ts` › Comanda (16/10/2026)               | Tablet na cozinha com a fila aberta durante o piloto    |
 | CA-15 Clientes (sugestão)   | `clientes.test.ts` (9 cenários) e `pedido-clientes.spec.ts` (17/10/2026)                        | Ver se os nomes se repetem no piloto                    |
+| CA-16 Tutorial e lâmpadas   | `auth.test.ts` › Tutorial e `tutorial.spec.ts` (cards por perfil, lâmpada) (17/10/2026)         | Pessoa nova faz o tutorial sozinha no piloto            |
 | CA-12 Operação              | Repositório sem segredos (conferido abaixo)                                                     | HTTPS e restauração de backup: etapa 7, ainda não feita |
 
 ## 6.3 Telas em computador e tablet

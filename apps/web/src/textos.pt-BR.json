@@ -32,7 +32,12 @@
     "modoClaro": "Modo claro",
     "novo": "Novo",
     "filaCurta": "Fila",
-    "perfis": "Perfis e permissões"
+    "perfis": "Perfis e permissões",
+    "tutorial": "Ver tutorial"
+  },
+  "ajuda": {
+    "verTutorial": "Ver tutorial",
+    "entendi": "Entendi"
   },
   "sucesso": {
     "pedidoGravado": "Pedido nº {numero} de {cliente} registrado, {total}",

@@ -20,6 +20,8 @@ interface ContextoSessao {
   eAdmin: boolean;
   /** O perfil do usuário pode fazer isso? Só esconde a tela; quem bloqueia é a API. */
   pode: (permissao: Permissao) => boolean;
+  /** Fechou ou terminou o tutorial: guarda no servidor para não abrir sozinho de novo. */
+  marcarTutorialVisto: () => void;
 }
 
 const Contexto = createContext<ContextoSessao | null>(null);
@@ -69,6 +71,13 @@ export function ProvedorSessao({ children }: { children: ReactNode }) {
     }
   }, [queryClient]);
 
+  const marcarTutorialVisto = useCallback(() => {
+    if (!usuario || usuario.tutorialVisto) return;
+    // Se falhar (sem internet), o tutorial volta no próximo acesso; não atrapalha o uso.
+    api('/auth/tutorial', { metodo: 'PUT' }).catch(() => undefined);
+    setUsuario({ ...usuario, tutorialVisto: true });
+  }, [usuario]);
+
   const valor = useMemo(
     () => ({
       usuario,
@@ -78,8 +87,9 @@ export function ProvedorSessao({ children }: { children: ReactNode }) {
       sair,
       eAdmin: usuario?.perfil === 'ADMIN',
       pode: (permissao: Permissao) => podeFazer(usuario, permissao),
+      marcarTutorialVisto,
     }),
-    [usuario, carregando, expirou, entrar, sair],
+    [usuario, carregando, expirou, entrar, sair, marcarTutorialVisto],
   );
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
 }
