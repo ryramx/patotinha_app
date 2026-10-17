@@ -108,6 +108,11 @@ export async function construirApp(opcoes: OpcoesApp): Promise<FastifyInstance> 
         }
       });
 
+      // Respostas da API nunca ficam guardadas: o site repassa /api pela CDN do Render (etapa 9).
+      api.addHook('onSend', async (_request, reply) => {
+        reply.header('Cache-Control', 'no-store');
+      });
+
       // Para o monitor externo: não toca no banco, para o Neon poder desligar quando parado.
       api.get('/vivo', async () => ({ status: 'ok' }));
 
@@ -136,9 +141,23 @@ export async function construirApp(opcoes: OpcoesApp): Promise<FastifyInstance> 
     { prefix: '/api' },
   );
 
-  // Em produção, a própria API serve as telas (mesma origem, sem CORS; PRD 7.3).
+  // Telas no Static Site: o endereço antigo leva para o novo, mantendo o caminho.
+  if (config.siteUrl) {
+    const siteUrl = config.siteUrl;
+    app.setNotFoundHandler((request, reply) => {
+      if (request.method === 'GET' && !request.url.startsWith('/api')) {
+        return reply.redirect(`${siteUrl}${request.url}`, 302);
+      }
+      return reply
+        .status(404)
+        .send({ erro: { codigo: 'ROTA_NAO_ENCONTRADA', mensagem: 'Endereço não encontrado' } });
+    });
+  }
+
+  // Sem SITE_URL, a própria API serve as telas (mesma origem, sem CORS; PRD 7.3).
+  // É assim no Docker local e nos testes de ponta a ponta.
   const pastaWeb = config.pastaWeb ? path.resolve(config.pastaWeb) : null;
-  if (pastaWeb && existsSync(path.join(pastaWeb, 'index.html'))) {
+  if (!config.siteUrl && pastaWeb && existsSync(path.join(pastaWeb, 'index.html'))) {
     await app.register(fastifyStatic, { root: pastaWeb, wildcard: false });
     app.setNotFoundHandler((request, reply) => {
       if (request.method === 'GET' && !request.url.startsWith('/api')) {

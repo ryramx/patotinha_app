@@ -13,6 +13,7 @@ import './index.css';
 import { App } from './App';
 import { ProvedorSessao } from './auth/sessao';
 import { ProvedorAvisos } from './componentes/Avisos';
+import { EsperarServidor } from './componentes/EsperarServidor';
 import type { ErroDaApi } from './api/cliente';
 
 const queryClient = new QueryClient({
@@ -39,9 +40,12 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ProvedorAvisos>
-          <ProvedorSessao>
-            <App />
-          </ProvedorSessao>
+          {/* A sessão só é conferida depois que a API acordar. */}
+          <EsperarServidor>
+            <ProvedorSessao>
+              <App />
+            </ProvedorSessao>
+          </EsperarServidor>
         </ProvedorAvisos>
       </BrowserRouter>
     </QueryClientProvider>

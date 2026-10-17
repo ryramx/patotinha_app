@@ -6,6 +6,7 @@ import { construirApp } from '../src/app.js';
 import { criarBanco, type Banco } from '../src/banco.js';
 import { gerarHash } from '../src/auth/senha.js';
 import { LimiteLogin } from '../src/auth/limite-login.js';
+import type { Config } from '../src/config.js';
 
 try {
   process.loadEnvFile(path.resolve(import.meta.dirname, '../../../.env'));
@@ -22,7 +23,7 @@ export interface Contexto {
   http: () => ReturnType<typeof request>;
 }
 
-export async function criarContexto(): Promise<Contexto> {
+export async function criarContexto(config: Partial<Config> = {}): Promise<Contexto> {
   const url = process.env.DATABASE_URL_TESTE;
   if (!url) throw new Error('DATABASE_URL_TESTE não definida');
   const banco = criarBanco(url);
@@ -35,6 +36,8 @@ export async function criarContexto(): Promise<Contexto> {
       appOrigin: 'http://localhost',
       porta: 0,
       pastaWeb: null,
+      siteUrl: null,
+      ...config,
     },
     banco,
     logger: false,

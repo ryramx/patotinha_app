@@ -14,6 +14,11 @@ export interface Config {
   porta: number;
   /** Pasta com o build do frontend, servida pela própria API (PRD 7.3). */
   pastaWeb: string | null;
+  /**
+   * Endereço do site (Static Site do Render). Quando definido, quem abre as telas pelo endereço
+   * da API é levado para lá; a API continua respondendo em /api.
+   */
+  siteUrl: string | null;
 }
 
 export function lerConfig(): Config {
@@ -29,5 +34,6 @@ export function lerConfig(): Config {
     appOrigin: process.env.APP_ORIGIN ?? 'http://localhost:5173',
     porta: Number(process.env.PORT ?? 3000),
     pastaWeb: process.env.PASTA_WEB ?? null,
+    siteUrl: process.env.SITE_URL?.replace(/\/+$/, '') || null,
   };
 }
