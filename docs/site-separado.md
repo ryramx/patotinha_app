@@ -10,7 +10,7 @@ Agora são dois serviços no `render.yaml`:
 
 | Serviço             | Tipo                 | Dorme? | O que faz                                 |
 | ------------------- | -------------------- | ------ | ----------------------------------------- |
-| `patotinha`         | Static Site (grátis) | Nunca  | Entrega as telas React pela CDN do Render |
+| `patotinha-da-vovo` | Static Site (grátis) | Nunca  | Entrega as telas React pela CDN do Render |
 | `patotinha-pedidos` | Web Service (Docker) | Sim    | API (`/api/...`) e banco Neon, como antes |
 
 ## Como funciona
@@ -39,14 +39,17 @@ em `textos.pt-BR.json` (seção `carregando`).
 
 1. **Criar o site.** No painel do Render, abrir **Blueprints**, escolher o Blueprint deste
    repositório e clicar em **Manual sync** (se ele não sincronizar sozinho). O Render cria o
-   Static Site `patotinha`. Se o sistema foi criado sem Blueprint, usar **New > Static Site** com:
+   Static Site `patotinha-da-vovo`. Se o sistema foi criado sem Blueprint, usar **New > Static Site** com:
    - Build command: o `buildCommand` do `render.yaml`
    - Publish directory: `apps/web/dist`
    - Variável `NODE_VERSION` = `24`
    - Em **Redirects/Rewrites**, as duas regras do `render.yaml`, na mesma ordem
    - Em **Headers**, os cabeçalhos do `render.yaml`
-2. **Anotar o endereço do site**, que aparece no topo da página do serviço (por exemplo,
-   `https://patotinha.onrender.com`; se o nome já existir, o Render acrescenta letras no fim).
+     Se uma sincronização anterior já criou um Static Site chamado `patotinha` (com letras extras
+     no endereço), apagar esse serviço em **Settings > Delete** depois que o novo estiver no ar.
+2. **Conferir o endereço do site** no topo da página do serviço: deve ser
+   `https://patotinha-da-vovo.onrender.com` (o endereço vem do nome do serviço na criação; trocar
+   o nome depois não muda o endereço).
 3. **Testar:** abrir o endereço do site, entrar com o usuário e abrir um novo pedido.
 4. **Ligar o redirecionamento:** no serviço `patotinha-pedidos`, **Environment** > adicionar
    `SITE_URL` com o endereço do site (sem barra no fim) > **Save changes**. A partir daí, o

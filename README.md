@@ -88,7 +88,7 @@ docker compose exec app npm run seed:admin
 
 ## Publicação (Render + Neon, planos gratuitos)
 
-O `render.yaml` descreve dois serviços: o **site** (`patotinha`, Static Site com as telas, que
+O `render.yaml` descreve dois serviços: o **site** (`patotinha-da-vovo`, Static Site com as telas, que
 nunca dorme) e a **API** (`patotinha-pedidos`, imagem Docker do `Dockerfile`). O site repassa
 `/api/*` para a API pelo mesmo endereço e mostra "Carregando…" com a logo enquanto ela acorda.
 Detalhes e o passo a passo no painel em [docs/site-separado.md](docs/site-separado.md). O banco

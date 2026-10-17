@@ -10,7 +10,7 @@
 services:
   # Site: as telas já compiladas, servidas pela CDN do Render.
   - type: web
-    name: patotinha
+    name: patotinha-da-vovo # vira https://patotinha-da-vovo.onrender.com
     runtime: static
     buildCommand: npm ci --workspace packages/shared --workspace apps/web --include-workspace-root && npm run build -w packages/shared && npm run build -w apps/web
     staticPublishPath: ./apps/web/dist
@@ -73,7 +73,7 @@ services:
         value: production
       - key: TZ
         value: America/Sao_Paulo
-      # Endereço do site acima, como aparece no painel do Render (ex.: https://patotinha.onrender.com).
+      # Endereço do site acima, como aparece no painel do Render (https://patotinha-da-vovo.onrender.com).
       # Colado à mão depois que o site existir; sem ele, a API continua servindo as telas.
       - key: SITE_URL
         sync: false
