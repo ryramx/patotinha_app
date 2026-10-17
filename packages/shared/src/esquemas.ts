@@ -163,9 +163,19 @@ export const esquemaClienteNome = texto(
   'o nome do cliente',
 ).transform((v) => v.replace(/\s+/g, ' '));
 
+/** Telefone opcional do cliente: só números, com DDD. Vazio é o mesmo que não informar. */
+export const esquemaTelefone = z
+  .string()
+  .regex(/^[\d\s()+.-]*$/, 'Telefone com DDD, como (11) 98765-4321')
+  .transform((v) => v.replace(/\D/g, ''))
+  .refine((v) => v === '' || /^\d{10,11}$/.test(v), 'Telefone com DDD, como (11) 98765-4321')
+  .transform((v) => v || undefined);
+
 export const esquemaNovoPedido = z.strictObject({
   chaveIdempotencia: z.uuid(),
   cliente: esquemaClienteNome,
+  /** Se vier, fica guardado no cadastro do cliente. Se não vier, o telefone salvo não muda. */
+  telefone: esquemaTelefone.nullish(),
   formaPagamento: z.string().trim().min(1).max(20),
   valorRecebido: dinheiro(8).nullish(),
   itens: z.array(esquemaItemPedido).max(200),
@@ -181,6 +191,10 @@ export const esquemaFiltroPedidos = z.strictObject({
   cliente: z.string().trim().max(LIMITES.clienteNome.max).optional(),
   pagina: z.coerce.number().int().min(1).default(1),
   tamanho: z.coerce.number().int().min(1).max(LIMITES.tamanhoPaginaMax).default(50),
+});
+
+export const esquemaBuscaClientes = z.strictObject({
+  busca: z.string().trim().min(1).max(LIMITES.clienteNome.max),
 });
 
 export const esquemaCancelamento = z.strictObject({

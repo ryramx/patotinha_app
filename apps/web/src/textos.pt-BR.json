@@ -143,7 +143,14 @@
     "precoMudouLinha": "Preço mudou de {de} para {para}",
     "indisponivelLinha": "Produto indisponível",
     "cliente": "Nome do cliente",
-    "clienteDica": "Para chamar quando ficar pronto"
+    "clienteDica": "Para chamar quando ficar pronto",
+    "sugestoes": "Clientes que já pediram",
+    "umPedidoCliente": "1 pedido",
+    "pedidosCliente": "{quantidade} pedidos",
+    "telefone": "Telefone (opcional)",
+    "adicionarTelefone": "Adicionar telefone (opcional)",
+    "trocarTelefone": "Trocar",
+    "telefoneInvalido": "Telefone com DDD, como (11) 98765-4321"
   },
   "inicio": {
     "bomDia": "Bom dia",

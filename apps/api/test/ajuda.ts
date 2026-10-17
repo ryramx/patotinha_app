@@ -50,7 +50,7 @@ export async function criarContexto(config: Partial<Config> = {}): Promise<Conte
 
 export async function limparBanco(banco: Banco) {
   await banco.$executeRawUnsafe(
-    'TRUNCATE itens_pedido, pedidos, produtos, categorias, usuarios RESTART IDENTITY CASCADE',
+    'TRUNCATE itens_pedido, pedidos, clientes, produtos, categorias, usuarios RESTART IDENTITY CASCADE',
   );
   await banco.$executeRawUnsafe('UPDATE formas_pagamento SET ativo = true');
   for (const [codigo, permissoes] of Object.entries(PERMISSOES_PADRAO)) {

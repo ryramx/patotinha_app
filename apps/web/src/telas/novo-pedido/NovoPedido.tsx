@@ -4,7 +4,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, X } from 'lucide-react';
 import {
   combinaBusca,
+  esquemaTelefone,
   formatarReais,
+  formatarTelefone,
   LIMITES,
   paraCentavos,
   type Categoria,
@@ -206,20 +208,26 @@ export function NovoPedido() {
     rascunho.recebidoCentavos !== null &&
     rascunho.recebidoCentavos < totalCentavos;
   const temIndisponivel = [...problemas.values()].some((p) => p.tipo === 'indisponivel');
+  const erroTelefone =
+    rascunho.telefone && !esquemaTelefone.safeParse(rascunho.telefone).success
+      ? t('pedido.telefoneInvalido')
+      : null;
   const dicaFinalizar =
     rascunho.itens.length === 0
       ? t('dica.semItens')
       : !rascunho.cliente.trim()
         ? t('dica.semCliente')
-        : !rascunho.forma
-          ? t('dica.semPagamento')
-          : faltaRecebido
-            ? t('pedido.faltam', {
-                valor: formatarReais(totalCentavos - rascunho.recebidoCentavos!),
-              })
-            : temIndisponivel
-              ? t('pedido.indisponivelLinha')
-              : null;
+        : erroTelefone
+          ? erroTelefone
+          : !rascunho.forma
+            ? t('dica.semPagamento')
+            : faltaRecebido
+              ? t('pedido.faltam', {
+                  valor: formatarReais(totalCentavos - rascunho.recebidoCentavos!),
+                })
+              : temIndisponivel
+                ? t('pedido.indisponivelLinha')
+                : null;
 
   const finalizar = useCallback(async () => {
     if (enviando) return;
@@ -237,6 +245,7 @@ export function NovoPedido() {
         corpo: {
           chaveIdempotencia: rascunho.chaveIdempotencia,
           cliente: rascunho.cliente.trim(),
+          telefone: rascunho.telefone || undefined,
           formaPagamento: rascunho.forma,
           valorRecebido:
             rascunho.forma === 'DINHEIRO' && rascunho.recebidoCentavos !== null
@@ -392,7 +401,31 @@ export function NovoPedido() {
       semConexao={semConexao}
       dicaFinalizar={dicaFinalizar}
       refCliente={refCliente}
-      aoMudarCliente={(cliente) => atualizar((r) => ({ ...r, cliente }))}
+      erroTelefone={erroTelefone}
+      aoMudarCliente={(cliente) =>
+        // Trocou o nome depois de escolher uma sugestão: o telefone dela não vale mais.
+        atualizar((r) => ({
+          ...r,
+          cliente,
+          telefone: r.telefoneDoCadastro ? '' : r.telefone,
+          telefoneDoCadastro: false,
+        }))
+      }
+      aoMudarTelefone={(telefone) =>
+        atualizar((r) => ({ ...r, telefone, telefoneDoCadastro: false }))
+      }
+      aoEscolherCliente={(c) =>
+        atualizar((r) => ({
+          ...r,
+          cliente: c.nome,
+          telefone: c.telefone
+            ? formatarTelefone(c.telefone)
+            : r.telefoneDoCadastro
+              ? ''
+              : r.telefone,
+          telefoneDoCadastro: c.telefone !== null,
+        }))
+      }
       aoMudarQuantidade={(id, q) => {
         confirmarPreco(id);
         mudarQuantidade(id, q);
