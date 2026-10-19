@@ -76,6 +76,62 @@ describe('CA-10 Resumo de vendas', () => {
     ]);
   });
 
+  it('carro-chefe: o mais vendido de cada categoria, sem cancelados', async () => {
+    // Pastéis: carne 2, queijo 3 (+5 cancelados); Bebidas: coca 1
+    await registrar({
+      ...pedidoExemplo(c),
+      itens: [
+        { produtoId: c.carne, quantidade: 2, precoExibido: '8.00' },
+        { produtoId: c.coca, quantidade: 1, precoExibido: '5.00' },
+      ],
+    });
+    await registrar({
+      ...pedidoExemplo(c),
+      itens: [{ produtoId: c.queijo, quantidade: 3, precoExibido: '7.00' }],
+    });
+    const cancelado = await registrar({
+      ...pedidoExemplo(c),
+      itens: [{ produtoId: c.carne, quantidade: 5, precoExibido: '8.00' }],
+    });
+    await ctx
+      .http()
+      .patch(`/api/pedidos/${cancelado.body.id}/cancelar`)
+      .set('Cookie', admin)
+      .send({ motivo: 'Lançado errado' });
+
+    const r = await ctx.http().get('/api/relatorios/vendas').set('Cookie', admin);
+    expect(r.body.maisVendidoPorCategoria).toEqual([
+      {
+        categoriaId: Number(c.pasteis.id),
+        categoria: 'Pastéis',
+        produtoId: c.queijo,
+        nome: 'Pastel de Queijo',
+        quantidade: 3,
+        valor: '21.00',
+      },
+      {
+        categoriaId: Number(c.bebidas.id),
+        categoria: 'Bebidas',
+        produtoId: c.coca,
+        nome: 'Coca-Cola',
+        quantidade: 1,
+        valor: '5.00',
+      },
+    ]);
+  });
+
+  it('carro-chefe empatado em quantidade fica com o de maior valor', async () => {
+    await registrar({
+      ...pedidoExemplo(c),
+      itens: [
+        { produtoId: c.queijo, quantidade: 2, precoExibido: '7.00' },
+        { produtoId: c.carne, quantidade: 2, precoExibido: '8.00' },
+      ],
+    });
+    const r = await ctx.http().get('/api/relatorios/vendas').set('Cookie', admin);
+    expect(r.body.maisVendidoPorCategoria[0]).toMatchObject({ produtoId: c.carne, quantidade: 2 });
+  });
+
   it('período sem vendas devolve zeros', async () => {
     const r = await ctx
       .http()
@@ -88,6 +144,7 @@ describe('CA-10 Resumo de vendas', () => {
       faturamento: '0.00',
       cartaoTotal: '0.00',
       produtosMaisVendidos: [],
+      maisVendidoPorCategoria: [],
     });
   });
 
