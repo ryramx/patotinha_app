@@ -1,9 +1,10 @@
 import type { FastifyInstance } from 'fastify';
-import type { FilaPreparo, ListaPedidos } from '@patotinha/shared';
+import type { FilaPreparo, ListaPedidos, PedidoAReceber } from '@patotinha/shared';
 import {
   esquemaCancelamento,
   esquemaFiltroPedidos,
   esquemaNovoPedido,
+  esquemaPagamento,
   esquemaParamId,
   esquemaPreparo,
 } from '@patotinha/shared';
@@ -14,11 +15,14 @@ import { dinheiro } from '../serializar.js';
 import type { Prisma } from '../generated/prisma/client.js';
 import {
   buscarPedidoCompleto,
+  paraPedidoAReceberApi,
   paraPedidoApi,
   paraPedidoNaFilaApi,
   paraPedidoResumidoApi,
 } from './repositorio.js';
 import { criarPedido } from './servico.js';
+import { calcularPagamento } from './calculo.js';
+import { deCentavos, paraCentavos } from '@patotinha/shared';
 
 const naoEncontrado = () => erros.naoEncontrado('PEDIDO_NAO_ENCONTRADO', 'Pedido não encontrado');
 
@@ -112,11 +116,86 @@ export async function rotasPedidos(app: FastifyInstance) {
     return paraPedidoApi(pedido);
   });
 
-  // Fila de preparo do dia: pedidos pagos ainda não entregues, por ordem de chegada.
+  // Pagar depois (etapa 15): quem registra pedidos vê os que faltam pagar, de qualquer dia,
+  // do mais antigo para o mais novo.
+  app.get(
+    '/pedidos/a-receber',
+    { preHandler: app.exigir('PEDIDOS_REGISTRAR') },
+    async (): Promise<{ dados: PedidoAReceber[] }> => {
+      const abertos = await app.banco.pedido.findMany({
+        where: { status: 'ABERTO' },
+        include: { itens: { orderBy: { id: 'asc' } } },
+        orderBy: [{ criadoEm: 'asc' }, { id: 'asc' }],
+        take: 200,
+      });
+      return { dados: abertos.map(paraPedidoAReceberApi) };
+    },
+  );
+
+  // Recebe o pagamento de um pedido ABERTO: vira FINALIZADO e entra no faturamento.
+  app.patch(
+    '/pedidos/:id/pagamento',
+    { preHandler: app.exigir('PEDIDOS_REGISTRAR') },
+    async (request) => {
+      const { id } = esquemaParamId.parse(request.params);
+      const corpo = esquemaPagamento.safeParse(request.body);
+      if (!corpo.success) {
+        throw new ErroApp(422, 'FORMA_PAGAMENTO_INVALIDA', 'Escolha uma forma de pagamento válida');
+      }
+      const usuario = usuarioDa(request);
+      const pedido = await app.banco.$transaction(async (tx) => {
+        const atual = await tx.pedido.findUnique({ where: { id: BigInt(id) } });
+        if (!atual) throw naoEncontrado();
+        if (atual.status === 'CANCELADO') {
+          throw new ErroApp(409, 'PEDIDO_CANCELADO', 'Este pedido foi cancelado');
+        }
+        if (atual.status === 'FINALIZADO') {
+          throw new ErroApp(409, 'PEDIDO_JA_PAGO', 'Este pedido já foi pago');
+        }
+        const forma = await tx.formaPagamento.findUnique({
+          where: { codigo: corpo.data.formaPagamento },
+        });
+        const { valorRecebidoCentavos, trocoCentavos } = calcularPagamento(
+          paraCentavos(atual.total.toFixed(2)),
+          forma,
+          corpo.data.valorRecebido,
+        );
+        // Só passa de ABERTO para FINALIZADO uma vez, mesmo com dois toques ao mesmo tempo.
+        const alterados = await tx.pedido.updateMany({
+          where: { id: atual.id, status: 'ABERTO' },
+          data: {
+            status: 'FINALIZADO',
+            formaPagamentoId: forma!.id,
+            valorRecebido:
+              valorRecebidoCentavos === null ? null : deCentavos(valorRecebidoCentavos),
+            troco: trocoCentavos === null ? null : deCentavos(trocoCentavos),
+            finalizadoEm: new Date(),
+          },
+        });
+        if (alterados.count === 0) {
+          throw new ErroApp(409, 'PEDIDO_JA_PAGO', 'Este pedido já foi pago');
+        }
+        return (await buscarPedidoCompleto(tx, atual.id))!;
+      });
+      request.log.info(
+        {
+          evento: 'pedido_pago',
+          pedidoId: id,
+          total: dinheiro(pedido.total),
+          usuarioId: Number(usuario.id),
+        },
+        'pagamento recebido',
+      );
+      return paraPedidoApi(pedido);
+    },
+  );
+
+  // Fila de preparo do dia: pedidos ainda não entregues, por ordem de chegada. Entram os pagos
+  // e os de pagar depois (o cliente come e paga no fim).
   app.get('/fila', { preHandler: app.exigir('FILA') }, async (): Promise<FilaPreparo> => {
     const hoje = intervaloDeDias(undefined, undefined, 'FILTRO_INVALIDO');
     const doDia = {
-      status: 'FINALIZADO',
+      status: { in: ['FINALIZADO', 'ABERTO'] },
       criadoEm: { gte: hoje.inicio, lt: hoje.fim },
     } satisfies Prisma.PedidoWhereInput;
     const [ativos, entregues] = await Promise.all([

@@ -176,9 +176,17 @@ export const esquemaNovoPedido = z.strictObject({
   cliente: esquemaClienteNome,
   /** Se vier, fica guardado no cadastro do cliente. Se não vier, o telefone salvo não muda. */
   telefone: esquemaTelefone.nullish(),
+  /** Vazio só com pagarDepois: o cliente come e paga no fim (etapa 15, docs/pagar-depois.md). */
+  formaPagamento: z.string().trim().min(1).max(20).nullish(),
+  valorRecebido: dinheiro(8).nullish(),
+  pagarDepois: z.boolean().optional(),
+  itens: z.array(esquemaItemPedido).max(200),
+});
+
+/** Receber o pagamento de um pedido que ficou para pagar depois. */
+export const esquemaPagamento = z.strictObject({
   formaPagamento: z.string().trim().min(1).max(20),
   valorRecebido: dinheiro(8).nullish(),
-  itens: z.array(esquemaItemPedido).max(200),
 });
 
 export const esquemaFiltroPedidos = z.strictObject({

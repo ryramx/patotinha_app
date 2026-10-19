@@ -127,6 +127,13 @@ export interface PedidoNaFila {
   criadoEm: string;
   preparo: Preparo;
   itens: { nomeProduto: string; quantidade: number }[];
+  /** Pagar depois: ainda não pagou (status ABERTO). */
+  aPagar: boolean;
+}
+
+/** Pedido que ficou para pagar depois, na tela A receber. */
+export interface PedidoAReceber extends PedidoNaFila {
+  total: string;
 }
 
 export interface FilaPreparo {

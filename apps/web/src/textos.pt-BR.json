@@ -34,7 +34,9 @@
     "filaCurta": "Fila",
     "perfis": "Perfis e permissões",
     "tutorial": "Ver tutorial",
-    "pix": "Pix da loja"
+    "pix": "Pix da loja",
+    "receber": "A receber",
+    "receberCurto": "Receber"
   },
   "ajuda": {
     "verTutorial": "Ver tutorial",
@@ -51,7 +53,8 @@
     "usuarioDesativado": "{nome} desativado",
     "senhaTrocada": "Senha alterada",
     "senhaRedefinida": "Nova senha criada para {nome}",
-    "itemRemovido": "{nome} removido"
+    "itemRemovido": "{nome} removido",
+    "pedidoPagarDepois": "Pedido nº {numero} de {cliente} foi para a cozinha. Cobre {total} no fim, em A receber"
   },
   "erro": {
     "loginInvalido": "Usuário ou senha inválidos",
@@ -94,7 +97,7 @@
   "dica": {
     "painelVazio": "Toque num produto para começar",
     "semItens": "Adicione pelo menos um produto",
-    "semPagamento": "Escolha a forma de pagamento",
+    "semPagamento": "Escolha a forma de pagamento, ou Pagar depois se o cliente paga no fim",
     "valorRecebido": "Opcional. Preencha para calcular o troco",
     "historicoVazio": "Nenhum pedido encontrado com esses filtros",
     "inicioVazio": "Nenhum pedido hoje ainda",
@@ -156,7 +159,9 @@
     "telefone": "Telefone (opcional)",
     "adicionarTelefone": "Adicionar telefone (opcional)",
     "trocarTelefone": "Trocar",
-    "telefoneInvalido": "Telefone com DDD, como (11) 98765-4321"
+    "telefoneInvalido": "Telefone com DDD, como (11) 98765-4321",
+    "pagarDepois": "Pagar depois",
+    "pagarDepoisDica": "Manda para a cozinha agora; o cliente paga no fim, em A receber"
   },
   "inicio": {
     "bomDia": "Bom dia",
@@ -281,7 +286,8 @@
     "atualizado": "Atualiza sozinha a cada 10 segundos",
     "naFila": "{quantidade} na fila",
     "posicao": "{posicao}º",
-    "pedidoCancelado": "Este pedido foi cancelado e saiu da fila"
+    "pedidoCancelado": "Este pedido foi cancelado e saiu da fila",
+    "aPagar": "Paga no fim"
   },
   "pix": {
     "titulo": "Pagar com Pix",
@@ -314,5 +320,15 @@
     "testeDescricao": "Teste: leia com o app do seu banco e confira o nome antes de pagar.",
     "pedido": "Pedido nº {numero} · {cliente}",
     "deste": "Mostrar o Pix deste pedido"
+  },
+  "receber": {
+    "intro": "Pedidos que o cliente vai pagar no fim. Quando ele vier pagar, toque em Receber.",
+    "soma": "{quantidade} a receber · {total}",
+    "vazio": "Nenhum pedido esperando pagamento.",
+    "receber": "Receber",
+    "receberPagamento": "Receber pagamento",
+    "titulo": "Receber pedido nº {numero}",
+    "confirmar": "Confirmar pagamento",
+    "recebido": "Pagamento do pedido nº {numero} recebido, {total}"
   }
 }

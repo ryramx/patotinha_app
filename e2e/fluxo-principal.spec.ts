@@ -92,11 +92,11 @@ test('CA-05 a CA-07: funcionário registra o pedido do exemplo em dinheiro', asy
   await expect(page.getByLabel('Nome do cliente')).toHaveValue('');
 });
 
-test('Funcionário só vê o Novo pedido', async ({ page }) => {
+test('Funcionário só vê o Novo pedido e A receber', async ({ page }) => {
   await entrar(page, FUNCIONARIO);
   await expect(page).toHaveURL(/\/pedidos\/novo$/);
   const menu = page.getByRole('navigation', { name: 'Menu principal' }).first();
-  await expect(menu.getByRole('link')).toHaveText(['Novo pedido']);
+  await expect(menu.getByRole('link')).toHaveText(['Novo pedido', 'A receber']);
   await expect(page.getByRole('button', { name: 'Cadastros' })).toHaveCount(0);
   for (const tela of ['/pedidos', '/fila', '/resumo']) {
     await page.goto(tela);

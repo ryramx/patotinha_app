@@ -1,4 +1,10 @@
-import type { Pedido, PedidoNaFila, PedidoResumido, Preparo } from '@patotinha/shared';
+import type {
+  Pedido,
+  PedidoAReceber,
+  PedidoNaFila,
+  PedidoResumido,
+  Preparo,
+} from '@patotinha/shared';
 import type { Banco } from '../banco.js';
 import { data, dinheiro, id } from '../serializar.js';
 import type { Prisma } from '../generated/prisma/client.js';
@@ -85,5 +91,10 @@ export function paraPedidoNaFilaApi(p: PedidoFila): PedidoNaFila {
     criadoEm: data(p.criadoEm),
     preparo: preparo(p),
     itens: p.itens.map((i) => ({ nomeProduto: i.nomeProduto, quantidade: i.quantidade })),
+    aPagar: p.status === 'ABERTO',
   };
+}
+
+export function paraPedidoAReceberApi(p: PedidoFila): PedidoAReceber {
+  return { ...paraPedidoNaFilaApi(p), total: dinheiro(p.total) };
 }

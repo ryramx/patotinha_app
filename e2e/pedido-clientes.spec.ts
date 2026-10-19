@@ -20,6 +20,9 @@ async function finalizarComPix(page: Page, cliente: string) {
       .filter({ hasText: new RegExp(`de ${cliente} registrado`) })
       .last(),
   ).toBeVisible();
+  // O aviso do pedido anterior do mesmo cliente pode continuar na tela: só segue com o
+  // painel já limpo, senão o próximo item cai no pedido que está sendo gravado.
+  await expect(page.getByLabel('Nome do cliente')).toHaveValue('');
 }
 
 test('o segundo pedido do mesmo cliente sai escolhendo a sugestão, com o telefone', async ({

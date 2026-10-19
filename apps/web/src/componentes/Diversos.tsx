@@ -18,7 +18,7 @@ export function EtiquetaStatus({ status }: { status: StatusPedido }) {
   const config = {
     FINALIZADO: { texto: 'Finalizado', cor: 'bg-sucesso-fundo text-sucesso', Icone: CircleCheck },
     CANCELADO: { texto: 'Cancelado', cor: 'bg-erro-fundo text-erro', Icone: Ban },
-    ABERTO: { texto: 'Aberto', cor: 'bg-aviso-fundo text-aviso', Icone: Clock },
+    ABERTO: { texto: 'A pagar', cor: 'bg-aviso-fundo text-aviso', Icone: Clock },
   }[status];
   return (
     <span

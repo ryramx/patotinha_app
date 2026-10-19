@@ -170,6 +170,7 @@ export function Historico() {
             >
               <option value="">{t('historico.todos')}</option>
               <option value="FINALIZADO">Finalizado</option>
+              <option value="ABERTO">A pagar</option>
               <option value="CANCELADO">Cancelado</option>
             </select>
           </label>
