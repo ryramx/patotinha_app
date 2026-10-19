@@ -1,0 +1,29 @@
+# Uso único (pedido do Ryan em 19/10/2026): o tutorial de primeiro acesso volta a aparecer para a
+# Adriana. Só zera usuarios.tutorial_visto_em dela; recusa se o nome achar 0 ou mais de 1 usuário.
+name: Resetar tutorial da Adriana
+
+on:
+  push:
+    branches: [resetar-tutorial-adriana]
+
+jobs:
+  resetar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Zerar tutorial_visto_em só da Adriana
+        env:
+          URL: ${{ secrets.PRODUCAO_DATABASE_URL }}
+        run: |
+          if [ -z "$URL" ]; then echo "::error::Segredo PRODUCAO_DATABASE_URL não configurado"; exit 1; fi
+          docker run --rm -e URL="$URL" -e PGTZ=America/Sao_Paulo postgres:18 psql "$URL" -v ON_ERROR_STOP=1 -c "
+            SELECT id, nome, login, to_char(tutorial_visto_em, 'YYYY-MM-DD HH24:MI') AS antes
+            FROM usuarios WHERE nome ILIKE 'adriana%' OR login ILIKE 'adriana%';" -c "
+            DO \$\$
+            DECLARE n int;
+            BEGIN
+              SELECT count(*) INTO n FROM usuarios WHERE nome ILIKE 'adriana%' OR login ILIKE 'adriana%';
+              IF n <> 1 THEN RAISE EXCEPTION 'Esperava 1 usuário Adriana, achei %', n; END IF;
+              UPDATE usuarios SET tutorial_visto_em = NULL WHERE nome ILIKE 'adriana%' OR login ILIKE 'adriana%';
+            END \$\$;" -c "
+            SELECT id, nome, login, to_char(tutorial_visto_em, 'YYYY-MM-DD HH24:MI') AS depois
+            FROM usuarios WHERE nome ILIKE 'adriana%' OR login ILIKE 'adriana%';"
