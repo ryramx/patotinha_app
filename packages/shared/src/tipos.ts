@@ -162,6 +162,15 @@ export interface RelatorioVendas {
   cartaoTotal: string;
   cartaoPedidos: number;
   produtosMaisVendidos: { produtoId: number; nome: string; quantidade: number; valor: string }[];
+  /** Carro-chefe (etapa 14): o produto que mais saiu em cada categoria, na ordem do cadastro. */
+  maisVendidoPorCategoria: {
+    categoriaId: number;
+    categoria: string;
+    produtoId: number;
+    nome: string;
+    quantidade: number;
+    valor: string;
+  }[];
 }
 
 export interface StatusCategoriaResposta extends Categoria {

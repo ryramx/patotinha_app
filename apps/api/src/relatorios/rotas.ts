@@ -11,6 +11,11 @@ interface LinhaMaisVendido {
   valor: string;
 }
 
+interface LinhaCarroChefe extends LinhaMaisVendido {
+  categoria_id: bigint;
+  categoria: string;
+}
+
 export async function rotasRelatorios(app: FastifyInstance) {
   app.get(
     '/relatorios/vendas',
@@ -25,7 +30,7 @@ export async function rotasRelatorios(app: FastifyInstance) {
       const periodo = intervaloDeDias(filtro.de, filtro.ate, 'PERIODO_INVALIDO');
       const noPeriodo = { criadoEm: { gte: periodo.inicio, lt: periodo.fim } };
 
-      const [formas, porForma, cancelados, maisVendidos] = await Promise.all([
+      const [formas, porForma, cancelados, maisVendidos, carrosChefe] = await Promise.all([
         app.banco.formaPagamento.findMany({ orderBy: { id: 'asc' } }),
         app.banco.pedido.groupBy({
           by: ['formaPagamentoId'],
@@ -52,6 +57,28 @@ export async function rotasRelatorios(app: FastifyInstance) {
            GROUP BY i.produto_id
            ORDER BY sum(i.quantidade) DESC, sum(i.subtotal) DESC, i.produto_id
            LIMIT ${filtro.limiteProdutos}`,
+        // Carro-chefe: o mais vendido de cada categoria (pela categoria atual do produto),
+        // com o mesmo desempate da lista acima.
+        app.banco.$queryRaw<LinhaCarroChefe[]>`
+          WITH vendas AS (
+            SELECT i.produto_id,
+                   (array_agg(i.nome_produto ORDER BY i.id DESC))[1] AS nome,
+                   sum(i.quantidade)::bigint AS quantidade,
+                   sum(i.subtotal) AS valor
+              FROM itens_pedido i
+              JOIN pedidos p ON p.id = i.pedido_id
+             WHERE p.status = 'FINALIZADO'
+               AND p.criado_em >= ${periodo.inicio}
+               AND p.criado_em <  ${periodo.fim}
+             GROUP BY i.produto_id
+          )
+          SELECT DISTINCT ON (pr.categoria_id)
+                 pr.categoria_id, c.nome AS categoria, v.produto_id, v.nome, v.quantidade,
+                 v.valor::text AS valor
+            FROM vendas v
+            JOIN produtos pr ON pr.id = v.produto_id
+            JOIN categorias c ON c.id = pr.categoria_id
+           ORDER BY pr.categoria_id, v.quantidade DESC, v.valor DESC, v.produto_id`,
       ]);
 
       // Cancelados ficam fora do faturamento e dos totais por forma (RN-16).
@@ -82,6 +109,14 @@ export async function rotasRelatorios(app: FastifyInstance) {
         cartaoTotal: deCentavos(cartoes.reduce((s, l) => s + l.centavos, 0)),
         cartaoPedidos: cartoes.reduce((s, l) => s + l.pedidos, 0),
         produtosMaisVendidos: maisVendidos.map((m) => ({
+          produtoId: Number(m.produto_id),
+          nome: m.nome,
+          quantidade: Number(m.quantidade),
+          valor: deCentavos(paraCentavos(m.valor)),
+        })),
+        maisVendidoPorCategoria: carrosChefe.map((m) => ({
+          categoriaId: Number(m.categoria_id),
+          categoria: m.categoria,
           produtoId: Number(m.produto_id),
           nome: m.nome,
           quantidade: Number(m.quantidade),

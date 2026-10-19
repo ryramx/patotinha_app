@@ -75,7 +75,7 @@ export const CARDS_TUTORIAL: CardTutorial[] = [
     Icone: ChartColumnBig,
     titulo: 'Resumo de vendas: as contas',
     texto:
-      'Escolha o período (hoje, ontem, 7 dias, o mês) e veja o faturamento, quantos pedidos, o total por forma de pagamento e os mais vendidos. Dá para imprimir.',
+      'Escolha o período (hoje, ontem, 7 dias, o mês) e veja o faturamento, quantos pedidos, o carro-chefe de cada categoria (o sabor que mais sai), o total por forma de pagamento e os mais vendidos. Dá para imprimir.',
     exige: ['FINANCEIRO'],
   },
   {
@@ -276,6 +276,10 @@ export const AJUDA_TELAS: AjudaTela[] = [
       },
       {
         texto: 'Os cartões mostram o faturamento, os pedidos finalizados, a média e os cancelados.',
+      },
+      {
+        texto:
+          'Carro-chefe: o produto que mais saiu em cada categoria, como o sabor de pastel campeão.',
       },
       { texto: 'Por forma de pagamento: quanto entrou em dinheiro, PIX e cartão.' },
       { texto: 'Mais vendidos: os produtos que mais saíram no período.' },
