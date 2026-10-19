@@ -43,7 +43,7 @@ export const CARDS_TUTORIAL: CardTutorial[] = [
     Icone: PlusCircle,
     titulo: 'Novo pedido: a venda no balcão',
     texto:
-      'Toque nos produtos para montar o pedido; cada toque soma mais um. Digite o nome do cliente, escolha a forma de pagamento e toque em Finalizar pedido. No computador, a tecla F1 abre esta tela de qualquer lugar.',
+      'Toque nos produtos para montar o pedido; cada toque soma mais um. Digite o nome do cliente, escolha a forma de pagamento e toque em Finalizar pedido. Se o cliente paga no fim, toque em Pagar depois e cobre em A receber. No computador, a tecla F1 abre esta tela de qualquer lugar.',
     exige: ['PEDIDOS_REGISTRAR'],
   },
   {
@@ -168,6 +168,10 @@ export const AJUDA_TELAS: AjudaTela[] = [
       },
       {
         texto:
+          'Cliente vai pagar depois de comer? Toque em Pagar depois: o pedido vai para a cozinha sem pagamento e fica em A receber até ele pagar.',
+      },
+      {
+        texto:
           'No computador: F1 abre esta tela, "/" vai para a busca, F2 a F5 escolhem o pagamento e Ctrl+Enter finaliza.',
       },
     ],
@@ -180,6 +184,11 @@ export const AJUDA_TELAS: AjudaTela[] = [
       { texto: 'No alto: número, cliente, data, hora e quem registrou.' },
       { texto: 'Embaixo: os itens, o total, a forma de pagamento, o valor recebido e o troco.' },
       { texto: 'O andamento do preparo mostra se o pedido está na fila, pronto ou entregue.' },
+      {
+        texto:
+          'Pedido "A pagar" (Pagar depois): Receber pagamento cobra o cliente e finaliza o pedido.',
+        exige: ['PEDIDOS_REGISTRAR'],
+      },
       {
         texto:
           'Pedido em PIX: "Mostrar o Pix deste pedido" abre de novo o QR Code e o copia e cola com o valor, se o cliente for pagar depois.',
@@ -211,6 +220,27 @@ export const AJUDA_TELAS: AjudaTela[] = [
     ],
   },
   {
+    rota: /^\/receber/,
+    titulo: 'A receber',
+    resumo: 'Os pedidos de quem come primeiro e paga no fim.',
+    passos: [
+      {
+        texto:
+          'Aparecem aqui os pedidos feitos com Pagar depois, do mais antigo para o mais novo, com o andamento do preparo.',
+      },
+      { texto: 'Quando o cliente vier pagar, toque em Receber no cartão dele.' },
+      {
+        texto:
+          'Escolha a forma de pagamento. Em Dinheiro, digite o valor recebido para ver o troco; em PIX, mostre o QR Code com o valor.',
+      },
+      {
+        texto:
+          'Confirmar pagamento finaliza o pedido: ele sai desta lista e entra no faturamento do dia.',
+      },
+      { texto: 'No alto aparece quantos pedidos faltam receber e quanto somam.' },
+    ],
+  },
+  {
     rota: /^\/fila/,
     titulo: 'Fila de preparo',
     resumo: 'As comandas da cozinha: o que preparar e em que ordem.',
@@ -222,6 +252,10 @@ export const AJUDA_TELAS: AjudaTela[] = [
       { texto: 'Toque em Começar preparo quando for fazer; o cartão vai para Preparando.' },
       { texto: 'Ficou pronto? Marcar pronto. Chame o cliente pelo nome.' },
       { texto: 'Entregou? Entregue ao cliente, e o cartão sai da fila.' },
+      {
+        texto:
+          '"Paga no fim" no cartão quer dizer que o cliente ainda vai pagar no balcão. A cozinha prepara do mesmo jeito.',
+      },
       {
         texto:
           'Tocou errado? Voltar etapa no cartão, ou Voltar para a fila em "Entregues há pouco".',

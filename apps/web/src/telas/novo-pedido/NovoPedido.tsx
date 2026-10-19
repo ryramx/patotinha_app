@@ -35,6 +35,8 @@ import {
 } from './rascunho';
 import { PainelPedido, type Problema } from './PainelPedido';
 
+const pedidoParaDepois = (p: Pedido) => p.status === 'ABERTO';
+
 export function NovoPedido() {
   const { pode } = useSessao();
   const avisos = useAvisos();
@@ -212,127 +214,140 @@ export function NovoPedido() {
     rascunho.telefone && !esquemaTelefone.safeParse(rascunho.telefone).success
       ? t('pedido.telefoneInvalido')
       : null;
-  const dicaFinalizar =
+  // O que falta para mandar o pedido, pagando agora ou depois.
+  const dicaBase =
     rascunho.itens.length === 0
       ? t('dica.semItens')
       : !rascunho.cliente.trim()
         ? t('dica.semCliente')
         : erroTelefone
           ? erroTelefone
-          : !rascunho.forma
-            ? t('dica.semPagamento')
-            : faltaRecebido
-              ? t('pedido.faltam', {
-                  valor: formatarReais(totalCentavos - rascunho.recebidoCentavos!),
-                })
-              : temIndisponivel
-                ? t('pedido.indisponivelLinha')
-                : null;
+          : temIndisponivel
+            ? t('pedido.indisponivelLinha')
+            : null;
+  const dicaFinalizar =
+    dicaBase ??
+    (!rascunho.forma
+      ? t('dica.semPagamento')
+      : faltaRecebido
+        ? t('pedido.faltam', {
+            valor: formatarReais(totalCentavos - rascunho.recebidoCentavos!),
+          })
+        : null);
 
-  const finalizar = useCallback(async () => {
-    if (enviando) return;
-    if (rascunho.itens.length > 0 && !rascunho.cliente.trim()) {
-      // Sem nome não há como chamar o cliente: leva o cursor até o campo.
-      refCliente.current?.focus();
-      avisos.aviso(t('dica.semCliente'));
-      return;
-    }
-    if (dicaFinalizar) return;
-    setEnviando(true);
-    try {
-      const pedido = await api<Pedido>('/pedidos', {
-        metodo: 'POST',
-        corpo: {
-          chaveIdempotencia: rascunho.chaveIdempotencia,
-          cliente: rascunho.cliente.trim(),
-          telefone: rascunho.telefone || undefined,
-          formaPagamento: rascunho.forma,
-          valorRecebido:
-            rascunho.forma === 'DINHEIRO' && rascunho.recebidoCentavos !== null
-              ? (rascunho.recebidoCentavos / 100).toFixed(2)
-              : null,
-          itens: rascunho.itens.map((i) => ({
-            produtoId: i.produtoId,
-            quantidade: i.quantidade,
-            precoExibido: (i.precoCentavos / 100).toFixed(2),
-          })),
-        },
-      });
-      avisos.sucesso(
-        t('sucesso.pedidoGravado', {
-          numero: pedido.id,
-          cliente: pedido.cliente ?? '',
-          total: formatarReais(pedido.total),
-        }),
-      );
-      setRascunho(rascunhoVazio());
-      apagarRascunho();
-      setProblemas(new Map());
-      setSemConexao(false);
-      setPainelAberto(false);
-      void queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      void queryClient.invalidateQueries({ queryKey: ['inicio'] });
-      void queryClient.invalidateQueries({ queryKey: ['fila'] });
-    } catch (e) {
-      const erro = e as ErroDaApi;
-      if (erro.semConexao) {
-        // O rascunho e a mesma chave continuam: tentar de novo não duplica o pedido.
-        setSemConexao(true);
-        avisos.erro(t('erro.semConexaoFinalizar'));
-      } else if (erro.codigo === 'PRECO_ALTERADO') {
-        const lista = erro.detalhes as {
-          produtoId: number;
-          nome: string;
-          precoExibido: string;
-          precoAtual: string;
-        }[];
-        setProblemas((p) => {
-          const n = new Map(p);
-          for (const d of lista) {
-            n.set(d.produtoId, {
-              tipo: 'preco',
-              de: paraCentavos(d.precoExibido),
-              para: paraCentavos(d.precoAtual),
-            });
-          }
-          return n;
+  // Pagar depois (etapa 14): o pedido vai para a cozinha e o cliente paga no fim.
+  const finalizar = useCallback(
+    async (pagarDepois = false) => {
+      if (enviando) return;
+      if (rascunho.itens.length > 0 && !rascunho.cliente.trim()) {
+        // Sem nome não há como chamar o cliente: leva o cursor até o campo.
+        refCliente.current?.focus();
+        avisos.aviso(t('dica.semCliente'));
+        return;
+      }
+      if (pagarDepois ? dicaBase : dicaFinalizar) return;
+      setEnviando(true);
+      try {
+        const pedido = await api<Pedido>('/pedidos', {
+          metodo: 'POST',
+          corpo: {
+            chaveIdempotencia: rascunho.chaveIdempotencia,
+            cliente: rascunho.cliente.trim(),
+            telefone: rascunho.telefone || undefined,
+            ...(pagarDepois
+              ? { pagarDepois: true }
+              : {
+                  formaPagamento: rascunho.forma,
+                  valorRecebido:
+                    rascunho.forma === 'DINHEIRO' && rascunho.recebidoCentavos !== null
+                      ? (rascunho.recebidoCentavos / 100).toFixed(2)
+                      : null,
+                }),
+            itens: rascunho.itens.map((i) => ({
+              produtoId: i.produtoId,
+              quantidade: i.quantidade,
+              precoExibido: (i.precoCentavos / 100).toFixed(2),
+            })),
+          },
         });
-        atualizar((r) => ({
-          ...r,
-          itens: r.itens.map((i) => {
-            const d = lista.find((x) => x.produtoId === i.produtoId);
-            return d ? { ...i, precoCentavos: paraCentavos(d.precoAtual) } : i;
-          }),
-        }));
-        const primeiro = lista[0]!;
-        avisos.aviso(
-          t('erro.precoMudou', {
-            nome: primeiro.nome,
-            de: formatarReais(primeiro.precoExibido),
-            para: formatarReais(primeiro.precoAtual),
+        avisos.sucesso(
+          t(pedidoParaDepois(pedido) ? 'sucesso.pedidoPagarDepois' : 'sucesso.pedidoGravado', {
+            numero: pedido.id,
+            cliente: pedido.cliente ?? '',
+            total: formatarReais(pedido.total),
           }),
         );
-        void queryClient.invalidateQueries({ queryKey: ['produtos'] });
-      } else if (erro.codigo === 'PRODUTO_INATIVO' || erro.codigo === 'PRODUTO_NAO_ENCONTRADO') {
-        const lista = (erro.detalhes as { produtoId: number; nome?: string }[]) ?? [];
-        setProblemas((p) => {
-          const n = new Map(p);
-          for (const d of lista) n.set(d.produtoId, { tipo: 'indisponivel' });
-          return n;
-        });
-        const nome =
-          lista[0]?.nome ??
-          rascunho.itens.find((i) => i.produtoId === lista[0]?.produtoId)?.nome ??
-          '';
-        avisos.erro(t('erro.produtoIndisponivel', { nome }));
-        void queryClient.invalidateQueries({ queryKey: ['produtos'] });
-      } else if (erro.status !== 401) {
-        avisos.erro(erro.message);
+        setRascunho(rascunhoVazio());
+        apagarRascunho();
+        setProblemas(new Map());
+        setSemConexao(false);
+        setPainelAberto(false);
+        void queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+        void queryClient.invalidateQueries({ queryKey: ['inicio'] });
+        void queryClient.invalidateQueries({ queryKey: ['fila'] });
+        void queryClient.invalidateQueries({ queryKey: ['a-receber'] });
+      } catch (e) {
+        const erro = e as ErroDaApi;
+        if (erro.semConexao) {
+          // O rascunho e a mesma chave continuam: tentar de novo não duplica o pedido.
+          setSemConexao(true);
+          avisos.erro(t('erro.semConexaoFinalizar'));
+        } else if (erro.codigo === 'PRECO_ALTERADO') {
+          const lista = erro.detalhes as {
+            produtoId: number;
+            nome: string;
+            precoExibido: string;
+            precoAtual: string;
+          }[];
+          setProblemas((p) => {
+            const n = new Map(p);
+            for (const d of lista) {
+              n.set(d.produtoId, {
+                tipo: 'preco',
+                de: paraCentavos(d.precoExibido),
+                para: paraCentavos(d.precoAtual),
+              });
+            }
+            return n;
+          });
+          atualizar((r) => ({
+            ...r,
+            itens: r.itens.map((i) => {
+              const d = lista.find((x) => x.produtoId === i.produtoId);
+              return d ? { ...i, precoCentavos: paraCentavos(d.precoAtual) } : i;
+            }),
+          }));
+          const primeiro = lista[0]!;
+          avisos.aviso(
+            t('erro.precoMudou', {
+              nome: primeiro.nome,
+              de: formatarReais(primeiro.precoExibido),
+              para: formatarReais(primeiro.precoAtual),
+            }),
+          );
+          void queryClient.invalidateQueries({ queryKey: ['produtos'] });
+        } else if (erro.codigo === 'PRODUTO_INATIVO' || erro.codigo === 'PRODUTO_NAO_ENCONTRADO') {
+          const lista = (erro.detalhes as { produtoId: number; nome?: string }[]) ?? [];
+          setProblemas((p) => {
+            const n = new Map(p);
+            for (const d of lista) n.set(d.produtoId, { tipo: 'indisponivel' });
+            return n;
+          });
+          const nome =
+            lista[0]?.nome ??
+            rascunho.itens.find((i) => i.produtoId === lista[0]?.produtoId)?.nome ??
+            '';
+          avisos.erro(t('erro.produtoIndisponivel', { nome }));
+          void queryClient.invalidateQueries({ queryKey: ['produtos'] });
+        } else if (erro.status !== 401) {
+          avisos.erro(erro.message);
+        }
+      } finally {
+        setEnviando(false);
       }
-    } finally {
-      setEnviando(false);
-    }
-  }, [dicaFinalizar, enviando, rascunho, avisos, queryClient, atualizar]);
+    },
+    [dicaBase, dicaFinalizar, enviando, rascunho, avisos, queryClient, atualizar],
+  );
 
   // Preço confirmado de novo: ao mexer no item com aviso de preço, o aviso some.
   const confirmarPreco = useCallback((produtoId: number) => {
@@ -400,6 +415,7 @@ export function NovoPedido() {
       enviando={enviando}
       semConexao={semConexao}
       dicaFinalizar={dicaFinalizar}
+      podePagarDepois={!dicaBase}
       refCliente={refCliente}
       erroTelefone={erroTelefone}
       aoMudarCliente={(cliente) =>
@@ -434,6 +450,7 @@ export function NovoPedido() {
       aoEscolherForma={escolherForma}
       aoMudarRecebido={(c) => atualizar((r) => ({ ...r, recebidoCentavos: c }))}
       aoFinalizar={() => void finalizar()}
+      aoPagarDepois={() => void finalizar(true)}
       aoLimpar={() => setConfirmarLimpar(true)}
       aoFecharCelular={() => setPainelAberto(false)}
     />

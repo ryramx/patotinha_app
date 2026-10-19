@@ -10,7 +10,8 @@ export type ResultadoCriacao =
   | { criado: false; pedido: NonNullable<Awaited<ReturnType<typeof buscarPedidoCompleto>>> };
 
 /**
- * Registra um pedido já FINALIZADO (opção A do PRD 4.3) numa única transação:
+ * Registra um pedido já FINALIZADO (opção A do PRD 4.3), ou ABERTO quando o cliente paga
+ * depois de comer (etapa 14), numa única transação:
  * ou grava pedido e itens, ou nada (RNF-17). Ordem do PRD 13.1, passo 8.
  */
 export async function criarPedido(
@@ -45,10 +46,13 @@ export async function criarPedido(
           },
         ]),
       );
-      const forma = await tx.formaPagamento.findUnique({ where: { codigo: dados.formaPagamento } });
+      const forma = dados.formaPagamento
+        ? await tx.formaPagamento.findUnique({ where: { codigo: dados.formaPagamento } })
+        : null;
+      const pagarDepois = dados.pagarDepois === true;
 
       // 4 a 6. Confere preços e regras e calcula tudo com os valores do banco.
-      const calculo = calcularPedido(dados.itens, mapa, forma, dados.valorRecebido);
+      const calculo = calcularPedido(dados.itens, mapa, forma, dados.valorRecebido, pagarDepois);
 
       // Cadastro leve de clientes: o nome vira sugestão nos próximos pedidos. A grafia mais
       // recente vale, e o telefone só muda quando vem preenchido. ON CONFLICT evita
@@ -65,14 +69,15 @@ export async function criarPedido(
       // 7. Grava pedido e itens. Usuário vem do token e a hora do servidor (RN-22, RN-23).
       const criado = await tx.pedido.create({
         data: {
-          status: 'FINALIZADO',
+          // Pagar depois: ABERTO até receber; já entra na fila de preparo.
+          status: pagarDepois ? 'ABERTO' : 'FINALIZADO',
           clienteNome: dados.cliente,
           clienteId: cliente!.id,
           // Entra no fim da fila de preparo (comanda digital).
           statusPreparo: 'AGUARDANDO',
           preparoAtualizadoEm: new Date(),
           usuarioId,
-          formaPagamentoId: forma!.id,
+          formaPagamentoId: pagarDepois ? null : forma!.id,
           total: deCentavos(calculo.totalCentavos),
           valorRecebido:
             calculo.valorRecebidoCentavos === null
@@ -80,7 +85,7 @@ export async function criarPedido(
               : deCentavos(calculo.valorRecebidoCentavos),
           troco: calculo.trocoCentavos === null ? null : deCentavos(calculo.trocoCentavos),
           chaveIdempotencia: dados.chaveIdempotencia,
-          finalizadoEm: new Date(),
+          finalizadoEm: pagarDepois ? null : new Date(),
           itens: {
             create: calculo.itens.map((i) => ({
               produtoId: BigInt(i.produtoId),

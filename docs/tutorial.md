@@ -38,7 +38,7 @@ que cada parte do sistema faz, e toda tela tem uma lâmpada que explica o que fa
 ## Lâmpada de cada tela
 
 - Botão de lâmpada no cabeçalho, ao lado da lua/sol, em todas as telas depois do login
-  (Novo pedido, Fila, Histórico, Detalhe do pedido, Início, Resumo, Produtos, Categorias,
+  (Novo pedido, A receber, Fila, Histórico, Detalhe do pedido, Início, Resumo, Produtos, Categorias,
   Usuários, Perfis e Pix da loja). No celular também fica no cabeçalho.
 - Abre a janela **"Como funciona: <tela>"** com uma frase sobre para que a tela serve e os passos
   numerados de como usar. Passos de coisas que o perfil não faz não aparecem (por exemplo, o

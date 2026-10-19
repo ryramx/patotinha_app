@@ -38,6 +38,9 @@ funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
 - **Pix com o valor do pedido:** o pedido em PIX mostra o QR Code e o Pix copia e cola já com o
   valor, para a chave que o administrador cadastra em **Cadastros › Pix da loja**. Sem taxa; quem
   atende confere no app do banco. Detalhes em [docs/pix.md](docs/pix.md).
+- **Pagar depois:** o pedido vai para a cozinha sem pagamento e aparece na tela **A receber**,
+  onde o balcão cobra quando o cliente terminar (dinheiro com troco, PIX, débito ou crédito). Só
+  conta nas vendas depois de recebido. Detalhes em [docs/pagar-depois.md](docs/pagar-depois.md).
 - **Acesso:** login com sessão de 12 horas, troca da própria senha e limite de tentativas de
   login. Um usuário desativado perde a sessão na hora.
 - **Atalhos de teclado** para o balcão (tecla `?` mostra a lista): F1 abre um novo pedido, `/`
@@ -175,13 +178,14 @@ apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos (
 apps/web/        React. telas/, componentes/, layout/, estilos/tokens.css, textos.pt-BR.json
   public/        manifest.webmanifest, sw.js (app instalável), logo, ícones e favicon
 packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
-e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, clientes, tutorial, Pix, tablet, preço alterado)
+e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, clientes, tutorial, Pix, pagar depois, tablet, preço alterado)
 docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
                  comanda.md: nome do cliente e fila de preparo
                  clientes.md: sugestão de clientes e telefone opcional
                  perfis.md: perfis de acesso e a tela de permissões (etapa 10)
                  tutorial.md: tutorial de primeiro acesso e lâmpadas de ajuda (etapa 12)
                  pix.md: Pix com o valor do pedido e a tela Pix da loja (etapa 13)
+                 pagar-depois.md: Pagar depois e a tela A receber (etapa 14)
                  site-separado.md: site no Static Site, tela "Carregando…" e passo a passo
   marca/         Arte original da logo e a versão sem fundo
 scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)

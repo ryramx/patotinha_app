@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Undo2 } from 'lucide-react';
+import { HandCoins, Undo2 } from 'lucide-react';
 import {
   formatarHora,
   type FilaPreparo,
@@ -193,6 +193,11 @@ function CartaoComanda({
           <p className="truncate font-titulo text-[24px] font-semibold leading-8">
             {pedido.cliente ?? t('fila.semNome')}
           </p>
+          {pedido.aPagar && (
+            <span className="mb-0.5 inline-flex items-center gap-1 rounded-full bg-aviso-fundo px-2 py-0.5 text-[13px] font-bold text-aviso">
+              <HandCoins size={14} aria-hidden /> {t('fila.aPagar')}
+            </span>
+          )}
           <p className="legenda tabular-nums">
             {verPedido ? (
               <Link

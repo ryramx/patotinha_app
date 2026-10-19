@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ban, QrCode } from 'lucide-react';
+import { Ban, HandCoins, QrCode } from 'lucide-react';
 import {
   formatarData,
   formatarHora,
@@ -25,6 +25,7 @@ import {
 } from '../componentes/Diversos';
 import { Janela } from '../componentes/Janela';
 import { JanelaPix } from '../componentes/JanelaPix';
+import { JanelaReceber } from '../componentes/JanelaReceber';
 import { t } from '../textos';
 
 const SUGESTOES = ['Cliente desistiu', 'Lançado errado', 'Pedido duplicado'];
@@ -62,6 +63,7 @@ export function DetalhePedido() {
         <ConteudoPedido
           p={pedido.data}
           podeCancelar={pode('PEDIDOS_CANCELAR')}
+          podeReceber={pode('PEDIDOS_REGISTRAR')}
           aoCancelar={() => setCancelando(true)}
         />
       )}
@@ -76,14 +78,18 @@ export function DetalhePedido() {
 function ConteudoPedido({
   p,
   podeCancelar,
+  podeReceber,
   aoCancelar,
 }: {
   p: Pedido;
   podeCancelar: boolean;
+  podeReceber: boolean;
   aoCancelar: () => void;
 }) {
   const cancelado = p.status === 'CANCELADO';
   const [verPix, setVerPix] = useState(false);
+  const [recebendo, setRecebendo] = useState(false);
+  const queryClient = useQueryClient();
   return (
     <>
       {p.cancelamento && (
@@ -108,7 +114,7 @@ function ConteudoPedido({
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="titulo-tela">{t('detalhe.titulo', { numero: p.id })}</h1>
             <EtiquetaStatus status={p.status} />
-            {p.status === 'FINALIZADO' && <EtiquetaPreparo status={p.preparo.status} />}
+            {p.status !== 'CANCELADO' && <EtiquetaPreparo status={p.preparo.status} />}
           </div>
           {p.cliente && (
             <p className="mt-1 text-[20px] font-bold">
@@ -123,11 +129,22 @@ function ConteudoPedido({
             })}
           </p>
         </div>
-        {podeCancelar && p.status === 'FINALIZADO' && (
-          <Botao variante="perigo" onClick={aoCancelar}>
-            {t('confirmacao.cancelarBotao')}
-          </Botao>
-        )}
+        <div className="flex flex-wrap gap-3">
+          {podeReceber && p.status === 'ABERTO' && (
+            <Botao
+              variante="principal"
+              icone={<HandCoins size={20} aria-hidden />}
+              onClick={() => setRecebendo(true)}
+            >
+              {t('receber.receberPagamento')}
+            </Botao>
+          )}
+          {podeCancelar && p.status !== 'CANCELADO' && (
+            <Botao variante="perigo" onClick={aoCancelar}>
+              {t('confirmacao.cancelarBotao')}
+            </Botao>
+          )}
+        </div>
       </div>
 
       {p.formaPagamento && (
@@ -155,6 +172,13 @@ function ConteudoPedido({
             </Botao>
           )}
         </div>
+      )}
+      {recebendo && (
+        <JanelaReceber
+          pedido={p}
+          aoFechar={() => setRecebendo(false)}
+          aoReceber={(pago) => queryClient.setQueryData(['pedidos', 'detalhe', String(p.id)], pago)}
+        />
       )}
       {verPix && (
         <JanelaPix

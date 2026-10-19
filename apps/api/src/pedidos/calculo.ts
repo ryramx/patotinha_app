@@ -62,6 +62,7 @@ export function calcularPedido(
   produtos: Map<number, ProdutoAtual>,
   forma: FormaAtual | null,
   valorRecebido: string | null | undefined,
+  pagarDepois = false,
 ): PedidoCalculado {
   if (itensRecebidos.length === 0) {
     throw new ErroApp(422, 'PEDIDO_SEM_ITENS', 'Adicione pelo menos um produto');
@@ -121,10 +122,6 @@ export function calcularPedido(
     );
   }
 
-  if (!forma || !forma.ativo) {
-    throw new ErroApp(422, 'FORMA_PAGAMENTO_INVALIDA', 'Escolha uma forma de pagamento válida');
-  }
-
   const calculados: ItemCalculado[] = itens.map((i) => {
     const produto = produtos.get(i.produtoId)!;
     return {
@@ -137,6 +134,33 @@ export function calcularPedido(
   });
   const totalCentavos = calculados.reduce((soma, i) => soma + i.subtotalCentavos, 0);
 
+  // Pagar depois (etapa 14): sem forma nem valor recebido agora; o pagamento vem no fim.
+  if (pagarDepois) {
+    if (forma || (valorRecebido !== null && valorRecebido !== undefined && valorRecebido !== '')) {
+      throw new ErroApp(
+        422,
+        'PAGAR_DEPOIS_SEM_PAGAMENTO',
+        'Pedido para pagar depois não leva forma de pagamento agora',
+      );
+    }
+    return { itens: calculados, totalCentavos, valorRecebidoCentavos: null, trocoCentavos: null };
+  }
+  return {
+    itens: calculados,
+    totalCentavos,
+    ...calcularPagamento(totalCentavos, forma, valorRecebido),
+  };
+}
+
+/** Confere a forma de pagamento e calcula o troco (na hora do pedido ou ao receber depois). */
+export function calcularPagamento(
+  totalCentavos: number,
+  forma: FormaAtual | null,
+  valorRecebido: string | null | undefined,
+): { valorRecebidoCentavos: number | null; trocoCentavos: number | null } {
+  if (!forma || !forma.ativo) {
+    throw new ErroApp(422, 'FORMA_PAGAMENTO_INVALIDA', 'Escolha uma forma de pagamento válida');
+  }
   let valorRecebidoCentavos: number | null = null;
   let trocoCentavos: number | null = null;
   if (valorRecebido !== null && valorRecebido !== undefined && valorRecebido !== '') {
@@ -159,6 +183,5 @@ export function calcularPedido(
     }
     trocoCentavos = valorRecebidoCentavos - totalCentavos;
   }
-
-  return { itens: calculados, totalCentavos, valorRecebidoCentavos, trocoCentavos };
+  return { valorRecebidoCentavos, trocoCentavos };
 }

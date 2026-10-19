@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
-import { Check, Minus, Plus, QrCode, Trash2, TriangleAlert, X } from 'lucide-react';
+import { Check, HandCoins, Minus, Plus, QrCode, Trash2, TriangleAlert, X } from 'lucide-react';
 import {
   formatarReais,
   LIMITES,
@@ -26,6 +26,8 @@ interface Props {
   enviando: boolean;
   semConexao: boolean;
   dicaFinalizar: string | null;
+  /** Pagar depois só precisa de itens e nome do cliente. */
+  podePagarDepois: boolean;
   refCliente: RefObject<HTMLInputElement | null>;
   erroTelefone: string | null;
   aoMudarCliente: (nome: string) => void;
@@ -36,6 +38,7 @@ interface Props {
   aoEscolherForma: (forma: CodigoPagamento) => void;
   aoMudarRecebido: (centavos: number | null) => void;
   aoFinalizar: () => void;
+  aoPagarDepois: () => void;
   aoLimpar: () => void;
   aoFecharCelular: () => void;
 }
@@ -228,6 +231,16 @@ export function PainelPedido(props: Props) {
           onClick={props.aoFinalizar}
         >
           {props.semConexao ? t('pedido.tentarDeNovo') : t('pedido.finalizar')}
+        </Botao>
+        <Botao
+          variante="secundario"
+          className="mt-2 w-full"
+          icone={<HandCoins size={20} aria-hidden />}
+          title={t('pedido.pagarDepoisDica')}
+          disabled={!props.podePagarDepois || props.enviando}
+          onClick={props.aoPagarDepois}
+        >
+          {t('pedido.pagarDepois')}
         </Botao>
         <div className="mt-2 text-center">
           <Botao

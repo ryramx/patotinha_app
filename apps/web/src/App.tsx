@@ -9,6 +9,7 @@ import { NovoPedido } from './telas/novo-pedido/NovoPedido';
 import { Historico } from './telas/Historico';
 import { DetalhePedido } from './telas/DetalhePedido';
 import { Fila } from './telas/Fila';
+import { AReceber } from './telas/AReceber';
 import { Resumo } from './telas/Resumo';
 import { Produtos } from './telas/cadastros/Produtos';
 import { Categorias } from './telas/cadastros/Categorias';
@@ -87,6 +88,14 @@ export function App() {
           element={
             <Exige permissao="PEDIDOS_VER">
               <DetalhePedido />
+            </Exige>
+          }
+        />
+        <Route
+          path="receber"
+          element={
+            <Exige permissao="PEDIDOS_REGISTRAR">
+              <AReceber />
             </Exige>
           }
         />
