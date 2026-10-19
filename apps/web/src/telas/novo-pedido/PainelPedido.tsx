@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
-import { Check, Minus, Plus, Trash2, TriangleAlert, X } from 'lucide-react';
+import { Check, Minus, Plus, QrCode, Trash2, TriangleAlert, X } from 'lucide-react';
 import {
   formatarReais,
   LIMITES,
@@ -10,6 +10,7 @@ import {
 import { Botao } from '../../componentes/Botao';
 import { CampoDinheiro } from '../../componentes/Campos';
 import { IconePagamento, NOME_PAGAMENTO } from '../../componentes/Diversos';
+import { JanelaPix } from '../../componentes/JanelaPix';
 import { t } from '../../textos';
 import { CampoCliente } from './CampoCliente';
 import type { ItemRascunho, Rascunho } from './rascunho';
@@ -50,6 +51,7 @@ const TECLA: Record<CodigoPagamento, string> = {
 export function PainelPedido(props: Props) {
   const { rascunho, totalCentavos, problemas, piscando } = props;
   const refLista = useRef<HTMLUListElement>(null);
+  const [verPix, setVerPix] = useState(false);
   const unidades = rascunho.itens.reduce((s, i) => s + i.quantidade, 0);
 
   // Item novo: a lista rola até ele.
@@ -188,6 +190,25 @@ export function PainelPedido(props: Props) {
               </p>
             )}
           </div>
+        )}
+
+        {rascunho.forma === 'PIX' && totalCentavos > 0 && (
+          <Botao
+            variante="secundario"
+            className="mt-3 w-full"
+            icone={<QrCode size={20} aria-hidden />}
+            onClick={() => setVerPix(true)}
+          >
+            {t('pix.mostrar')}
+          </Botao>
+        )}
+        {verPix && (
+          <JanelaPix
+            totalCentavos={totalCentavos}
+            identificador="PATOTINHA"
+            descricao={rascunho.cliente.trim() || undefined}
+            aoFechar={() => setVerPix(false)}
+          />
         )}
 
         {props.dicaFinalizar && (

@@ -35,6 +35,9 @@ funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
 - **Tutorial e lâmpadas de ajuda:** no primeiro acesso, cards explicam o que cada parte faz (só
   as telas do perfil da pessoa); toda tela tem uma lâmpada no cabeçalho com o passo a passo.
   Detalhes em [docs/tutorial.md](docs/tutorial.md).
+- **Pix com o valor do pedido:** o pedido em PIX mostra o QR Code e o Pix copia e cola já com o
+  valor, para a chave que o administrador cadastra em **Cadastros › Pix da loja**. Sem taxa; quem
+  atende confere no app do banco. Detalhes em [docs/pix.md](docs/pix.md).
 - **Acesso:** login com sessão de 12 horas, troca da própria senha e limite de tentativas de
   login. Um usuário desativado perde a sessão na hora.
 - **Atalhos de teclado** para o balcão (tecla `?` mostra a lista): F1 abre um novo pedido, `/`
@@ -165,19 +168,20 @@ O CI (`.github/workflows/ci.yml`) roda tudo isso com um PostgreSQL 16 de serviç
 ## Estrutura
 
 ```text
-apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos (com a fila), relatorios
+apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos (com a fila), relatorios, pix
   prisma/        schema.prisma e migrações (DDL do PRD 15.5, com CHECKs e gatilhos)
   scripts/       seed-dev.ts (o seed-admin fica em src/scripts para rodar também no servidor)
   test/          testes de integração (Supertest) contra PostgreSQL real
 apps/web/        React. telas/, componentes/, layout/, estilos/tokens.css, textos.pt-BR.json
   public/        manifest.webmanifest, sw.js (app instalável), logo, ícones e favicon
 packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
-e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, clientes, tutorial, tablet, preço alterado)
+e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, clientes, tutorial, Pix, tablet, preço alterado)
 docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
                  comanda.md: nome do cliente e fila de preparo
                  clientes.md: sugestão de clientes e telefone opcional
                  perfis.md: perfis de acesso e a tela de permissões (etapa 10)
                  tutorial.md: tutorial de primeiro acesso e lâmpadas de ajuda (etapa 12)
+                 pix.md: Pix com o valor do pedido e a tela Pix da loja (etapa 13)
                  site-separado.md: site no Static Site, tela "Carregando…" e passo a passo
   marca/         Arte original da logo e a versão sem fundo
 scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)

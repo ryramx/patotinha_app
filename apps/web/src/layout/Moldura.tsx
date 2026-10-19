@@ -11,6 +11,7 @@ import {
   LogOut,
   Moon,
   PlusCircle,
+  QrCode,
   Receipt,
   ShieldCheck,
   Sun,
@@ -113,6 +114,13 @@ const CADASTROS: ItemMenu[] = [
     Icone: ShieldCheck,
     exige: ['ADMIN'],
   },
+  {
+    para: '/pix',
+    rotulo: t('menu.pix'),
+    curto: t('menu.pix'),
+    Icone: QrCode,
+    exige: ['ADMIN'],
+  },
 ];
 
 const TITULOS: [RegExp, string][] = [
@@ -125,6 +133,7 @@ const TITULOS: [RegExp, string][] = [
   [/^\/categorias/, 'Categorias'],
   [/^\/usuarios/, 'Usuários'],
   [/^\/perfis/, 'Perfis e permissões'],
+  [/^\/pix/, 'Pix da loja'],
   [/^\/$/, 'Início'],
 ];
 

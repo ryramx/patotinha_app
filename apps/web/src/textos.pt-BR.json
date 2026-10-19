@@ -33,7 +33,8 @@
     "novo": "Novo",
     "filaCurta": "Fila",
     "perfis": "Perfis e permissões",
-    "tutorial": "Ver tutorial"
+    "tutorial": "Ver tutorial",
+    "pix": "Pix da loja"
   },
   "ajuda": {
     "verTutorial": "Ver tutorial",
@@ -277,5 +278,37 @@
     "naFila": "{quantidade} na fila",
     "posicao": "{posicao}º",
     "pedidoCancelado": "Este pedido foi cancelado e saiu da fila"
+  },
+  "pix": {
+    "titulo": "Pagar com Pix",
+    "mostrar": "Mostrar QR Code do Pix",
+    "qrAlt": "QR Code do Pix com o valor do pedido",
+    "copiaECola": "Pix copia e cola",
+    "copiar": "Copiar Pix copia e cola",
+    "copiado": "Copiado! Cole no app do banco",
+    "naoCopiou": "Não deu para copiar sozinho. Toque no código acima, selecione tudo e copie.",
+    "compartilhar": "Enviar o código (WhatsApp e outros)",
+    "recebedor": "Para {nome} · {tipo} {chave}",
+    "confira": "O sistema não confirma o pagamento sozinho: confira no app do banco se o Pix entrou antes de finalizar.",
+    "naoConfigurado": "O Pix da loja ainda não foi configurado.",
+    "configurarAdmin": "Cadastre a chave Pix em Cadastros › Pix da loja para o QR Code aparecer aqui.",
+    "configurarPeca": "Peça ao administrador para cadastrar a chave Pix em Cadastros › Pix da loja.",
+    "irConfigurar": "Configurar o Pix agora",
+    "intro": "Cadastre a chave Pix que recebe os pagamentos. Cada pedido em Pix mostra o QR Code e o copia e cola já com o valor dele. Pode trocar quando quiser.",
+    "tipo": "Tipo da chave",
+    "chave": "Chave Pix",
+    "dicaChave": "Igual à cadastrada no app do banco.",
+    "nome": "Nome do recebedor",
+    "dicaNome": "Aparece para o cliente na hora de pagar. Até {max} letras, sem acento.",
+    "cidade": "Cidade",
+    "dicaCidade": "Até {max} letras, sem acento.",
+    "salvar": "Salvar Pix",
+    "salvando": "Salvando…",
+    "salvo": "Pix da loja salvo",
+    "testar": "Testar com R$ 1,00",
+    "salveAntes": "Salve as mudanças antes de testar",
+    "testeDescricao": "Teste: leia com o app do seu banco e confira o nome antes de pagar.",
+    "pedido": "Pedido nº {numero} · {cliente}",
+    "deste": "Mostrar o Pix deste pedido"
   }
 }

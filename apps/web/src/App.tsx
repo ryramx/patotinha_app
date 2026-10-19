@@ -14,6 +14,7 @@ import { Produtos } from './telas/cadastros/Produtos';
 import { Categorias } from './telas/cadastros/Categorias';
 import { Usuarios } from './telas/cadastros/Usuarios';
 import { Perfis } from './telas/cadastros/Perfis';
+import { PixLoja } from './telas/cadastros/PixLoja';
 import { Vazio } from './componentes/Diversos';
 import { t } from './textos';
 
@@ -134,6 +135,14 @@ export function App() {
           element={
             <Exige permissao="ADMIN">
               <Perfis />
+            </Exige>
+          }
+        />
+        <Route
+          path="pix"
+          element={
+            <Exige permissao="ADMIN">
+              <PixLoja />
             </Exige>
           }
         />

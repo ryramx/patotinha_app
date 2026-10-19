@@ -8,7 +8,7 @@ que cada parte do sistema faz, e toda tela tem uma lâmpada que explica o que fa
 - Abre sozinho **uma vez por usuário**, logo depois do primeiro login. O servidor guarda que a
   pessoa já viu, então não volta a abrir em outro computador, tablet ou celular.
 - Cada pessoa vê **só os cards das telas que o perfil dela abre** (ver [perfis.md](perfis.md)).
-  De fábrica: Funcionário e Chef veem 4 cards, Gerente 7 e Administrador 11.
+  De fábrica: Funcionário e Chef veem 4 cards, Gerente 7 e Administrador 12.
 
 | Card                        | Quem vê                                  |
 | --------------------------- | ---------------------------------------- |
@@ -21,6 +21,7 @@ que cada parte do sistema faz, e toda tela tem uma lâmpada que explica o que fa
 | Cardápio                    | Cardápio                                 |
 | Usuários                    | Usuários                                 |
 | Perfis e permissões         | Só o Administrador                       |
+| Pix da loja                 | Só o Administrador                       |
 | No alto da tela             | Todos (conexão, Modo Claro/Escuro, menu) |
 | Lâmpada                     | Todos                                    |
 
@@ -38,7 +39,7 @@ que cada parte do sistema faz, e toda tela tem uma lâmpada que explica o que fa
 
 - Botão de lâmpada no cabeçalho, ao lado da lua/sol, em todas as telas depois do login
   (Novo pedido, Fila, Histórico, Detalhe do pedido, Início, Resumo, Produtos, Categorias,
-  Usuários e Perfis). No celular também fica no cabeçalho.
+  Usuários, Perfis e Pix da loja). No celular também fica no cabeçalho.
 - Abre a janela **"Como funciona: <tela>"** com uma frase sobre para que a tela serve e os passos
   numerados de como usar. Passos de coisas que o perfil não faz não aparecem (por exemplo, o
   passo de cancelar pedido só aparece para quem pode cancelar).
