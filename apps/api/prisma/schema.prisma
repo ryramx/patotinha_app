@@ -3,6 +3,7 @@
 // Perfis e permissões (etapa 10) na migração 20261017000000_perfis.
 // Clientes (sugestão de nome no novo pedido, telefone opcional) na migração 20261017010000_clientes.
 // Tutorial de primeiro acesso (quando o usuário viu os cards) na migração 20261017020000_tutorial.
+// Pix da loja (chave, recebedor e cidade do copia e cola) na migração 20261019000000_pix.
 // CHECKs, índices em lower() e o gatilho de atualizado_em ficam na migração SQL,
 // porque o Prisma não os representa no schema.
 
@@ -31,6 +32,7 @@ model Usuario {
   dadosPerfil       Perfil   @relation(fields: [perfil], references: [codigo], onDelete: Restrict, onUpdate: NoAction, map: "fk_usuarios_perfil")
   pedidos           Pedido[] @relation("PedidoUsuario")
   pedidosCancelados Pedido[] @relation("PedidoCanceladoPor")
+  configPix         ConfigPix[]
 
   @@index([perfil], map: "ix_usuarios_perfil")
   @@map("usuarios")
@@ -151,4 +153,19 @@ model ItemPedido {
   @@unique([pedidoId, produtoId], map: "uq_itens_pedido_produto")
   @@index([produtoId], map: "ix_itens_produto")
   @@map("itens_pedido")
+}
+
+// Pix da loja: uma linha só (id = 1), gravada pelo administrador na tela "Pix da loja".
+model ConfigPix {
+  id              Int      @id @default(1) @db.SmallInt
+  tipoChave       String   @map("tipo_chave") @db.VarChar(10)
+  chave           String   @db.VarChar(77)
+  nomeRecebedor   String   @map("nome_recebedor") @db.VarChar(25)
+  cidade          String   @db.VarChar(15)
+  atualizadoPorId BigInt?  @map("atualizado_por_id")
+  atualizadoEm    DateTime @default(now()) @map("atualizado_em") @db.Timestamptz(6)
+
+  atualizadoPor Usuario? @relation(fields: [atualizadoPorId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@map("config_pix")
 }

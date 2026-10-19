@@ -160,3 +160,14 @@ export interface RelatorioVendas {
 export interface StatusCategoriaResposta extends Categoria {
   produtosAfetados: number;
 }
+
+/** Pix da loja (etapa 13): sem chave cadastrada, o pedido mostra o aviso para configurar. */
+export interface ConfigPix {
+  configurado: boolean;
+  tipoChave: import('./pix.js').TipoChavePix | null;
+  /** Já normalizada: CPF e CNPJ só números, celular com +55. */
+  chave: string | null;
+  nome: string | null;
+  cidade: string | null;
+  atualizadoEm: string | null;
+}

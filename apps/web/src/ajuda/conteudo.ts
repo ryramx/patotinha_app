@@ -5,6 +5,7 @@ import {
   House,
   Lightbulb,
   PlusCircle,
+  QrCode,
   Receipt,
   ShieldCheck,
   Smile,
@@ -102,6 +103,14 @@ export const CARDS_TUTORIAL: CardTutorial[] = [
     exige: ['ADMIN'],
   },
   {
+    id: 'pix',
+    Icone: QrCode,
+    titulo: 'Pix da loja',
+    texto:
+      'Em Cadastros › Pix da loja você cadastra a chave Pix que recebe os pagamentos. Com ela, todo pedido em PIX mostra o QR Code e o copia e cola já com o valor do pedido.',
+    exige: ['ADMIN'],
+  },
+  {
     id: 'topo',
     Icone: SunMoon,
     titulo: 'No alto da tela',
@@ -151,6 +160,10 @@ export const AJUDA_TELAS: AjudaTela[] = [
       },
       {
         texto:
+          'Em PIX, toque em Mostrar QR Code do Pix: o cliente lê o QR Code ou recebe o copia e cola, já com o valor. Confira no app do banco se o Pix entrou antes de finalizar.',
+      },
+      {
+        texto:
           'Toque em Finalizar pedido. Se a internet cair, o pedido continua na tela e é só tentar de novo, sem duplicar.',
       },
       {
@@ -167,6 +180,10 @@ export const AJUDA_TELAS: AjudaTela[] = [
       { texto: 'No alto: número, cliente, data, hora e quem registrou.' },
       { texto: 'Embaixo: os itens, o total, a forma de pagamento, o valor recebido e o troco.' },
       { texto: 'O andamento do preparo mostra se o pedido está na fila, pronto ou entregue.' },
+      {
+        texto:
+          'Pedido em PIX: "Mostrar o Pix deste pedido" abre de novo o QR Code e o copia e cola com o valor, se o cliente for pagar depois.',
+      },
       {
         texto:
           'Cancelar pedido pede um motivo. O pedido sai do faturamento, mas continua no histórico como cancelado. Não dá para desfazer.',
@@ -291,6 +308,30 @@ export const AJUDA_TELAS: AjudaTela[] = [
       {
         texto:
           'O Administrador sempre pode tudo e não dá para mudar, para ninguém ficar trancado fora.',
+      },
+    ],
+  },
+  {
+    rota: /^\/pix/,
+    titulo: 'Pix da loja',
+    resumo: 'A chave Pix que aparece no QR Code e no copia e cola de cada pedido.',
+    passos: [
+      {
+        texto:
+          'Escolha o tipo da chave (celular, CPF, CNPJ, e-mail ou aleatória) e digite a chave igual à do app do banco.',
+      },
+      {
+        texto:
+          'Nome do recebedor e cidade aparecem para o cliente na hora de pagar. Sem acentos, que o Pix não aceita.',
+      },
+      { texto: 'Toque em Salvar Pix. Vale na hora para todos os pedidos.' },
+      {
+        texto:
+          'Testar com R$ 1,00 mostra um QR Code de teste: leia com o app do seu banco e confira se aparece o nome certo.',
+      },
+      {
+        texto:
+          'O sistema não confirma o pagamento sozinho. Quem atende confere no app do banco se o Pix entrou.',
       },
     ],
   },

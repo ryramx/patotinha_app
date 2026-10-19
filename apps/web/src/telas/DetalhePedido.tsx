@@ -1,8 +1,15 @@
 import { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Ban } from 'lucide-react';
-import { formatarData, formatarHora, formatarReais, LIMITES, type Pedido } from '@patotinha/shared';
+import { Ban, QrCode } from 'lucide-react';
+import {
+  formatarData,
+  formatarHora,
+  formatarReais,
+  LIMITES,
+  paraCentavos,
+  type Pedido,
+} from '@patotinha/shared';
 import { api, ErroDaApi } from '../api/cliente';
 import { useSessao } from '../auth/sessao';
 import { useAvisos } from '../componentes/Avisos';
@@ -17,6 +24,7 @@ import {
   Vazio,
 } from '../componentes/Diversos';
 import { Janela } from '../componentes/Janela';
+import { JanelaPix } from '../componentes/JanelaPix';
 import { t } from '../textos';
 
 const SUGESTOES = ['Cliente desistiu', 'Lançado errado', 'Pedido duplicado'];
@@ -75,6 +83,7 @@ function ConteudoPedido({
   aoCancelar: () => void;
 }) {
   const cancelado = p.status === 'CANCELADO';
+  const [verPix, setVerPix] = useState(false);
   return (
     <>
       {p.cancelamento && (
@@ -122,7 +131,7 @@ function ConteudoPedido({
       </div>
 
       {p.formaPagamento && (
-        <div className="cartao inline-flex w-fit items-center gap-3 px-4 py-3">
+        <div className="cartao inline-flex w-fit flex-wrap items-center gap-3 px-4 py-3">
           <IconePagamento codigo={p.formaPagamento.codigo} tamanho={24} />
           <div>
             <p className="font-bold">{NOME_PAGAMENTO[p.formaPagamento.codigo]}</p>
@@ -135,7 +144,29 @@ function ConteudoPedido({
               </p>
             )}
           </div>
+          {/* Cliente vai pagar depois de gravado: mostra de novo o Pix com o valor do pedido. */}
+          {p.formaPagamento.codigo === 'PIX' && !cancelado && (
+            <Botao
+              variante="secundario"
+              icone={<QrCode size={20} aria-hidden />}
+              onClick={() => setVerPix(true)}
+            >
+              {t('pix.deste')}
+            </Botao>
+          )}
         </div>
+      )}
+      {verPix && (
+        <JanelaPix
+          totalCentavos={paraCentavos(p.total)}
+          identificador={`PEDIDO${p.id}`}
+          descricao={
+            p.cliente
+              ? t('pix.pedido', { numero: p.id, cliente: p.cliente })
+              : t('detalhe.titulo', { numero: p.id })
+          }
+          aoFechar={() => setVerPix(false)}
+        />
       )}
 
       <div className="cartao overflow-x-auto">
