@@ -203,6 +203,10 @@
     "porForma": "Por forma de pagamento",
     "cartao": "Cartão (débito + crédito)",
     "maisVendidos": "Mais vendidos",
+    "carroChefe": "Carro-chefe de cada categoria",
+    "carroChefeDica": "O que mais saiu no período em cada parte do cardápio.",
+    "vendidos": "{quantidade} vendidos · {valor}",
+    "vendidoUm": "{quantidade} vendido · {valor}",
     "imprimir": "Imprimir"
   },
   "periodo": {
