@@ -15,7 +15,7 @@ import { EtiquetaPreparo, LinhasEsqueleto, Vazio } from '../componentes/Diversos
 import { JanelaReceber } from '../componentes/JanelaReceber';
 import { t } from '../textos';
 
-/** Pagar depois (etapa 14): pedidos que o cliente vai pagar no fim, para cobrar. */
+/** Pagar depois (etapa 15): pedidos que o cliente vai pagar no fim, para cobrar. */
 export function AReceber() {
   const [recebendo, setRecebendo] = useState<PedidoAReceber | null>(null);
   const lista = useQuery({

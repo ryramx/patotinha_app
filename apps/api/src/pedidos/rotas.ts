@@ -116,7 +116,7 @@ export async function rotasPedidos(app: FastifyInstance) {
     return paraPedidoApi(pedido);
   });
 
-  // Pagar depois (etapa 14): quem registra pedidos vê os que faltam pagar, de qualquer dia,
+  // Pagar depois (etapa 15): quem registra pedidos vê os que faltam pagar, de qualquer dia,
   // do mais antigo para o mais novo.
   app.get(
     '/pedidos/a-receber',

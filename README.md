@@ -185,7 +185,7 @@ docs/            verificacao.md: critérios de aceitação, segurança e tempos 
                  perfis.md: perfis de acesso e a tela de permissões (etapa 10)
                  tutorial.md: tutorial de primeiro acesso e lâmpadas de ajuda (etapa 12)
                  pix.md: Pix com o valor do pedido e a tela Pix da loja (etapa 13)
-                 pagar-depois.md: Pagar depois e a tela A receber (etapa 14)
+                 pagar-depois.md: Pagar depois e a tela A receber (etapa 15)
                  site-separado.md: site no Static Site, tela "Carregando…" e passo a passo
   marca/         Arte original da logo e a versão sem fundo
 scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)

@@ -134,7 +134,7 @@ export function calcularPedido(
   });
   const totalCentavos = calculados.reduce((soma, i) => soma + i.subtotalCentavos, 0);
 
-  // Pagar depois (etapa 14): sem forma nem valor recebido agora; o pagamento vem no fim.
+  // Pagar depois (etapa 15): sem forma nem valor recebido agora; o pagamento vem no fim.
   if (pagarDepois) {
     if (forma || (valorRecebido !== null && valorRecebido !== undefined && valorRecebido !== '')) {
       throw new ErroApp(

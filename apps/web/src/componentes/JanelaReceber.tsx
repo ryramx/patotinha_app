@@ -25,7 +25,7 @@ interface Props {
   aoReceber?: (pedido: Pedido) => void;
 }
 
-/** Pagar depois (etapa 14): recebe o pagamento de um pedido que o cliente já comeu. */
+/** Pagar depois (etapa 15): recebe o pagamento de um pedido que o cliente já comeu. */
 export function JanelaReceber({ pedido, aoFechar, aoReceber }: Props) {
   const avisos = useAvisos();
   const queryClient = useQueryClient();

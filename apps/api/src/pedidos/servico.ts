@@ -11,7 +11,7 @@ export type ResultadoCriacao =
 
 /**
  * Registra um pedido já FINALIZADO (opção A do PRD 4.3), ou ABERTO quando o cliente paga
- * depois de comer (etapa 14), numa única transação:
+ * depois de comer (etapa 15), numa única transação:
  * ou grava pedido e itens, ou nada (RNF-17). Ordem do PRD 13.1, passo 8.
  */
 export async function criarPedido(

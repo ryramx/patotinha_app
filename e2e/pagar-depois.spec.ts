@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { CHEF, FUNCIONARIO } from './dados';
 
-/** Etapa 14: o cliente come primeiro e paga no fim. */
+/** Etapa 15: o cliente come primeiro e paga no fim. */
 
 async function entrar(page: Page, u: { login: string; senha: string }) {
   await page.goto('/login');

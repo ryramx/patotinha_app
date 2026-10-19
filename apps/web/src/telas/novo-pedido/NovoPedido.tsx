@@ -235,7 +235,7 @@ export function NovoPedido() {
           })
         : null);
 
-  // Pagar depois (etapa 14): o pedido vai para a cozinha e o cliente paga no fim.
+  // Pagar depois (etapa 15): o pedido vai para a cozinha e o cliente paga no fim.
   const finalizar = useCallback(
     async (pagarDepois = false) => {
       if (enviando) return;

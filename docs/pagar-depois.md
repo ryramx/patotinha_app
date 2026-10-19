@@ -1,4 +1,4 @@
-# Pagar depois e tela A receber (etapa 14)
+# Pagar depois e tela A receber (etapa 15)
 
 Adicionado em 19/10/2026, a pedido do Ryan: na Patotinha o costume é o cliente pedir, comer e
 pagar no fim. O pedido agora pode ir para a cozinha **sem pagamento**, e a cobrança fica para

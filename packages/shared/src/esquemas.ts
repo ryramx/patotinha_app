@@ -176,7 +176,7 @@ export const esquemaNovoPedido = z.strictObject({
   cliente: esquemaClienteNome,
   /** Se vier, fica guardado no cadastro do cliente. Se não vier, o telefone salvo não muda. */
   telefone: esquemaTelefone.nullish(),
-  /** Vazio só com pagarDepois: o cliente come e paga no fim (etapa 14, docs/pagar-depois.md). */
+  /** Vazio só com pagarDepois: o cliente come e paga no fim (etapa 15, docs/pagar-depois.md). */
   formaPagamento: z.string().trim().min(1).max(20).nullish(),
   valorRecebido: dinheiro(8).nullish(),
   pagarDepois: z.boolean().optional(),
