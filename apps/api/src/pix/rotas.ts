@@ -17,11 +17,18 @@ function paraConfigApi(c: ConfigPixBanco | null): ConfigPix {
   };
 }
 
-/** Pix da loja (etapa 13, docs/pix.md): quem registra ou vê pedidos lê; só o administrador muda. */
+/**
+ * Pix da loja (etapa 13, docs/pix.md): quem registra ou vê pedidos lê; quem tem a permissão
+ * Pix da loja (Administrador e Gerente, de fábrica) muda.
+ */
 export async function rotasPix(app: FastifyInstance) {
   const lerConfig = async (request: FastifyRequest, reply: FastifyReply) => {
     await app.autenticar(request, reply);
-    if (!pode(request.usuario, 'PEDIDOS_REGISTRAR') && !pode(request.usuario, 'PEDIDOS_VER')) {
+    if (
+      !pode(request.usuario, 'PEDIDOS_REGISTRAR') &&
+      !pode(request.usuario, 'PEDIDOS_VER') &&
+      !pode(request.usuario, 'PIX_LOJA')
+    ) {
       throw erros.semPermissao();
     }
   };
@@ -30,7 +37,7 @@ export async function rotasPix(app: FastifyInstance) {
     paraConfigApi(await app.banco.configPix.findUnique({ where: { id: 1 } })),
   );
 
-  app.put('/pix', { preHandler: app.exigirAdmin }, async (request) => {
+  app.put('/pix', { preHandler: app.exigir('PIX_LOJA') }, async (request) => {
     const resultado = esquemaConfigPix.safeParse(request.body);
     if (!resultado.success) {
       const issue = resultado.error.issues[0];

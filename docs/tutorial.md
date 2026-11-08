@@ -21,7 +21,7 @@ que cada parte do sistema faz, e toda tela tem uma lâmpada que explica o que fa
 | Cardápio                    | Cardápio                                 |
 | Usuários                    | Usuários                                 |
 | Perfis e permissões         | Só o Administrador                       |
-| Pix da loja                 | Só o Administrador                       |
+| Pix da loja                 | Pix da loja (Administrador e Gerente)    |
 | No alto da tela             | Todos (conexão, Modo Claro/Escuro, menu) |
 | Lâmpada                     | Todos                                    |
 

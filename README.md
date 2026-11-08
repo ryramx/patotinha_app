@@ -36,7 +36,7 @@ funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
   as telas do perfil da pessoa); toda tela tem uma lâmpada no cabeçalho com o passo a passo.
   Detalhes em [docs/tutorial.md](docs/tutorial.md).
 - **Pix com o valor do pedido:** o pedido em PIX mostra o QR Code e o Pix copia e cola já com o
-  valor, para a chave que o administrador cadastra em **Cadastros › Pix da loja**. Sem taxa; quem
+  valor, para a chave que o administrador ou o gerente cadastra em **Cadastros › Pix da loja**. Sem taxa; quem
   atende confere no app do banco. Detalhes em [docs/pix.md](docs/pix.md).
 - **Carro-chefe:** o Resumo de vendas mostra o produto que mais saiu em cada categoria (o sabor
   de pastel campeão, a bebida, o lanche) no período escolhido. Detalhes em

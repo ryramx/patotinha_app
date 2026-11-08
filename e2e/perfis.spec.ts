@@ -19,7 +19,7 @@ test('admin libera "Ver pedidos" para o Chef e depois volta ao padrão', async (
   await expect(admin).toHaveURL(/\/perfis$/);
 
   const cartaoAdmin = admin.getByRole('region', { name: 'Administrador' });
-  await expect(cartaoAdmin.getByRole('switch', { checked: true })).toHaveCount(7);
+  await expect(cartaoAdmin.getByRole('switch', { checked: true })).toHaveCount(8);
   await expect(cartaoAdmin.getByRole('switch').first()).toBeDisabled();
 
   const chef = admin.getByRole('region', { name: 'Chef' });

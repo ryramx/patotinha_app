@@ -95,7 +95,7 @@ describe('Perfis de acesso: permissões de fábrica', () => {
     const me = await get('/api/auth/me', chef);
     expect(me.body.usuario).toMatchObject({ perfil: 'CHEF', permissoes: ['FILA'] });
     const meAdmin = await get('/api/auth/me', admin);
-    expect(meAdmin.body.usuario.permissoes).toHaveLength(7);
+    expect(meAdmin.body.usuario.permissoes).toHaveLength(8);
   });
 });
 

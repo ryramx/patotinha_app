@@ -127,7 +127,7 @@ const CADASTROS: ItemMenu[] = [
     rotulo: t('menu.pix'),
     curto: t('menu.pix'),
     Icone: QrCode,
-    exige: ['ADMIN'],
+    exige: ['PIX_LOJA'],
   },
 ];
 
