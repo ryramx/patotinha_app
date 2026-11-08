@@ -44,13 +44,18 @@ funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
 - **Pagar depois:** o pedido vai para a cozinha sem pagamento e aparece na tela **A receber**,
   onde o balcão cobra quando o cliente terminar (dinheiro com troco, PIX, débito ou crédito). Só
   conta nas vendas depois de recebido. Detalhes em [docs/pagar-depois.md](docs/pagar-depois.md).
+- **Abrir sem esperar o servidor:** o sistema abre na hora, mesmo com a API do Render dormindo.
+  Quem já entrou no aparelho entra direto; o cardápio fica guardado no aparelho e os pedidos feitos
+  enquanto a API acorda (ou sem internet) ficam guardados e sobem sozinhos quando ela responder.
+  Detalhes em [docs/abrir-sem-esperar.md](docs/abrir-sem-esperar.md).
 - **Acesso:** login com sessão de 12 horas, troca da própria senha e limite de tentativas de
   login. Um usuário desativado perde a sessão na hora.
 - **Atalhos de teclado** para o balcão (tecla `?` mostra a lista): F1 abre um novo pedido, `/`
   vai para a busca, F2 a F5 escolhem a forma de pagamento e Ctrl+Enter finaliza.
 - **App instalável (PWA):** pode ser instalado no computador, tablet ou celular pelo navegador e
-  abre em tela cheia com o ícone da Patotinha. Só os arquivos das telas ficam guardados no
-  aparelho; pedidos e preços vêm sempre do servidor, então o sistema precisa de internet.
+  abre em tela cheia com o ícone da Patotinha. Ficam guardados no aparelho os arquivos das telas,
+  a cópia do cardápio e os pedidos que ainda não subiram; o servidor confere preços e grava tudo
+  assim que responde.
 - **Modo Claro e Modo Escuro:** botão de lua/sol no cabeçalho; o aparelho lembra a escolha e,
   sem escolha, segue o tema do sistema. Menu em pílulas no topo (cadastros no menu "Cadastros")
   e, no celular, barra de abas no rodapé. Detalhes em [docs/visual.md](docs/visual.md).
@@ -113,7 +118,8 @@ docker compose exec app npm run seed:admin
 
 O `render.yaml` descreve dois serviços: o **site** (`patotinha-da-vovo`, Static Site com as telas, que
 nunca dorme) e a **API** (`patotinha-pedidos`, imagem Docker do `Dockerfile`). O site repassa
-`/api/*` para a API pelo mesmo endereço e mostra "Carregando…" com a logo enquanto ela acorda.
+`/api/*` para a API pelo mesmo endereço e abre na hora enquanto ela acorda
+([docs/abrir-sem-esperar.md](docs/abrir-sem-esperar.md)).
 Detalhes e o passo a passo no painel em [docs/site-separado.md](docs/site-separado.md). O banco
 fica num projeto do Neon na região us-east-2 (Ohio), a mesma da API. A cada publicação a imagem
 aplica as migrações pendentes antes de subir.
@@ -138,7 +144,7 @@ aplica as migrações pendentes antes de subir.
    podendo desligar quando parado. O `/api/saude` testa o banco também, para conferências.
 
 Limites do plano gratuito: a API desliga depois de 15 minutos sem acesso e leva cerca de 1 minuto
-para voltar (o monitor evita isso no horário da loja; fora dele, o site mostra "Carregando…"); as 750 horas mensais do Render
+para voltar (o monitor evita isso no horário da loja; fora dele, o site abre na hora e avisa "Conectando ao servidor"); as 750 horas mensais do Render
 são divididas entre todos os apps gratuitos da conta. O Neon tem 1 GB e 100 horas de
 processamento por mês, desligando depois de 5 minutos parado.
 
@@ -181,7 +187,7 @@ apps/api/        Fastify + Prisma. Módulos: auth, usuarios, cardapio, pedidos (
 apps/web/        React. telas/, componentes/, layout/, estilos/tokens.css, textos.pt-BR.json
   public/        manifest.webmanifest, sw.js (app instalável), logo, ícones e favicon
 packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
-e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, clientes, tutorial, Pix, carro-chefe, pagar depois, tablet, preço alterado)
+e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, clientes, tutorial, Pix, carro-chefe, pagar depois, sem esperar o servidor, tablet, preço alterado)
 docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
                  comanda.md: nome do cliente e fila de preparo
                  clientes.md: sugestão de clientes e telefone opcional
@@ -190,7 +196,8 @@ docs/            verificacao.md: critérios de aceitação, segurança e tempos 
                  pix.md: Pix com o valor do pedido e a tela Pix da loja (etapa 13)
                  carro-chefe.md: mais vendido de cada categoria no Resumo (etapa 14)
                  pagar-depois.md: Pagar depois e a tela A receber (etapa 15)
-                 site-separado.md: site no Static Site, tela "Carregando…" e passo a passo
+                 site-separado.md: site no Static Site, repasse de /api e passo a passo (etapa 9)
+                 abrir-sem-esperar.md: abre na hora sem esperar a API acordar, pedidos guardados no aparelho (etapa 16)
   marca/         Arte original da logo e a versão sem fundo
 scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)
 render.yaml      Site (Static Site) e API (Docker) no Render, plano gratuito, Ohio

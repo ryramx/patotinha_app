@@ -19,18 +19,9 @@ import { PixLoja } from './telas/cadastros/PixLoja';
 import { Vazio } from './componentes/Diversos';
 import { t } from './textos';
 
-function Carregando() {
-  return (
-    <div className="flex h-full items-center justify-center bg-marca">
-      <img src="/logo.webp" alt="Patotinha da Vovó" className="w-40 animate-pulse" />
-    </div>
-  );
-}
-
 function ExigeLogin({ children }: { children: ReactNode }) {
-  const { usuario, carregando } = useSessao();
+  const { usuario } = useSessao();
   const local = useLocation();
-  if (carregando) return <Carregando />;
   if (!usuario) return <Navigate to="/login" replace state={{ de: local.pathname }} />;
   return children;
 }
@@ -54,8 +45,6 @@ function TelaInicio() {
 }
 
 export function App() {
-  const { carregando } = useSessao();
-  if (carregando) return <Carregando />;
   return (
     <Routes>
       <Route path="/login" element={<Login />} />

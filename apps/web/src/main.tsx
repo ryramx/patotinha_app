@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { onlineManager, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import '@fontsource/oswald/500.css';
 import '@fontsource/oswald/600.css';
 import '@fontsource/plus-jakarta-sans/400.css';
@@ -14,8 +14,9 @@ import './index.css';
 import { App } from './App';
 import { ProvedorSessao } from './auth/sessao';
 import { ProvedorAvisos } from './componentes/Avisos';
-import { EsperarServidor } from './componentes/EsperarServidor';
 import type { ErroDaApi } from './api/cliente';
+import { aoMudarEstadoConexao, estadoConexao, iniciarConexao } from './api/conexao';
+import { ligarCopiaLocal } from './api/copiaLocal';
 import { iniciarTema } from './tema';
 
 // Antes da primeira tela, para não piscar o tema errado.
@@ -32,8 +33,20 @@ const queryClient = new QueryClient({
         return tentativas < 2 && (status === 0 || status >= 500);
       },
     },
+    // Gravações não esperam em pausa: com o servidor fora, falham na hora e a tela avisa.
+    mutations: { networkMode: 'always' },
   },
 });
+
+// Abrir sem esperar o servidor (etapa 16, docs/abrir-sem-esperar.md): a tela abre na hora e a API
+// é acordada em segundo plano. Até ela responder, as consultas ficam em pausa (sem erro) e o
+// cardápio vem da cópia guardada no aparelho.
+onlineManager.setEventListener((mudar) => {
+  mudar(estadoConexao() === 'conectado');
+  return aoMudarEstadoConexao(() => mudar(estadoConexao() === 'conectado'));
+});
+ligarCopiaLocal(queryClient);
+iniciarConexao();
 
 // App instalável: o service worker só existe no build de produção.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
@@ -45,12 +58,9 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ProvedorAvisos>
-          {/* A sessão só é conferida depois que a API acordar. */}
-          <EsperarServidor>
-            <ProvedorSessao>
-              <App />
-            </ProvedorSessao>
-          </EsperarServidor>
+          <ProvedorSessao>
+            <App />
+          </ProvedorSessao>
         </ProvedorAvisos>
       </BrowserRouter>
     </QueryClientProvider>

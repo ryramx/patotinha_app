@@ -24,7 +24,6 @@ interface Props {
   problemas: Map<number, Problema>;
   piscando: { produtoId: number; novo: boolean; vez: number } | null;
   enviando: boolean;
-  semConexao: boolean;
   dicaFinalizar: string | null;
   /** Pagar depois só precisa de itens e nome do cliente. */
   podePagarDepois: boolean;
@@ -230,7 +229,7 @@ export function PainelPedido(props: Props) {
           textoCarregando={t('pedido.gravando')}
           onClick={props.aoFinalizar}
         >
-          {props.semConexao ? t('pedido.tentarDeNovo') : t('pedido.finalizar')}
+          {t('pedido.finalizar')}
         </Botao>
         <Botao
           variante="secundario"

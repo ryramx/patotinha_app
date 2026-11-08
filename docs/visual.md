@@ -10,7 +10,7 @@ Desde 2026-10-17 o sistema tem dois temas, escolhidos pelo botão de lua/sol no 
 | Preço nos cartões                     | Plus Jakarta Sans, cor do texto  | Oswald dourado                  |
 | Total do pedido                       | Oswald 44 px                     | Oswald 44 px dourado            |
 
-Login e "Carregando…" ficam no vinho da marca nos dois temas. Na impressão vale sempre o claro.
+O login fica no vinho da marca nos dois temas. Na impressão vale sempre o claro.
 
 ## Como funciona
 

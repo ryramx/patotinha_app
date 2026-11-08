@@ -4,12 +4,20 @@
     "subtitulo": "Pedidos",
     "rodapeLogin": "Feito com carinho"
   },
-  "carregando": {
-    "titulo": "Carregando…",
-    "acordando": "O sistema estava descansando e está acordando. Isso leva até 1 minuto.",
-    "falhouTitulo": "Não foi possível abrir o sistema",
-    "falhou": "Verifique a internet e tente de novo.",
-    "tentarDeNovo": "Tentar de novo"
+  "conexao": {
+    "curto": "Conectando",
+    "conectando": "Conectando ao servidor…",
+    "demorando": "O servidor ainda não respondeu. Continuamos tentando sozinhos; confira a internet do aparelho.",
+    "podeRegistrar": "Pode registrar pedidos: eles ficam guardados neste aparelho e vão para a cozinha assim que ele responder.",
+    "atualizaSozinho": "A tela atualiza sozinha quando ele responder.",
+    "guardados": "{quantos} neste aparelho: vão para a cozinha assim que ele responder.",
+    "enviando": "Enviando {quantos} neste aparelho…",
+    "umPedido": "1 pedido guardado",
+    "pedidos": "{n} pedidos guardados",
+    "recusado": "O pedido de {cliente} ({total}) não foi aceito pelo servidor: {motivo}.",
+    "abrirNoPedido": "Abrir no Novo pedido",
+    "termineOPedido": "Finalize ou limpe o pedido em montagem antes de abrir o que foi recusado",
+    "entrandoSemServidor": "Conectando ao servidor… Na primeira entrada neste aparelho, isso leva até 1 minuto."
   },
   "menu": {
     "novoPedido": "Novo pedido",
@@ -36,7 +44,8 @@
     "tutorial": "Ver tutorial",
     "pix": "Pix da loja",
     "receber": "A receber",
-    "receberCurto": "Receber"
+    "receberCurto": "Receber",
+    "conectando": "Conectando ao servidor"
   },
   "ajuda": {
     "verTutorial": "Ver tutorial",
@@ -54,12 +63,13 @@
     "senhaTrocada": "Senha alterada",
     "senhaRedefinida": "Nova senha criada para {nome}",
     "itemRemovido": "{nome} removido",
-    "pedidoPagarDepois": "Pedido nº {numero} de {cliente} foi para a cozinha. Cobre {total} no fim, em A receber"
+    "pedidoPagarDepois": "Pedido nº {numero} de {cliente} foi para a cozinha. Cobre {total} no fim, em A receber",
+    "pedidoGuardado": "Pedido de {cliente} ({total}) guardado neste aparelho. Vai para a cozinha assim que o servidor conectar",
+    "pedidoGuardadoEnviado": "Pedido nº {numero} de {cliente} chegou ao servidor e foi para a cozinha"
   },
   "erro": {
     "loginInvalido": "Usuário ou senha inválidos",
     "muitasTentativas": "Muitas tentativas. Aguarde 1 minuto e tente de novo",
-    "semConexaoFinalizar": "Sem conexão. O pedido NÃO foi gravado. Ele continua na tela; tente de novo",
     "semConexaoCarregar": "Não foi possível carregar. Verifique a internet e tente de novo",
     "inesperado": "Algo deu errado do nosso lado. Tente de novo; se continuar, avise o administrador",
     "sessaoExpirada": "Sua sessão expirou. Entre de novo para continuar",
@@ -68,7 +78,9 @@
     "produtoIndisponivel": "{nome} não está mais disponível. Remova-o para finalizar",
     "pedidoJaCancelado": "Este pedido já foi cancelado",
     "desativarASiMesmo": "Você não pode desativar o seu próprio usuário",
-    "ultimoAdmin": "É preciso ter pelo menos um administrador ativo"
+    "ultimoAdmin": "É preciso ter pelo menos um administrador ativo",
+    "pedidoGuardadoRecusado": "O servidor não aceitou o pedido de {cliente}. Veja o motivo na faixa no alto da tela",
+    "acessoRecusado": "O servidor não aceitou o seu usuário e senha. Entre de novo para continuar"
   },
   "confirmacao": {
     "limparTitulo": "Limpar o pedido?",
@@ -92,7 +104,8 @@
     "sairTitulo": "Sair do sistema?",
     "sairTexto": "O pedido em andamento fica salvo neste computador",
     "sair": "Sair",
-    "voltar": "Voltar"
+    "voltar": "Voltar",
+    "sairGuardados": "Há pedidos guardados neste aparelho ({n}) que ainda não chegaram ao servidor. Eles só sobem quando você entrar de novo"
   },
   "dica": {
     "painelVazio": "Toque num produto para começar",

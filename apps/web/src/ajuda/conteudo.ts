@@ -115,7 +115,7 @@ export const CARDS_TUTORIAL: CardTutorial[] = [
     Icone: SunMoon,
     titulo: 'No alto da tela',
     texto:
-      'A bolinha verde mostra que o sistema está conectado (vermelha é sem internet). A lua ou o sol troca entre o Modo Claro e o Modo Escuro. Tocando no seu nome você troca a senha, vê os atalhos e sai.',
+      'A bolinha verde mostra que o sistema está conectado (amarela: conectando ao servidor; dá para continuar registrando pedidos). A lua ou o sol troca entre o Modo Claro e o Modo Escuro. Tocando no seu nome você troca a senha, vê os atalhos e sai.',
   },
   {
     id: 'lampada',
@@ -164,7 +164,7 @@ export const AJUDA_TELAS: AjudaTela[] = [
       },
       {
         texto:
-          'Toque em Finalizar pedido. Se a internet cair, o pedido continua na tela e é só tentar de novo, sem duplicar.',
+          'Toque em Finalizar pedido. Se o servidor estiver acordando ou a internet cair, o pedido fica guardado neste aparelho e vai para a cozinha sozinho assim que a conexão voltar, sem duplicar.',
       },
       {
         texto:
