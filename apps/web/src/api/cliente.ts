@@ -1,5 +1,6 @@
 import type { ErroApi } from '@patotinha/shared';
 import { t } from '../textos';
+import { marcarSemConexao } from './conexao';
 
 /** Erro devolvido pela API no formato padrão, ou falta de conexão (status 0). */
 export class ErroDaApi extends Error {
@@ -20,7 +21,6 @@ export class ErroDaApi extends Error {
 
 type Ouvinte = (erro: ErroDaApi) => void;
 const ouvintesSessao = new Set<Ouvinte>();
-const ouvintesConexao = new Set<(online: boolean) => void>();
 
 /** Avisado quando a sessão expira (401) para levar ao login sem apagar o rascunho. */
 export function aoExpirarSessao(fn: Ouvinte) {
@@ -28,14 +28,9 @@ export function aoExpirarSessao(fn: Ouvinte) {
   return () => void ouvintesSessao.delete(fn);
 }
 
-/** Avisado quando a conexão com o servidor cai ou volta. */
-export function aoMudarConexao(fn: (online: boolean) => void) {
-  ouvintesConexao.add(fn);
-  return () => void ouvintesConexao.delete(fn);
-}
-
+/** A conexão caiu: a tela de conexão volta a perguntar pelo servidor (api/conexao.ts). */
 function avisarConexao(online: boolean) {
-  ouvintesConexao.forEach((fn) => fn(online));
+  if (!online) marcarSemConexao();
 }
 
 export async function api<T>(
@@ -60,6 +55,12 @@ export async function api<T>(
   avisarConexao(resposta.status !== 502 && resposta.status !== 504);
 
   if (resposta.status === 204) return undefined as T;
+  // Enquanto a API acorda, o Render pode responder com uma página HTML própria: isso é falta
+  // de conexão, não uma resposta da API (etapa 17).
+  if (!(resposta.headers.get('content-type') ?? '').includes('json')) {
+    avisarConexao(false);
+    throw new ErroDaApi(0, 'SEM_CONEXAO', t('erro.semConexaoCarregar'));
+  }
   const corpo = await resposta.json().catch(() => null);
   if (resposta.ok) return corpo as T;
 

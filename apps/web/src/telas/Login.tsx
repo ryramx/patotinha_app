@@ -3,6 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { CircleAlert } from 'lucide-react';
 import { telaInicial, useSessao } from '../auth/sessao';
 import { ErroDaApi } from '../api/cliente';
+import { useEstadoConexao } from '../api/conexao';
 import { Botao } from '../componentes/Botao';
 import { CampoSenha, CampoTexto } from '../componentes/Campos';
 import { marcarRascunhoRetomado } from './novo-pedido/rascunho';
@@ -19,7 +20,8 @@ function ultimoUsuario() {
 }
 
 export function Login() {
-  const { usuario, entrar, expirou } = useSessao();
+  const { usuario, entrar, avisoLogin } = useSessao();
+  const conexao = useEstadoConexao();
   const navegar = useNavigate();
   const [login, setLogin] = useState(ultimoUsuario);
   const [senha, setSenha] = useState('');
@@ -85,7 +87,7 @@ export function Login() {
         className="w-[360px] max-w-full rounded-[20px] bg-superficie p-8 shadow-elevada"
       >
         <h1 className="mb-4 text-[22px] font-extrabold tracking-[-0.3px]">{t('login.titulo')}</h1>
-        {(erro || expirou) && (
+        {(erro || avisoLogin) && (
           <div
             role="alert"
             className={`mb-4 flex items-start gap-2 rounded-padrao px-3 py-2 font-semibold ${
@@ -93,7 +95,7 @@ export function Login() {
             }`}
           >
             <CircleAlert size={20} className="mt-0.5 shrink-0" aria-hidden />
-            {erro ?? t('erro.sessaoExpirada')}
+            {erro ?? avisoLogin}
           </div>
         )}
         <div className="flex flex-col gap-4">
@@ -126,6 +128,12 @@ export function Login() {
           >
             {t('login.entrar')}
           </Botao>
+          {/* Senha que o aparelho ainda não conhece: o login espera a API acordar (etapa 17). */}
+          {enviando && conexao !== 'conectado' && (
+            <p role="status" className="text-center text-[14px] text-texto-suave">
+              {t('conexao.entrandoSemServidor')}
+            </p>
+          )}
         </div>
       </form>
       <p className="enfeite mt-6 text-[16px] text-dourado">{t('sistema.rodapeLogin')}</p>

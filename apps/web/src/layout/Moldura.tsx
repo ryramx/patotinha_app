@@ -24,13 +24,14 @@ import {
 } from 'lucide-react';
 import type { Permissao } from '@patotinha/shared';
 import { primeiroNome, useSessao } from '../auth/sessao';
-import { aoMudarConexao } from '../api/cliente';
+import { FaixaConexao, PontoConexao } from './FaixaConexao';
 import { t } from '../textos';
 import { useTema } from '../tema';
 import { Confirmacao } from '../componentes/Janela';
 import { JanelaTrocarSenha } from './JanelaTrocarSenha';
 import { JanelaAtalhos } from './JanelaAtalhos';
 import { temRascunho } from '../telas/novo-pedido/rascunho';
+import { pedidosGuardados } from '../telas/novo-pedido/filaPedidos';
 import { Tutorial } from '../ajuda/Tutorial';
 import { BotaoLampada } from '../ajuda/Lampada';
 
@@ -146,29 +147,6 @@ const TITULOS: [RegExp, string][] = [
   [/^\/$/, 'Início'],
 ];
 
-/** Ponto verde ou vermelho com o estado da conexão, o tempo todo. */
-function useConexao() {
-  const [online, setOnline] = useState(true);
-  useEffect(() => {
-    const parar = aoMudarConexao(setOnline);
-    const verificar = () =>
-      fetch('/api/saude', { cache: 'no-store' })
-        .then((r) => setOnline(r.ok))
-        .catch(() => setOnline(false));
-    const id = setInterval(verificar, 30_000);
-    const offline = () => setOnline(false);
-    window.addEventListener('offline', offline);
-    window.addEventListener('online', verificar);
-    return () => {
-      parar();
-      clearInterval(id);
-      window.removeEventListener('offline', offline);
-      window.removeEventListener('online', verificar);
-    };
-  }, []);
-  return online;
-}
-
 /** Fecha um menu suspenso ao clicar fora dele. */
 function useFecharFora(aberto: boolean, fechar: () => void) {
   const ref = useRef<HTMLDivElement>(null);
@@ -208,7 +186,6 @@ export function Moldura() {
   const { tema, alternar } = useTema();
   const navegar = useNavigate();
   const local = useLocation();
-  const online = useConexao();
   const [menuUsuario, setMenuUsuario] = useState(false);
   const [menuCadastros, setMenuCadastros] = useState(false);
   const [gaveta, setGaveta] = useState(false);
@@ -228,11 +205,15 @@ export function Moldura() {
 
   const titulo = TITULOS.find(([re]) => re.test(local.pathname))?.[1] ?? '';
 
+  // Pedidos guardados no aparelho só sobem com a sessão de quem os registrou (etapa 17).
+  const guardadosAoSair = () =>
+    pedidosGuardados().filter((p) => p.usuarioId === usuario?.id && !p.recusa).length;
   const pedirSaida = useCallback(() => {
     setMenuUsuario(false);
-    if (temRascunho()) setConfirmarSaida(true);
+    const guardados = pedidosGuardados().filter((p) => p.usuarioId === usuario?.id).length;
+    if (temRascunho() || guardados > 0) setConfirmarSaida(true);
     else void sair();
-  }, [sair]);
+  }, [sair, usuario]);
 
   // Atalhos globais: F1 abre Novo pedido e "?" mostra a lista. F1 a F5 não fazem a ação do navegador.
   useEffect(() => {
@@ -332,15 +313,7 @@ export function Moldura() {
         </nav>
 
         <div className="ml-auto flex items-center gap-0.5 md:gap-2">
-          <span
-            className={`flex items-center gap-1.5 rounded-full px-2 py-1 text-[13px] font-bold ${online ? 'text-sucesso' : 'text-erro'}`}
-            title={online ? t('menu.conectado') : t('menu.semConexao')}
-            role="status"
-            aria-label={online ? t('menu.conectado') : t('menu.semConexao')}
-          >
-            <span className={`h-2 w-2 rounded-full ${online ? 'bg-sucesso' : 'bg-erro'}`} />
-            <span className="hidden xl:inline">{online ? 'Online' : 'Sem conexão'}</span>
-          </span>
+          <PontoConexao />
           <BotaoLampada aoVerTutorial={() => setTutorial(true)} />
           <button
             type="button"
@@ -412,6 +385,7 @@ export function Moldura() {
           </button>
         </div>
       </header>
+      <FaixaConexao />
 
       <main className="min-h-0 min-w-0 flex-1 overflow-y-auto max-md:pb-[var(--altura-abas-celular)]">
         <Outlet />
@@ -486,7 +460,11 @@ export function Moldura() {
       {confirmarSaida && (
         <Confirmacao
           titulo={t('confirmacao.sairTitulo')}
-          texto={t('confirmacao.sairTexto')}
+          texto={
+            guardadosAoSair() > 0
+              ? t('confirmacao.sairGuardados', { n: guardadosAoSair() })
+              : t('confirmacao.sairTexto')
+          }
           confirmar={t('confirmacao.sair')}
           perigo={false}
           aoFechar={() => setConfirmarSaida(false)}

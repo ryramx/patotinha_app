@@ -15,12 +15,11 @@ Agora são dois serviços no `render.yaml`:
 
 ## Como funciona
 
-- O site abre na hora e mostra a logo. Antes de qualquer tela, ele pergunta a `/api/vivo` se a API
-  está acordada (componente `apps/web/src/componentes/EsperarServidor.tsx`).
-- Se a API não responde logo (falha ou demora mais de 2,5 segundos), aparece **"Carregando…"** com o aviso de que o
-  sistema está acordando. O site tenta de novo a cada 2 segundos.
-- Depois de 2,5 minutos sem resposta, aparece "Não foi possível abrir o sistema" com o botão
-  **Tentar de novo**.
+- O site abre na hora. Desde a etapa 17 ([abrir-sem-esperar.md](abrir-sem-esperar.md)) ele não
+  segura mais a tela "Carregando…" esperando a API: abre com a sessão e o cardápio guardados no
+  aparelho, acorda a API em segundo plano (`/api/vivo`) e mostra "Conectando ao servidor" no alto
+  da tela até ela responder. Pedidos feitos nesse meio tempo ficam guardados no aparelho e sobem
+  sozinhos.
 - O site repassa tudo que vai para `/api/*` à API (regra de rewrite do `render.yaml`). Para o
   navegador, site e API têm o mesmo endereço: o cookie de login continua `SameSite=Strict`, sem
   CORS, e funciona no Safari do iPad.
@@ -32,8 +31,7 @@ Agora são dois serviços no `render.yaml`:
 - Sem `SITE_URL` (no PC, no Docker local e nos testes), a API continua servindo as telas como
   antes.
 
-A aparência da tela de carregamento fica toda em `TelaCarregando`, no mesmo arquivo, e os textos
-em `textos.pt-BR.json` (seção `carregando`).
+Os textos do aviso de conexão ficam em `textos.pt-BR.json` (seção `conexao`).
 
 ## Passo a passo no Render (uma vez, depois do merge)
 
@@ -65,6 +63,5 @@ O monitor do cron-job.org continua apontando para
 
 - `apps/api/test/site.test.ts`: o endereço antigo leva ao site mantendo o caminho; `/api`
   continua respondendo; respostas da API com `no-store`.
-- `e2e/carregando.spec.ts`: com `/api/vivo` falhando (como no Render dormindo), aparece
-  "Carregando…" com a logo e, quando a API responde, o login abre; com a API acordada, a mensagem
-  não aparece.
+- `e2e/sem-esperar-servidor.spec.ts` (etapa 17, substitui o antigo `carregando.spec.ts`): com a
+  API respondendo como o Render dormindo, o sistema abre na hora e conecta quando ela acorda.

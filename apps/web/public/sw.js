@@ -1,5 +1,6 @@
-// Service worker do app instalável. Guarda só os arquivos das telas para abrir rápido;
-// nunca guarda respostas da API: pedidos e preços vêm sempre do servidor (PRD 7 e D-18).
+// Service worker do app instalável. Guarda só os arquivos das telas para abrir rápido, mesmo
+// com a API dormindo. Nunca guarda respostas da API: a cópia do cardápio fica no navegador
+// (api/copiaLocal.ts, etapa 17) e quem confere preços é sempre o servidor (PRD 7 e D-18).
 const VERSAO = 'patotinha-v3';
 
 self.addEventListener('install', () => self.skipWaiting());

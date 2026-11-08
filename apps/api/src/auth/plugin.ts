@@ -1,11 +1,11 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 import fastifyJwt from '@fastify/jwt';
-import { PERMISSOES, type Perfil, type Permissao } from '@patotinha/shared';
+import { DURACAO_SESSAO_S, PERMISSOES, type Perfil, type Permissao } from '@patotinha/shared';
 import { erros } from '../erros.js';
 
 export const NOME_COOKIE = 'sessao';
-export const DURACAO_SESSAO_S = 12 * 60 * 60; // 12 h (D-21)
+export { DURACAO_SESSAO_S };
 
 export interface UsuarioAutenticado {
   id: bigint;

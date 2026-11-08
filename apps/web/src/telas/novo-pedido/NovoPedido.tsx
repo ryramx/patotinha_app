@@ -11,11 +11,13 @@ import {
   paraCentavos,
   type Categoria,
   type CodigoPagamento,
+  type DadosNovoPedido,
   type FormaPagamento,
   type Pedido,
   type Produto,
 } from '@patotinha/shared';
 import { api, ErroDaApi } from '../../api/cliente';
+import { estadoConexao } from '../../api/conexao';
 import { useSessao } from '../../auth/sessao';
 import { useAvisos } from '../../componentes/Avisos';
 import { Botao } from '../../componentes/Botao';
@@ -23,6 +25,7 @@ import { Confirmacao } from '../../componentes/Janela';
 import { Esqueleto, Vazio } from '../../componentes/Diversos';
 import { t } from '../../textos';
 import {
+  aoAbrirRascunho,
   apagarRascunho,
   lerRascunho,
   marcarRascunhoRetomado,
@@ -34,11 +37,12 @@ import {
   type Rascunho,
 } from './rascunho';
 import { PainelPedido, type Problema } from './PainelPedido';
+import { guardarPedido } from './filaPedidos';
 
 const pedidoParaDepois = (p: Pedido) => p.status === 'ABERTO';
 
 export function NovoPedido() {
-  const { pode } = useSessao();
+  const { pode, usuario } = useSessao();
   const avisos = useAvisos();
   const navegar = useNavigate();
   const queryClient = useQueryClient();
@@ -71,6 +75,17 @@ export function NovoPedido() {
     salvarRascunho(rascunho);
     marcarRascunhoRetomado(true);
   }, [rascunho, ofertaRascunho]);
+  // Pedido guardado que o servidor recusou, aberto de novo pela faixa de aviso (etapa 17).
+  useEffect(
+    () =>
+      aoAbrirRascunho(() => {
+        const salvo = lerRascunho();
+        if (!salvo) return;
+        setOfertaRascunho(null);
+        setRascunho(salvo);
+      }),
+    [],
+  );
 
   const [categoriaSel, setCategoriaSel] = useState<number | null>(null);
   const [busca, setBusca] = useState('');
@@ -81,7 +96,6 @@ export function NovoPedido() {
   } | null>(null);
   const [problemas, setProblemas] = useState<Map<number, Problema>>(new Map());
   const [enviando, setEnviando] = useState(false);
-  const [semConexao, setSemConexao] = useState(false);
   const [confirmarLimpar, setConfirmarLimpar] = useState(false);
   const [painelAberto, setPainelAberto] = useState(false); // celular
   const desfazer = useRef<{
@@ -104,7 +118,6 @@ export function NovoPedido() {
 
   const atualizar = useCallback((fn: (r: Rascunho) => Rascunho) => {
     setRascunho((r) => fn(r));
-    setSemConexao(false);
   }, []);
 
   const adicionar = useCallback(
@@ -246,30 +259,57 @@ export function NovoPedido() {
         return;
       }
       if (pagarDepois ? dicaBase : dicaFinalizar) return;
+      const corpo: DadosNovoPedido = {
+        chaveIdempotencia: rascunho.chaveIdempotencia,
+        cliente: rascunho.cliente.trim(),
+        telefone: rascunho.telefone || undefined,
+        ...(pagarDepois
+          ? { pagarDepois: true }
+          : {
+              formaPagamento: rascunho.forma!,
+              valorRecebido:
+                rascunho.forma === 'DINHEIRO' && rascunho.recebidoCentavos !== null
+                  ? (rascunho.recebidoCentavos / 100).toFixed(2)
+                  : null,
+            }),
+        itens: rascunho.itens.map((i) => ({
+          produtoId: i.produtoId,
+          quantidade: i.quantidade,
+          precoExibido: (i.precoCentavos / 100).toFixed(2),
+        })),
+      };
+      const limparTela = () => {
+        setRascunho(rascunhoVazio());
+        apagarRascunho();
+        setProblemas(new Map());
+        setPainelAberto(false);
+      };
+      // Servidor acordando ou fora: o pedido fica guardado no aparelho e sobe sozinho depois,
+      // com a mesma chave (etapa 17). O caixa segue atendendo.
+      const guardar = () => {
+        if (!usuario) return;
+        guardarPedido({
+          chave: rascunho.chaveIdempotencia,
+          usuarioId: usuario.id,
+          corpo,
+          rascunho,
+          totalCentavos,
+        });
+        avisos.aviso(
+          t('sucesso.pedidoGuardado', {
+            cliente: corpo.cliente,
+            total: formatarReais(totalCentavos),
+          }),
+        );
+        limparTela();
+      };
+      if (estadoConexao() !== 'conectado') {
+        guardar();
+        return;
+      }
       setEnviando(true);
       try {
-        const pedido = await api<Pedido>('/pedidos', {
-          metodo: 'POST',
-          corpo: {
-            chaveIdempotencia: rascunho.chaveIdempotencia,
-            cliente: rascunho.cliente.trim(),
-            telefone: rascunho.telefone || undefined,
-            ...(pagarDepois
-              ? { pagarDepois: true }
-              : {
-                  formaPagamento: rascunho.forma,
-                  valorRecebido:
-                    rascunho.forma === 'DINHEIRO' && rascunho.recebidoCentavos !== null
-                      ? (rascunho.recebidoCentavos / 100).toFixed(2)
-                      : null,
-                }),
-            itens: rascunho.itens.map((i) => ({
-              produtoId: i.produtoId,
-              quantidade: i.quantidade,
-              precoExibido: (i.precoCentavos / 100).toFixed(2),
-            })),
-          },
-        });
+        const pedido = await api<Pedido>('/pedidos', { metodo: 'POST', corpo });
         avisos.sucesso(
           t(pedidoParaDepois(pedido) ? 'sucesso.pedidoPagarDepois' : 'sucesso.pedidoGravado', {
             numero: pedido.id,
@@ -277,11 +317,7 @@ export function NovoPedido() {
             total: formatarReais(pedido.total),
           }),
         );
-        setRascunho(rascunhoVazio());
-        apagarRascunho();
-        setProblemas(new Map());
-        setSemConexao(false);
-        setPainelAberto(false);
+        limparTela();
         void queryClient.invalidateQueries({ queryKey: ['pedidos'] });
         void queryClient.invalidateQueries({ queryKey: ['inicio'] });
         void queryClient.invalidateQueries({ queryKey: ['fila'] });
@@ -289,9 +325,8 @@ export function NovoPedido() {
       } catch (e) {
         const erro = e as ErroDaApi;
         if (erro.semConexao) {
-          // O rascunho e a mesma chave continuam: tentar de novo não duplica o pedido.
-          setSemConexao(true);
-          avisos.erro(t('erro.semConexaoFinalizar'));
+          // A mesma chave vai junto: se o servidor chegou a gravar, não duplica.
+          guardar();
         } else if (erro.codigo === 'PRECO_ALTERADO') {
           const lista = erro.detalhes as {
             produtoId: number;
@@ -346,7 +381,17 @@ export function NovoPedido() {
         setEnviando(false);
       }
     },
-    [dicaBase, dicaFinalizar, enviando, rascunho, avisos, queryClient, atualizar],
+    [
+      dicaBase,
+      dicaFinalizar,
+      enviando,
+      rascunho,
+      avisos,
+      queryClient,
+      atualizar,
+      usuario,
+      totalCentavos,
+    ],
   );
 
   // Preço confirmado de novo: ao mexer no item com aviso de preço, o aviso some.
@@ -413,7 +458,6 @@ export function NovoPedido() {
       problemas={problemas}
       piscando={piscando}
       enviando={enviando}
-      semConexao={semConexao}
       dicaFinalizar={dicaFinalizar}
       podePagarDepois={!dicaBase}
       refCliente={refCliente}
@@ -697,7 +741,6 @@ export function NovoPedido() {
             setRascunho(rascunhoVazio());
             apagarRascunho();
             setProblemas(new Map());
-            setSemConexao(false);
           }}
         />
       )}
