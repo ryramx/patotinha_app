@@ -61,6 +61,11 @@ funciona aos sábados e domingos, das 19h às 22h, só no balcão, sem delivery.
   e, no celular, barra de abas no rodapé. Detalhes em [docs/visual.md](docs/visual.md).
 - Telas em português, pensadas para computador (1366 x 768), tablet na horizontal e celular.
 
+## Entender o sistema por dentro
+
+O curso em [docs/course](docs/course/part-00-como-usar-este-curso.md) explica, em 17 partes, cada tela e o
+caminho de cada ação até o banco, com exercícios. Função nova no app atualiza o curso no mesmo PR.
+
 ## Tecnologias
 
 - **Backend:** Node.js + Fastify + Prisma (`apps/api`), API REST em `/api`
@@ -188,7 +193,8 @@ apps/web/        React. telas/, componentes/, layout/, estilos/tokens.css, texto
   public/        manifest.webmanifest, sw.js (app instalável), logo, ícones e favicon
 packages/shared/ Esquemas Zod usados na tela e na API, tipos e formatação
 e2e/             Testes Playwright (fluxo do pedido do exemplo, comanda, clientes, tutorial, Pix, carro-chefe, pagar depois, sem esperar o servidor, tablet, preço alterado)
-docs/            verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
+docs/            course/: curso passo a passo de como o app inteiro funciona (comece pela part-00)
+                 verificacao.md: critérios de aceitação, segurança e tempos medidos (etapa 6)
                  comanda.md: nome do cliente e fila de preparo
                  clientes.md: sugestão de clientes e telefone opcional
                  perfis.md: perfis de acesso e a tela de permissões (etapa 10)
