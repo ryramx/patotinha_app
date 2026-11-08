@@ -1,7 +1,7 @@
 import { DURACAO_SESSAO_S, type UsuarioSessao } from '@patotinha/shared';
 
 /**
- * Entrar sem esperar o servidor (etapa 16, docs/abrir-sem-esperar.md).
+ * Entrar sem esperar o servidor (etapa 17, docs/abrir-sem-esperar.md).
  *
  * 1. Sessão lembrada: depois de um login no servidor, o aparelho lembra quem entrou e até
  *    quando o cookie vale (12 h, D-21). Ao abrir o sistema dentro desse prazo, a tela abre na

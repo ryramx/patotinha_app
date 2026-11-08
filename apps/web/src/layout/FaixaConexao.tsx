@@ -17,7 +17,7 @@ import {
 import { abrirRascunho, temRascunho } from '../telas/novo-pedido/rascunho';
 
 /**
- * Conexão com o servidor no cabeçalho e na faixa logo abaixo dele (etapa 16,
+ * Conexão com o servidor no cabeçalho e na faixa logo abaixo dele (etapa 17,
  * docs/abrir-sem-esperar.md). Também envia os pedidos guardados no aparelho quando o servidor
  * responde.
  */

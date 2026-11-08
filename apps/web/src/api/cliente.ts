@@ -56,7 +56,7 @@ export async function api<T>(
 
   if (resposta.status === 204) return undefined as T;
   // Enquanto a API acorda, o Render pode responder com uma página HTML própria: isso é falta
-  // de conexão, não uma resposta da API (etapa 16).
+  // de conexão, não uma resposta da API (etapa 17).
   if (!(resposta.headers.get('content-type') ?? '').includes('json')) {
     avisarConexao(false);
     throw new ErroDaApi(0, 'SEM_CONEXAO', t('erro.semConexaoCarregar'));

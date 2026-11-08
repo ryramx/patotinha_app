@@ -205,7 +205,7 @@ export function Moldura() {
 
   const titulo = TITULOS.find(([re]) => re.test(local.pathname))?.[1] ?? '';
 
-  // Pedidos guardados no aparelho só sobem com a sessão de quem os registrou (etapa 16).
+  // Pedidos guardados no aparelho só sobem com a sessão de quem os registrou (etapa 17).
   const guardadosAoSair = () =>
     pedidosGuardados().filter((p) => p.usuarioId === usuario?.id && !p.recusa).length;
   const pedirSaida = useCallback(() => {

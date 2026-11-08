@@ -75,7 +75,7 @@ export function NovoPedido() {
     salvarRascunho(rascunho);
     marcarRascunhoRetomado(true);
   }, [rascunho, ofertaRascunho]);
-  // Pedido guardado que o servidor recusou, aberto de novo pela faixa de aviso (etapa 16).
+  // Pedido guardado que o servidor recusou, aberto de novo pela faixa de aviso (etapa 17).
   useEffect(
     () =>
       aoAbrirRascunho(() => {
@@ -285,7 +285,7 @@ export function NovoPedido() {
         setPainelAberto(false);
       };
       // Servidor acordando ou fora: o pedido fica guardado no aparelho e sobe sozinho depois,
-      // com a mesma chave (etapa 16). O caixa segue atendendo.
+      // com a mesma chave (etapa 17). O caixa segue atendendo.
       const guardar = () => {
         if (!usuario) return;
         guardarPedido({

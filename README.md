@@ -197,7 +197,7 @@ docs/            verificacao.md: critérios de aceitação, segurança e tempos 
                  carro-chefe.md: mais vendido de cada categoria no Resumo (etapa 14)
                  pagar-depois.md: Pagar depois e a tela A receber (etapa 15)
                  site-separado.md: site no Static Site, repasse de /api e passo a passo (etapa 9)
-                 abrir-sem-esperar.md: abre na hora sem esperar a API acordar, pedidos guardados no aparelho (etapa 16)
+                 abrir-sem-esperar.md: abre na hora sem esperar a API acordar, pedidos guardados no aparelho (etapa 17)
   marca/         Arte original da logo e a versão sem fundo
 scripts/         Banco local (PowerShell) e geração da logo e dos ícones (Python)
 render.yaml      Site (Static Site) e API (Docker) no Render, plano gratuito, Ohio

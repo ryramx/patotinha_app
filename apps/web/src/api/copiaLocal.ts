@@ -1,7 +1,7 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
 
 /**
- * Cópia do cardápio no aparelho (etapa 16, docs/abrir-sem-esperar.md).
+ * Cópia do cardápio no aparelho (etapa 17, docs/abrir-sem-esperar.md).
  *
  * Guarda a última resposta das consultas que o Novo pedido precisa para abrir: produtos e
  * categorias ativos, formas de pagamento e o Pix da loja. Ao abrir o sistema, a tela usa a cópia

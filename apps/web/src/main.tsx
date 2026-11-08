@@ -38,7 +38,7 @@ const queryClient = new QueryClient({
   },
 });
 
-// Abrir sem esperar o servidor (etapa 16, docs/abrir-sem-esperar.md): a tela abre na hora e a API
+// Abrir sem esperar o servidor (etapa 17, docs/abrir-sem-esperar.md): a tela abre na hora e a API
 // é acordada em segundo plano. Até ela responder, as consultas ficam em pausa (sem erro) e o
 // cardápio vem da cópia guardada no aparelho.
 onlineManager.setEventListener((mudar) => {

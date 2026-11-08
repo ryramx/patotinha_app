@@ -15,7 +15,7 @@ Agora são dois serviços no `render.yaml`:
 
 ## Como funciona
 
-- O site abre na hora. Desde a etapa 16 ([abrir-sem-esperar.md](abrir-sem-esperar.md)) ele não
+- O site abre na hora. Desde a etapa 17 ([abrir-sem-esperar.md](abrir-sem-esperar.md)) ele não
   segura mais a tela "Carregando…" esperando a API: abre com a sessão e o cardápio guardados no
   aparelho, acorda a API em segundo plano (`/api/vivo`) e mostra "Conectando ao servidor" no alto
   da tela até ela responder. Pedidos feitos nesse meio tempo ficam guardados no aparelho e sobem
@@ -63,5 +63,5 @@ O monitor do cron-job.org continua apontando para
 
 - `apps/api/test/site.test.ts`: o endereço antigo leva ao site mantendo o caminho; `/api`
   continua respondendo; respostas da API com `no-store`.
-- `e2e/sem-esperar-servidor.spec.ts` (etapa 16, substitui o antigo `carregando.spec.ts`): com a
+- `e2e/sem-esperar-servidor.spec.ts` (etapa 17, substitui o antigo `carregando.spec.ts`): com a
   API respondendo como o Render dormindo, o sistema abre na hora e conecta quando ela acorda.

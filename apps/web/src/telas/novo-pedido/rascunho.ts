@@ -102,7 +102,7 @@ const EVENTO_ABRIR = 'patotinha:abrir-rascunho';
 
 /**
  * Põe um pedido no Novo pedido de novo (o servidor recusou um pedido guardado no aparelho,
- * etapa 16). Se a tela já estiver aberta, ela troca o rascunho na hora.
+ * etapa 17). Se a tela já estiver aberta, ela troca o rascunho na hora.
  */
 export function abrirRascunho(r: Rascunho) {
   salvarRascunho(r);

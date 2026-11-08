@@ -128,7 +128,7 @@ export function Login() {
           >
             {t('login.entrar')}
           </Botao>
-          {/* Senha que o aparelho ainda não conhece: o login espera a API acordar (etapa 16). */}
+          {/* Senha que o aparelho ainda não conhece: o login espera a API acordar (etapa 17). */}
           {enviando && conexao !== 'conectado' && (
             <p role="status" className="text-center text-[14px] text-texto-suave">
               {t('conexao.entrandoSemServidor')}

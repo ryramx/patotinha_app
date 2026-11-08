@@ -4,7 +4,7 @@ import { api, ErroDaApi } from '../../api/cliente';
 import type { Rascunho } from './rascunho';
 
 /**
- * Pedidos guardados no aparelho (etapa 16, docs/abrir-sem-esperar.md).
+ * Pedidos guardados no aparelho (etapa 17, docs/abrir-sem-esperar.md).
  *
  * Com a API dormindo (ou a internet caída), finalizar não perde o pedido nem segura o caixa:
  * ele entra nesta fila, salva no navegador, e sobe sozinho, em ordem, assim que o servidor

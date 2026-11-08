@@ -60,7 +60,7 @@ function marcarSairPendente(valor: boolean) {
 }
 
 /**
- * Sessão de quem usa o sistema. Abre na hora, sem esperar a API acordar (etapa 16,
+ * Sessão de quem usa o sistema. Abre na hora, sem esperar a API acordar (etapa 17,
  * docs/abrir-sem-esperar.md): com a sessão lembrada no aparelho, ou conferindo a senha com o
  * acesso guardado no aparelho. O servidor confere tudo em segundo plano assim que responde.
  */

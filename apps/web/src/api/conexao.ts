@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 /**
- * Conexão com o servidor (etapa 16, docs/abrir-sem-esperar.md).
+ * Conexão com o servidor (etapa 17, docs/abrir-sem-esperar.md).
  *
  * O site fica num Static Site do Render, que nunca dorme; a API fica num serviço grátis que
  * desliga depois de 15 minutos parado e leva até 1 minuto para voltar. Em vez de segurar a

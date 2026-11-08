@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { ADMIN, FUNCIONARIO, GERENTE } from './dados';
 
 /**
- * Etapa 16 (docs/abrir-sem-esperar.md): o sistema abre na hora, sem esperar a API do Render
+ * Etapa 17 (docs/abrir-sem-esperar.md): o sistema abre na hora, sem esperar a API do Render
  * acordar. Simula a API dormindo: toda chamada a /api responde 503 com a página HTML do Render.
  *
  * Roda depois do fluxo-principal (os arquivos vão em ordem alfabética), que exige o Resumo de hoje

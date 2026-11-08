@@ -1,4 +1,4 @@
-# Abrir sem esperar o servidor (etapa 16)
+# Abrir sem esperar o servidor (etapa 17)
 
 Adicionado em 08/11/2026, a pedido do Ryan, copiando a solução do Compoze: o sistema abre **na
 hora**, mesmo com a API do Render dormindo, e se conecta ao servidor sozinho, em segundo plano.
