@@ -9,15 +9,18 @@ import {
   formatarTelefone,
   LIMITES,
   paraCentavos,
-  type Categoria,
   type CodigoPagamento,
   type DadosNovoPedido,
-  type FormaPagamento,
   type Pedido,
   type Produto,
 } from '@patotinha/shared';
 import { api, ErroDaApi } from '../../api/cliente';
-import { estadoConexao } from '../../api/conexao';
+import { estadoConexao, useEstadoConexao } from '../../api/conexao';
+import {
+  consultaCategoriasAtivas,
+  consultaFormasPagamento,
+  consultaProdutosAtivos,
+} from '../../api/cardapio';
 import { useSessao } from '../../auth/sessao';
 import { useAvisos } from '../../componentes/Avisos';
 import { Botao } from '../../componentes/Botao';
@@ -47,19 +50,10 @@ export function NovoPedido() {
   const navegar = useNavigate();
   const queryClient = useQueryClient();
 
-  const produtos = useQuery({
-    queryKey: ['produtos', 'ativos'],
-    queryFn: () => api<Produto[]>('/produtos?ativo=true'),
-  });
-  const categorias = useQuery({
-    queryKey: ['categorias', 'ativas'],
-    queryFn: () => api<Categoria[]>('/categorias?ativo=true'),
-  });
-  const formas = useQuery({
-    queryKey: ['formas-pagamento'],
-    queryFn: () => api<FormaPagamento[]>('/formas-pagamento'),
-    staleTime: Infinity,
-  });
+  const produtos = useQuery(consultaProdutosAtivos);
+  const categorias = useQuery(consultaCategoriasAtivas);
+  const formas = useQuery(consultaFormasPagamento);
+  const conexao = useEstadoConexao();
 
   // Rascunho: restaura sozinho se já foi retomado nesta aba; senão pergunta (UC-02).
   const [rascunho, setRascunho] = useState<Rascunho>(() => {
@@ -596,7 +590,16 @@ export function NovoPedido() {
         </div>
 
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto pb-24 md:pb-1" role="tabpanel">
-          {carregando ? (
+          {carregando && conexao !== 'conectado' ? (
+            // Aparelho sem a cópia do cardápio (primeira vez) e servidor acordando (etapa 17).
+            <div
+              role="status"
+              className="rounded-padrao border border-borda bg-superficie p-4 text-texto-suave"
+            >
+              <p className="font-semibold text-texto">{t('conexao.semCardapioTitulo')}</p>
+              <p className="mt-1">{t('conexao.semCardapio')}</p>
+            </div>
+          ) : carregando ? (
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 2xl:grid-cols-4">
               {Array.from({ length: 8 }, (_, i) => (
                 <Esqueleto key={i} className="h-32" />

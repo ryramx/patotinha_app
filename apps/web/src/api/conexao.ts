@@ -19,7 +19,8 @@ export type EstadoConexao = 'conectando' | 'conectado';
 
 const TEMPO_POR_TENTATIVA_MS = 15_000;
 const INTERVALO_MIN_MS = 2_000;
-const INTERVALO_MAX_MS = 15_000;
+// Curto de propósito: assim que a API acorda, a tela fica pronta em poucos segundos.
+const INTERVALO_MAX_MS = 5_000;
 
 let estado: EstadoConexao = 'conectando';
 /** Quando entrou no estado atual (para o aviso só aparecer se demorar). */

@@ -17,7 +17,9 @@
     "recusado": "O pedido de {cliente} ({total}) não foi aceito pelo servidor: {motivo}.",
     "abrirNoPedido": "Abrir no Novo pedido",
     "termineOPedido": "Finalize ou limpe o pedido em montagem antes de abrir o que foi recusado",
-    "entrandoSemServidor": "Conectando ao servidor… Na primeira entrada neste aparelho, isso leva até 1 minuto."
+    "entrandoSemServidor": "Conectando ao servidor… Na primeira entrada neste aparelho, isso leva até 1 minuto.",
+    "semCardapioTitulo": "O cardápio aparece assim que o servidor responder",
+    "semCardapio": "Este aparelho ainda não tem o cardápio guardado. Isso só acontece na primeira vez: depois que ele carregar uma vez, o Novo pedido abre na hora, mesmo com o servidor acordando."
   },
   "menu": {
     "novoPedido": "Novo pedido",
