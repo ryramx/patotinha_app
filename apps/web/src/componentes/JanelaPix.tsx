@@ -79,7 +79,8 @@ interface Props {
  * chave da loja. Não há confirmação automática: o atendente confere no app do banco.
  */
 export function JanelaPix({ totalCentavos, identificador, descricao, aoFechar }: Props) {
-  const { eAdmin } = useSessao();
+  const { pode } = useSessao();
+  const podeConfigurar = pode('PIX_LOJA');
   const config = usePixDaLoja();
   const [copiado, setCopiado] = useState(false);
   const [falhou, setFalhou] = useState(false);
@@ -124,9 +125,9 @@ export function JanelaPix({ totalCentavos, identificador, descricao, aoFechar }:
             {t('pix.naoConfigurado')}
           </p>
           <p className="text-[15px]">
-            {eAdmin ? t('pix.configurarAdmin') : t('pix.configurarPeca')}
+            {podeConfigurar ? t('pix.configurarAdmin') : t('pix.configurarPeca')}
           </p>
-          {eAdmin && (
+          {podeConfigurar && (
             <Link to="/pix" className="font-bold text-moldura underline-offset-4 hover:underline">
               {t('pix.irConfigurar')}
             </Link>

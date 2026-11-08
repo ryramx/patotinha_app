@@ -22,6 +22,7 @@ export const PERMISSOES = [
   'FINANCEIRO',
   'CARDAPIO',
   'USUARIOS',
+  'PIX_LOJA',
 ] as const;
 export type Permissao = (typeof PERMISSOES)[number];
 
@@ -55,12 +56,16 @@ export const DESCRICAO_PERMISSOES: Record<Permissao, { nome: string; descricao: 
     nome: 'Usuários',
     descricao: 'Cadastrar usuários, trocar o perfil e redefinir senhas (menos de administradores)',
   },
+  PIX_LOJA: {
+    nome: 'Pix da loja',
+    descricao: 'Cadastrar e trocar a chave Pix usada no QR Code e no copia e cola dos pedidos',
+  },
 };
 
 /** Permissões de fábrica, gravadas pela migração e usadas pelo botão "Voltar ao padrão". */
 export const PERMISSOES_PADRAO: Record<Perfil, readonly Permissao[]> = {
   ADMIN: PERMISSOES,
-  GERENTE: ['PEDIDOS_REGISTRAR', 'PEDIDOS_VER', 'FINANCEIRO'],
+  GERENTE: ['PEDIDOS_REGISTRAR', 'PEDIDOS_VER', 'FINANCEIRO', 'PIX_LOJA'],
   CHEF: ['FILA'],
   FUNCIONARIO: ['PEDIDOS_REGISTRAR'],
 };

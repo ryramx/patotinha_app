@@ -150,7 +150,7 @@ export function App() {
         <Route
           path="pix"
           element={
-            <Exige permissao="ADMIN">
+            <Exige permissao="PIX_LOJA">
               <PixLoja />
             </Exige>
           }

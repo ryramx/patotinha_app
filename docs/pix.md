@@ -17,14 +17,19 @@ tela editável, **Cadastros › Pix da loja**, e não no código.
 5. No **Detalhe do pedido** de um pedido em PIX, **Mostrar o Pix deste pedido** abre de novo o
    QR Code com o valor, para quando o cliente for pagar depois.
 
-Sem chave cadastrada, a janela avisa que o Pix ainda não foi configurado: o administrador vê o
-link para a tela de configuração; os outros perfis veem "Peça ao administrador".
+Sem chave cadastrada, a janela avisa que o Pix ainda não foi configurado: quem pode
+configurar o Pix vê o link para a tela de configuração; os outros perfis veem "Peça ao
+administrador ou ao gerente".
 
 ![QR Code do Pix no Novo pedido, Modo Claro](pix/claro-qr-pix-pc.png)
 ![QR Code do Pix no celular, Modo Escuro](pix/escuro-qr-pix-celular.png)
 ![Botão do Pix no painel do pedido, Modo Escuro](pix/escuro-botao-pix-pc.png)
 
-## Tela Pix da loja (só o Administrador)
+## Tela Pix da loja (Administrador e Gerente)
+
+Desde 08/11/2026, a pedido do Ryan, o Gerente também configura o Pix. A tela segue a permissão
+**Pix da loja** em Cadastros › Perfis e permissões: de fábrica, Administrador e Gerente a têm, e o
+administrador pode ligar ou desligar para os outros perfis.
 
 - Em **Cadastros › Pix da loja** (no celular, em **Mais**).
 - **Tipo da chave:** CPF, CNPJ, Celular, E-mail ou Chave aleatória. A chave é conferida conforme
@@ -48,8 +53,9 @@ link para a tela de configuração; os outros perfis veem "Peça ao administrado
   pedido; `PATOTINHA` no Novo pedido, porque o número só existe depois de gravar.
 - RN-P4: como não há confirmação automática, o pedido continua sendo finalizado pelo atendente,
   como nas outras formas de pagamento.
-- RN-P5: só o Administrador muda o Pix da loja. Quem registra ou vê pedidos pode ler a chave
-  (ela aparece para o cliente de qualquer jeito); o Chef não precisa dela.
+- RN-P5: muda o Pix da loja quem tem a permissão Pix da loja (de fábrica, Administrador e
+  Gerente). Quem registra ou vê pedidos pode ler a chave (ela aparece para o cliente de qualquer
+  jeito); o Chef não precisa dela.
 - RN-P6: a chave não vai para os registros (logs) do servidor; só o tipo e quem mudou.
 
 ## Por que não um "link de pagamento"

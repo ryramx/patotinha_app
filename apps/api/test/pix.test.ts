@@ -77,7 +77,22 @@ describe('Pix da loja', () => {
     expect(r.body.erro.detalhes[0].campo).toBe('chave');
   });
 
-  it('só o administrador muda; quem não vê nem registra pedidos não lê', async () => {
+  it('o Gerente muda o Pix de fábrica, e deixa de mudar se o administrador tirar', async () => {
+    await criarUsuario(ctx.banco, 'gil', 'GERENTE');
+    const gerente = await entrar(ctx, 'gil');
+    const r = await ctx.http().put('/api/pix').set('Cookie', gerente).send(config);
+    expect(r.status).toBe(200);
+    expect(r.body.chave).toBe('+5511987654321');
+    await ctx
+      .http()
+      .put('/api/perfis/GERENTE/permissoes')
+      .set('Cookie', admin)
+      .send({ permissoes: ['PEDIDOS_REGISTRAR', 'PEDIDOS_VER', 'FINANCEIRO'] })
+      .expect(200);
+    expect((await ctx.http().put('/api/pix').set('Cookie', gerente).send(config)).status).toBe(403);
+  });
+
+  it('o Funcionário não muda; quem não vê nem registra pedidos não lê', async () => {
     expect((await ctx.http().put('/api/pix').set('Cookie', func).send(config)).status).toBe(403);
     expect((await ctx.http().get('/api/pix').set('Cookie', chef)).status).toBe(403);
     expect((await ctx.http().get('/api/pix')).status).toBe(401);

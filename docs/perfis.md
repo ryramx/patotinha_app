@@ -15,10 +15,11 @@ fazer na tela **Cadastros › Perfis e permissões**.
 | Financeiro        | Resumo de vendas, cartões de faturamento do Início, soma em reais no Histórico |   ✓   |    ✓    |      |             |
 | Cardápio          | Produtos, preços e categorias                                                  |   ✓   |         |      |             |
 | Usuários          | Cadastrar usuários, trocar perfil, redefinir senha                             |   ✓   |         |      |             |
+| Pix da loja       | Cadastrar e trocar a chave Pix dos pedidos (desde 08/11/2026)                  |   ✓   |    ✓    |      |             |
 
 - **Administrador:** sempre pode tudo, inclusive a tela de perfis. Não dá para tirar permissões
   dele, para ninguém trancar o sistema por engano.
-- **Gerente:** registra pedidos, vê pedidos e o financeiro.
+- **Gerente:** registra pedidos, vê pedidos e o financeiro, e configura o Pix da loja.
 - **Chef:** só a Fila de preparo (as comandas). Abre direto nela. Vê nome do cliente, itens e
   quantidades; não vê valores.
 - **Funcionário:** só registra pedidos. Abre direto no Novo pedido.

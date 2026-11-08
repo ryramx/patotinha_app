@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ADMIN, FUNCIONARIO } from './dados';
+import { ADMIN, FUNCIONARIO, GERENTE } from './dados';
 
 /** Etapa 13: Pix com o valor do pedido, com a chave cadastrada pelo administrador. */
 
@@ -32,7 +32,7 @@ test('sem chave cadastrada avisa; o admin cadastra e o pedido mostra QR Code e c
   await expect(balcao).toHaveURL(/\/pedidos\/novo$/);
   const aviso = await pedidoEmPix(balcao);
   await expect(aviso.getByText('O Pix da loja ainda não foi configurado.')).toBeVisible();
-  await expect(aviso.getByText(/Peça ao administrador/)).toBeVisible();
+  await expect(aviso.getByText(/Peça ao administrador ou ao gerente/)).toBeVisible();
   await aviso.getByRole('button', { name: 'Fechar' }).click();
 
   const admin = await browser.newPage();
@@ -68,4 +68,25 @@ test('sem chave cadastrada avisa; o admin cadastra e o pedido mostra QR Code e c
   await expect(janela.getByRole('button', { name: 'Copiado! Cole no app do banco' })).toBeVisible();
   expect(await balcao.evaluate(() => navigator.clipboard.readText())).toBe(codigo);
   await contexto.close();
+});
+
+test('o Gerente também configura o Pix da loja; o Funcionário não abre a tela', async ({
+  page,
+}) => {
+  await entrar(page, GERENTE);
+  await page.getByRole('button', { name: 'Cadastros' }).click();
+  await page.getByRole('menuitem', { name: 'Pix da loja' }).click();
+  await expect(page).toHaveURL(/\/pix$/);
+  await page.getByRole('radio', { name: 'E-mail' }).click();
+  await page.getByLabel('Chave Pix').fill('Vovo@Patotinha.com');
+  await page.getByLabel('Cidade').fill('São Paulo');
+  await page.getByRole('button', { name: 'Salvar Pix' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Pix da loja salvo' })).toBeVisible();
+  await expect(page.getByLabel('Chave Pix')).toHaveValue('vovo@patotinha.com');
+
+  await page.context().clearCookies();
+  await entrar(page, FUNCIONARIO);
+  await expect(page).toHaveURL(/\/pedidos\/novo$/);
+  await page.goto('/pix');
+  await expect(page.getByRole('button', { name: 'Salvar Pix' })).toHaveCount(0);
 });

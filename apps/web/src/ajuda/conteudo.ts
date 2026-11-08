@@ -108,7 +108,7 @@ export const CARDS_TUTORIAL: CardTutorial[] = [
     titulo: 'Pix da loja',
     texto:
       'Em Cadastros › Pix da loja você cadastra a chave Pix que recebe os pagamentos. Com ela, todo pedido em PIX mostra o QR Code e o copia e cola já com o valor do pedido.',
-    exige: ['ADMIN'],
+    exige: ['PIX_LOJA'],
   },
   {
     id: 'topo',
