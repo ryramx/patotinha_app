@@ -3,13 +3,8 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import QRCode from 'qrcode';
 import { Check, Copy, Share2, TriangleAlert } from 'lucide-react';
-import {
-  formatarReais,
-  gerarPixCopiaECola,
-  NOMES_TIPO_CHAVE_PIX,
-  type ConfigPix,
-} from '@patotinha/shared';
-import { api } from '../api/cliente';
+import { formatarReais, gerarPixCopiaECola, NOMES_TIPO_CHAVE_PIX } from '@patotinha/shared';
+import { consultaPix } from '../api/cardapio';
 import { useSessao } from '../auth/sessao';
 import { Botao } from './Botao';
 import { Janela } from './Janela';
@@ -17,7 +12,7 @@ import { LinhasEsqueleto } from './Diversos';
 import { t } from '../textos';
 
 export function usePixDaLoja() {
-  return useQuery({ queryKey: ['pix'], queryFn: () => api<ConfigPix>('/pix'), staleTime: 60_000 });
+  return useQuery(consultaPix);
 }
 
 /** QR Code em SVG, sempre preto no branco para qualquer celular ler, nos dois modos. */

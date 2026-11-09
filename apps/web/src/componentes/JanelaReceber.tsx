@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, QrCode } from 'lucide-react';
-import {
-  formatarReais,
-  paraCentavos,
-  type CodigoPagamento,
-  type FormaPagamento,
-  type Pedido,
-} from '@patotinha/shared';
+import { formatarReais, paraCentavos, type CodigoPagamento, type Pedido } from '@patotinha/shared';
+import { consultaFormasPagamento } from '../api/cardapio';
 import { api, ErroDaApi } from '../api/cliente';
 import { useAvisos } from './Avisos';
 import { Botao } from './Botao';
@@ -29,11 +24,7 @@ interface Props {
 export function JanelaReceber({ pedido, aoFechar, aoReceber }: Props) {
   const avisos = useAvisos();
   const queryClient = useQueryClient();
-  const formas = useQuery({
-    queryKey: ['formas-pagamento'],
-    queryFn: () => api<FormaPagamento[]>('/formas-pagamento'),
-    staleTime: Infinity,
-  });
+  const formas = useQuery(consultaFormasPagamento);
   const [forma, setForma] = useState<CodigoPagamento | null>(null);
   const [recebido, setRecebido] = useState<number | null>(null);
   const [verPix, setVerPix] = useState(false);

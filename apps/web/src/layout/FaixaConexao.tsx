@@ -4,6 +4,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { CloudUpload, RefreshCw, TriangleAlert } from 'lucide-react';
 import { formatarReais } from '@patotinha/shared';
 import { conectadoDesde, useEstadoConexao } from '../api/conexao';
+import {
+  consultaCategoriasAtivas,
+  consultaFormasPagamento,
+  consultaPix,
+  consultaProdutosAtivos,
+} from '../api/cardapio';
 import { useSessao } from '../auth/sessao';
 import { useAvisos } from '../componentes/Avisos';
 import { Botao } from '../componentes/Botao';
@@ -100,6 +106,29 @@ function useEnvioDosGuardados(meus: PedidoGuardado[]) {
   }, [estado, usuario, pendentes, avisos, queryClient]);
 }
 
+/**
+ * Com o servidor conectado, quem registra pedidos já leva o cardápio para o aparelho, em qualquer
+ * tela: sem isso, a cópia só existiria depois de abrir o Novo pedido uma vez com o servidor
+ * acordado, e a primeira abertura sem servidor ficaria sem produtos.
+ */
+function useGuardarCardapio() {
+  const { usuario, pode } = useSessao();
+  const estado = useEstadoConexao();
+  const queryClient = useQueryClient();
+  const registra = !!usuario && pode('PEDIDOS_REGISTRAR');
+  useEffect(() => {
+    if (estado !== 'conectado' || !registra) return;
+    for (const consulta of [
+      consultaProdutosAtivos,
+      consultaCategoriasAtivas,
+      consultaFormasPagamento,
+      consultaPix,
+    ]) {
+      void queryClient.prefetchQuery(consulta as Parameters<typeof queryClient.prefetchQuery>[0]);
+    }
+  }, [estado, registra, queryClient]);
+}
+
 /** Faixa abaixo do cabeçalho: conectando, pedidos guardados e pedidos recusados. */
 export function FaixaConexao() {
   const { usuario, pode } = useSessao();
@@ -109,6 +138,7 @@ export function FaixaConexao() {
   const todos = usePedidosGuardados();
   const meus = todos.filter((p) => p.usuarioId === usuario?.id);
   useEnvioDosGuardados(meus);
+  useGuardarCardapio();
 
   const guardados = meus.filter((p) => !p.recusa);
   const recusados = meus.filter((p) => p.recusa);

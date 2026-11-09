@@ -176,3 +176,24 @@ test('senha que o aparelho já conhece entra na hora; o login de verdade vem qua
     .poll(async () => (await page.request.get('/api/auth/me')).status(), { timeout: 10_000 })
     .toBe(200);
 });
+
+test('sem cardápio guardado, o Novo pedido explica a espera e carrega quando a API acorda', async ({
+  page,
+}) => {
+  // O Gerente cai no Início: o cardápio vai para o aparelho sem abrir o Novo pedido.
+  await entrar(page, GERENTE);
+  await expect(page).toHaveURL(/\/$/);
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem('patotinha.copia') ?? ''))
+    .toContain('Pastel de Queijo');
+
+  // Aparelho sem a cópia (como na primeira vez depois da atualização) e API dormindo.
+  await page.evaluate(() => localStorage.removeItem('patotinha.copia'));
+  const api = await dormirApi(page);
+  await page.goto('/pedidos/novo');
+  await expect(page.getByText('O cardápio aparece assim que o servidor responder')).toBeVisible();
+
+  api.dormindo = false;
+  await expect(page.getByRole('tab', { name: 'Pastéis' })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText('O cardápio aparece assim que o servidor responder')).toHaveCount(0);
+});

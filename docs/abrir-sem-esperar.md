@@ -46,7 +46,7 @@ quando ela voltar. Antes, finalizar sem conexão dava "O pedido NÃO foi gravado
 
 - RN-O1: o sistema nunca segura a tela esperando a API. Ela é acordada em segundo plano assim que
   a página abre (`/api/vivo`, que não toca no banco), com novas tentativas de 2 em 2 segundos,
-  espaçando até 15 segundos. A faixa só aparece se a resposta passar de 2,5 segundos; depois de
+  espaçando até 5 segundos. A faixa só aparece se a resposta passar de 2,5 segundos; depois de
   2,5 minutos, o texto muda para "O servidor ainda não respondeu", mas continua tentando.
 - RN-O2: **sessão lembrada**: depois de um login aceito pelo servidor, o aparelho lembra quem
   entrou e até quando o cookie vale (12 h, D-21). Dentro desse prazo a tela abre direto e o
@@ -63,6 +63,11 @@ quando ela voltar. Antes, finalizar sem conexão dava "O pedido NÃO foi gravado
 - RN-O5: **cópia do cardápio**: produtos e categorias ativos, formas de pagamento e o Pix da loja
   ficam guardados no navegador a cada leitura. Pedidos, fila, clientes e relatórios nunca: mudam o
   tempo todo e só aparecem com o servidor.
+  A cópia é feita em qualquer tela, assim que o servidor responde, para quem pode registrar
+  pedidos (não só ao abrir o Novo pedido). Se o aparelho ainda não tem a cópia (primeira vez
+  depois de instalar ou atualizar) e o servidor está acordando, o Novo pedido mostra "O cardápio
+  aparece assim que o servidor responder" no lugar dos produtos, e carrega sozinho quando ele
+  responde. Corrigido em 08/11/2026, depois do primeiro teste no celular do Ryan.
 - RN-O6: **pedidos guardados**: com a API fora, o pedido entra numa fila no navegador
   (`localStorage`) com a mesma chave de idempotência do rascunho. Ao subir, o servidor confere
   tudo (preço, produto ativo, forma de pagamento) como em qualquer pedido; reenviar depois de uma
@@ -125,6 +130,8 @@ como o Render):
 - com a sessão lembrada, a tela abre com o cardápio da cópia, o pedido fica guardado e sobe uma vez
   só quando a API acorda;
 - pedido guardado recusado aparece na faixa e volta ao Novo pedido;
+- o cardápio vai para o aparelho mesmo sem abrir o Novo pedido; sem a cópia e com a API dormindo, o
+  Novo pedido explica a espera e carrega quando ela acorda;
 - senha errada espera o servidor, que recusa; a senha certa que o aparelho conhece entra na hora,
   e o cookie de sessão chega pelo login feito em segundo plano.
 
